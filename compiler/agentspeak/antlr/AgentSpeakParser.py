@@ -11,108 +11,115 @@ else:
 
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\61")
-        buf.write("\u00ed\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3-")
+        buf.write("\u00fa\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
-        buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\3\2\3\2\3\2\3")
-        buf.write("\2\3\2\3\3\3\3\3\3\3\4\3\4\3\4\7\4:\n\4\f\4\16\4=\13\4")
-        buf.write("\3\5\3\5\3\5\3\5\3\5\7\5D\n\5\f\5\16\5G\13\5\3\6\3\6\3")
-        buf.write("\6\3\6\7\6M\n\6\f\6\16\6P\13\6\3\7\7\7S\n\7\f\7\16\7V")
-        buf.write("\13\7\3\b\3\b\5\bZ\n\b\3\b\3\b\3\b\5\b_\n\b\3\b\3\b\5")
-        buf.write("\bc\n\b\3\b\3\b\3\t\3\t\5\ti\n\t\3\t\3\t\3\n\5\nn\n\n")
-        buf.write("\3\n\3\n\3\13\3\13\5\13t\n\13\3\f\3\f\3\f\3\f\3\f\3\f")
-        buf.write("\3\f\3\f\5\f~\n\f\3\f\3\f\3\f\3\f\3\f\3\f\7\f\u0086\n")
-        buf.write("\f\f\f\16\f\u0089\13\f\3\r\3\r\3\r\5\r\u008e\n\r\3\16")
-        buf.write("\3\16\3\16\7\16\u0093\n\16\f\16\16\16\u0096\13\16\3\17")
-        buf.write("\3\17\3\17\3\17\3\17\5\17\u009d\n\17\3\20\3\20\3\20\3")
-        buf.write("\20\3\20\5\20\u00a4\n\20\3\20\3\20\3\20\3\20\5\20\u00aa")
-        buf.write("\n\20\3\21\3\21\3\21\7\21\u00af\n\21\f\21\16\21\u00b2")
-        buf.write("\13\21\3\22\3\22\3\22\3\22\3\22\5\22\u00b9\n\22\3\23\3")
-        buf.write("\23\3\23\3\23\7\23\u00bf\n\23\f\23\16\23\u00c2\13\23\3")
-        buf.write("\23\3\23\3\23\5\23\u00c7\n\23\5\23\u00c9\n\23\5\23\u00cb")
-        buf.write("\n\23\3\23\3\23\3\24\3\24\3\24\7\24\u00d2\n\24\f\24\16")
-        buf.write("\24\u00d5\13\24\3\25\3\25\5\25\u00d9\n\25\3\26\3\26\3")
-        buf.write("\26\7\26\u00de\n\26\f\26\16\26\u00e1\13\26\3\27\3\27\3")
-        buf.write("\27\3\27\3\27\3\27\3\27\3\27\5\27\u00eb\n\27\3\27\2\3")
-        buf.write("\26\30\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,")
-        buf.write("\2\b\3\2\t\n\4\2\5\5\13\13\5\2\5\5\t\13\24\25\3\2&\'\3")
-        buf.write("\2\31 \4\2\t\n!%\2\u00fb\2.\3\2\2\2\4\63\3\2\2\2\6;\3")
-        buf.write("\2\2\2\bE\3\2\2\2\nN\3\2\2\2\fT\3\2\2\2\16Y\3\2\2\2\20")
-        buf.write("f\3\2\2\2\22m\3\2\2\2\24s\3\2\2\2\26}\3\2\2\2\30\u008d")
-        buf.write("\3\2\2\2\32\u008f\3\2\2\2\34\u009c\3\2\2\2\36\u009e\3")
-        buf.write("\2\2\2 \u00ab\3\2\2\2\"\u00b8\3\2\2\2$\u00ba\3\2\2\2&")
-        buf.write("\u00ce\3\2\2\2(\u00d8\3\2\2\2*\u00da\3\2\2\2,\u00ea\3")
-        buf.write("\2\2\2./\5\4\3\2/\60\5\n\6\2\60\61\5\f\7\2\61\62\7\3\2")
-        buf.write("\2\62\3\3\2\2\2\63\64\5\6\4\2\64\65\5\b\5\2\65\5\3\2\2")
-        buf.write("\2\66\67\5\22\n\2\678\7\3\2\28:\3\2\2\29\66\3\2\2\2:=")
-        buf.write("\3\2\2\2;9\3\2\2\2;<\3\2\2\2<\7\3\2\2\2=;\3\2\2\2>?\5")
-        buf.write("\22\n\2?@\7\4\2\2@A\5\26\f\2AB\7\3\2\2BD\3\2\2\2C>\3\2")
-        buf.write("\2\2DG\3\2\2\2EC\3\2\2\2EF\3\2\2\2F\t\3\2\2\2GE\3\2\2")
-        buf.write("\2HI\7\5\2\2IJ\5\22\n\2JK\7\3\2\2KM\3\2\2\2LH\3\2\2\2")
-        buf.write("MP\3\2\2\2NL\3\2\2\2NO\3\2\2\2O\13\3\2\2\2PN\3\2\2\2Q")
-        buf.write("S\5\16\b\2RQ\3\2\2\2SV\3\2\2\2TR\3\2\2\2TU\3\2\2\2U\r")
-        buf.write("\3\2\2\2VT\3\2\2\2WX\7\6\2\2XZ\5\36\20\2YW\3\2\2\2YZ\3")
-        buf.write("\2\2\2Z[\3\2\2\2[^\5\20\t\2\\]\7\7\2\2]_\5\24\13\2^\\")
-        buf.write("\3\2\2\2^_\3\2\2\2_b\3\2\2\2`a\7\b\2\2ac\5\32\16\2b`\3")
-        buf.write("\2\2\2bc\3\2\2\2cd\3\2\2\2de\7\3\2\2e\17\3\2\2\2fh\t\2")
-        buf.write("\2\2gi\t\3\2\2hg\3\2\2\2hi\3\2\2\2ij\3\2\2\2jk\5\22\n")
-        buf.write("\2k\21\3\2\2\2ln\7\f\2\2ml\3\2\2\2mn\3\2\2\2no\3\2\2\2")
-        buf.write("op\5\36\20\2p\23\3\2\2\2qt\5\26\f\2rt\7\r\2\2sq\3\2\2")
-        buf.write("\2sr\3\2\2\2t\25\3\2\2\2uv\b\f\1\2v~\5\30\r\2wx\7\16\2")
-        buf.write("\2x~\5\26\f\6yz\7\21\2\2z{\5\26\f\2{|\7\22\2\2|~\3\2\2")
-        buf.write("\2}u\3\2\2\2}w\3\2\2\2}y\3\2\2\2~\u0087\3\2\2\2\177\u0080")
-        buf.write("\f\5\2\2\u0080\u0081\7\17\2\2\u0081\u0086\5\26\f\6\u0082")
-        buf.write("\u0083\f\4\2\2\u0083\u0084\7\20\2\2\u0084\u0086\5\26\f")
-        buf.write("\5\u0085\177\3\2\2\2\u0085\u0082\3\2\2\2\u0086\u0089\3")
-        buf.write("\2\2\2\u0087\u0085\3\2\2\2\u0087\u0088\3\2\2\2\u0088\27")
-        buf.write("\3\2\2\2\u0089\u0087\3\2\2\2\u008a\u008e\5\22\n\2\u008b")
-        buf.write("\u008e\5&\24\2\u008c\u008e\7\'\2\2\u008d\u008a\3\2\2\2")
-        buf.write("\u008d\u008b\3\2\2\2\u008d\u008c\3\2\2\2\u008e\31\3\2")
-        buf.write("\2\2\u008f\u0094\5\34\17\2\u0090\u0091\7\23\2\2\u0091")
-        buf.write("\u0093\5\34\17\2\u0092\u0090\3\2\2\2\u0093\u0096\3\2\2")
-        buf.write("\2\u0094\u0092\3\2\2\2\u0094\u0095\3\2\2\2\u0095\33\3")
-        buf.write("\2\2\2\u0096\u0094\3\2\2\2\u0097\u0098\t\4\2\2\u0098\u009d")
-        buf.write("\5\22\n\2\u0099\u009d\5\36\20\2\u009a\u009d\7\'\2\2\u009b")
-        buf.write("\u009d\5&\24\2\u009c\u0097\3\2\2\2\u009c\u0099\3\2\2\2")
-        buf.write("\u009c\u009a\3\2\2\2\u009c\u009b\3\2\2\2\u009d\35\3\2")
-        buf.write("\2\2\u009e\u00a3\t\5\2\2\u009f\u00a0\7\21\2\2\u00a0\u00a1")
-        buf.write("\5 \21\2\u00a1\u00a2\7\22\2\2\u00a2\u00a4\3\2\2\2\u00a3")
-        buf.write("\u009f\3\2\2\2\u00a3\u00a4\3\2\2\2\u00a4\u00a9\3\2\2\2")
-        buf.write("\u00a5\u00a6\7\26\2\2\u00a6\u00a7\5 \21\2\u00a7\u00a8")
-        buf.write("\7\27\2\2\u00a8\u00aa\3\2\2\2\u00a9\u00a5\3\2\2\2\u00a9")
-        buf.write("\u00aa\3\2\2\2\u00aa\37\3\2\2\2\u00ab\u00b0\5\"\22\2\u00ac")
-        buf.write("\u00ad\7\30\2\2\u00ad\u00af\5\"\22\2\u00ae\u00ac\3\2\2")
-        buf.write("\2\u00af\u00b2\3\2\2\2\u00b0\u00ae\3\2\2\2\u00b0\u00b1")
-        buf.write("\3\2\2\2\u00b1!\3\2\2\2\u00b2\u00b0\3\2\2\2\u00b3\u00b9")
-        buf.write("\5\22\n\2\u00b4\u00b9\5$\23\2\u00b5\u00b9\5*\26\2\u00b6")
-        buf.write("\u00b9\7\'\2\2\u00b7\u00b9\7-\2\2\u00b8\u00b3\3\2\2\2")
-        buf.write("\u00b8\u00b4\3\2\2\2\u00b8\u00b5\3\2\2\2\u00b8\u00b6\3")
-        buf.write("\2\2\2\u00b8\u00b7\3\2\2\2\u00b9#\3\2\2\2\u00ba\u00ca")
-        buf.write("\7\26\2\2\u00bb\u00c0\5\"\22\2\u00bc\u00bd\7\30\2\2\u00bd")
-        buf.write("\u00bf\5\"\22\2\u00be\u00bc\3\2\2\2\u00bf\u00c2\3\2\2")
-        buf.write("\2\u00c0\u00be\3\2\2\2\u00c0\u00c1\3\2\2\2\u00c1\u00c8")
-        buf.write("\3\2\2\2\u00c2\u00c0\3\2\2\2\u00c3\u00c6\7\20\2\2\u00c4")
-        buf.write("\u00c7\5$\23\2\u00c5\u00c7\7\'\2\2\u00c6\u00c4\3\2\2\2")
-        buf.write("\u00c6\u00c5\3\2\2\2\u00c7\u00c9\3\2\2\2\u00c8\u00c3\3")
-        buf.write("\2\2\2\u00c8\u00c9\3\2\2\2\u00c9\u00cb\3\2\2\2\u00ca\u00bb")
-        buf.write("\3\2\2\2\u00ca\u00cb\3\2\2\2\u00cb\u00cc\3\2\2\2\u00cc")
-        buf.write("\u00cd\7\27\2\2\u00cd%\3\2\2\2\u00ce\u00d3\5(\25\2\u00cf")
-        buf.write("\u00d0\t\6\2\2\u00d0\u00d2\5(\25\2\u00d1\u00cf\3\2\2\2")
-        buf.write("\u00d2\u00d5\3\2\2\2\u00d3\u00d1\3\2\2\2\u00d3\u00d4\3")
-        buf.write("\2\2\2\u00d4\'\3\2\2\2\u00d5\u00d3\3\2\2\2\u00d6\u00d9")
-        buf.write("\5\22\n\2\u00d7\u00d9\5*\26\2\u00d8\u00d6\3\2\2\2\u00d8")
-        buf.write("\u00d7\3\2\2\2\u00d9)\3\2\2\2\u00da\u00df\5,\27\2\u00db")
-        buf.write("\u00dc\t\7\2\2\u00dc\u00de\5,\27\2\u00dd\u00db\3\2\2\2")
-        buf.write("\u00de\u00e1\3\2\2\2\u00df\u00dd\3\2\2\2\u00df\u00e0\3")
-        buf.write("\2\2\2\u00e0+\3\2\2\2\u00e1\u00df\3\2\2\2\u00e2\u00eb")
-        buf.write("\7.\2\2\u00e3\u00eb\7\'\2\2\u00e4\u00e5\7\n\2\2\u00e5")
-        buf.write("\u00eb\5,\27\2\u00e6\u00e7\7\21\2\2\u00e7\u00e8\5*\26")
-        buf.write("\2\u00e8\u00e9\7\22\2\2\u00e9\u00eb\3\2\2\2\u00ea\u00e2")
-        buf.write("\3\2\2\2\u00ea\u00e3\3\2\2\2\u00ea\u00e4\3\2\2\2\u00ea")
-        buf.write("\u00e6\3\2\2\2\u00eb-\3\2\2\2\36;ENTY^bhms}\u0085\u0087")
-        buf.write("\u008d\u0094\u009c\u00a3\u00a9\u00b0\u00b8\u00c0\u00c6")
-        buf.write("\u00c8\u00ca\u00d3\u00d8\u00df\u00ea")
+        buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
+        buf.write("\t\31\3\2\3\2\3\2\3\2\3\3\3\3\3\3\3\4\3\4\3\4\7\4=\n\4")
+        buf.write("\f\4\16\4@\13\4\3\5\3\5\3\5\3\5\3\5\7\5G\n\5\f\5\16\5")
+        buf.write("J\13\5\3\6\3\6\3\6\3\6\7\6P\n\6\f\6\16\6S\13\6\3\7\7\7")
+        buf.write("V\n\7\f\7\16\7Y\13\7\3\b\3\b\5\b]\n\b\3\b\3\b\3\b\5\b")
+        buf.write("b\n\b\3\b\3\b\5\bf\n\b\3\b\3\b\3\t\3\t\5\tl\n\t\3\t\3")
+        buf.write("\t\3\n\5\nq\n\n\3\n\3\n\3\13\3\13\5\13w\n\13\3\f\3\f\3")
+        buf.write("\f\3\f\3\f\3\f\3\f\3\f\5\f\u0081\n\f\3\f\3\f\3\f\3\f\3")
+        buf.write("\f\3\f\7\f\u0089\n\f\f\f\16\f\u008c\13\f\3\r\3\r\3\r\5")
+        buf.write("\r\u0091\n\r\3\16\3\16\3\16\7\16\u0096\n\16\f\16\16\16")
+        buf.write("\u0099\13\16\3\17\3\17\3\17\3\17\3\17\3\17\5\17\u00a1")
+        buf.write("\n\17\3\20\3\20\3\20\3\20\3\20\5\20\u00a8\n\20\3\20\3")
+        buf.write("\20\3\20\3\20\5\20\u00ae\n\20\3\21\3\21\3\21\7\21\u00b3")
+        buf.write("\n\21\f\21\16\21\u00b6\13\21\3\22\3\22\3\22\3\22\3\22")
+        buf.write("\3\22\5\22\u00be\n\22\3\23\3\23\3\24\3\24\3\24\3\24\3")
+        buf.write("\24\3\24\3\25\3\25\3\25\3\25\7\25\u00cc\n\25\f\25\16\25")
+        buf.write("\u00cf\13\25\3\25\3\25\3\25\5\25\u00d4\n\25\5\25\u00d6")
+        buf.write("\n\25\5\25\u00d8\n\25\3\25\3\25\3\26\3\26\3\26\7\26\u00df")
+        buf.write("\n\26\f\26\16\26\u00e2\13\26\3\27\3\27\5\27\u00e6\n\27")
+        buf.write("\3\30\3\30\3\30\7\30\u00eb\n\30\f\30\16\30\u00ee\13\30")
+        buf.write("\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\5\31\u00f8\n")
+        buf.write("\31\3\31\2\3\26\32\2\4\6\b\n\f\16\20\22\24\26\30\32\34")
+        buf.write("\36 \"$&(*,.\60\2\t\3\2\t\n\4\2\5\5\13\13\5\2\5\5\t\13")
+        buf.write("\24\25\4\2&&((\4\2\'\')*\3\2\31 \4\2\t\n!%\2\u0108\2\62")
+        buf.write("\3\2\2\2\4\66\3\2\2\2\6>\3\2\2\2\bH\3\2\2\2\nQ\3\2\2\2")
+        buf.write("\fW\3\2\2\2\16\\\3\2\2\2\20i\3\2\2\2\22p\3\2\2\2\24v\3")
+        buf.write("\2\2\2\26\u0080\3\2\2\2\30\u0090\3\2\2\2\32\u0092\3\2")
+        buf.write("\2\2\34\u00a0\3\2\2\2\36\u00a2\3\2\2\2 \u00af\3\2\2\2")
+        buf.write("\"\u00bd\3\2\2\2$\u00bf\3\2\2\2&\u00c1\3\2\2\2(\u00c7")
+        buf.write("\3\2\2\2*\u00db\3\2\2\2,\u00e5\3\2\2\2.\u00e7\3\2\2\2")
+        buf.write("\60\u00f7\3\2\2\2\62\63\5\4\3\2\63\64\5\n\6\2\64\65\5")
+        buf.write("\f\7\2\65\3\3\2\2\2\66\67\5\6\4\2\678\5\b\5\28\5\3\2\2")
+        buf.write("\29:\5\22\n\2:;\7\3\2\2;=\3\2\2\2<9\3\2\2\2=@\3\2\2\2")
+        buf.write("><\3\2\2\2>?\3\2\2\2?\7\3\2\2\2@>\3\2\2\2AB\5\22\n\2B")
+        buf.write("C\7\4\2\2CD\5\26\f\2DE\7\3\2\2EG\3\2\2\2FA\3\2\2\2GJ\3")
+        buf.write("\2\2\2HF\3\2\2\2HI\3\2\2\2I\t\3\2\2\2JH\3\2\2\2KL\7\5")
+        buf.write("\2\2LM\5\22\n\2MN\7\3\2\2NP\3\2\2\2OK\3\2\2\2PS\3\2\2")
+        buf.write("\2QO\3\2\2\2QR\3\2\2\2R\13\3\2\2\2SQ\3\2\2\2TV\5\16\b")
+        buf.write("\2UT\3\2\2\2VY\3\2\2\2WU\3\2\2\2WX\3\2\2\2X\r\3\2\2\2")
+        buf.write("YW\3\2\2\2Z[\7\6\2\2[]\5\36\20\2\\Z\3\2\2\2\\]\3\2\2\2")
+        buf.write("]^\3\2\2\2^a\5\20\t\2_`\7\7\2\2`b\5\24\13\2a_\3\2\2\2")
+        buf.write("ab\3\2\2\2be\3\2\2\2cd\7\b\2\2df\5\32\16\2ec\3\2\2\2e")
+        buf.write("f\3\2\2\2fg\3\2\2\2gh\7\3\2\2h\17\3\2\2\2ik\t\2\2\2jl")
+        buf.write("\t\3\2\2kj\3\2\2\2kl\3\2\2\2lm\3\2\2\2mn\5\22\n\2n\21")
+        buf.write("\3\2\2\2oq\7\f\2\2po\3\2\2\2pq\3\2\2\2qr\3\2\2\2rs\5\36")
+        buf.write("\20\2s\23\3\2\2\2tw\5\26\f\2uw\7\r\2\2vt\3\2\2\2vu\3\2")
+        buf.write("\2\2w\25\3\2\2\2xy\b\f\1\2y\u0081\5\30\r\2z{\7\16\2\2")
+        buf.write("{\u0081\5\26\f\6|}\7\21\2\2}~\5\26\f\2~\177\7\22\2\2\177")
+        buf.write("\u0081\3\2\2\2\u0080x\3\2\2\2\u0080z\3\2\2\2\u0080|\3")
+        buf.write("\2\2\2\u0081\u008a\3\2\2\2\u0082\u0083\f\5\2\2\u0083\u0084")
+        buf.write("\7\17\2\2\u0084\u0089\5\26\f\6\u0085\u0086\f\4\2\2\u0086")
+        buf.write("\u0087\7\20\2\2\u0087\u0089\5\26\f\5\u0088\u0082\3\2\2")
+        buf.write("\2\u0088\u0085\3\2\2\2\u0089\u008c\3\2\2\2\u008a\u0088")
+        buf.write("\3\2\2\2\u008a\u008b\3\2\2\2\u008b\27\3\2\2\2\u008c\u008a")
+        buf.write("\3\2\2\2\u008d\u0091\5\22\n\2\u008e\u0091\5*\26\2\u008f")
+        buf.write("\u0091\7(\2\2\u0090\u008d\3\2\2\2\u0090\u008e\3\2\2\2")
+        buf.write("\u0090\u008f\3\2\2\2\u0091\31\3\2\2\2\u0092\u0097\5\34")
+        buf.write("\17\2\u0093\u0094\7\23\2\2\u0094\u0096\5\34\17\2\u0095")
+        buf.write("\u0093\3\2\2\2\u0096\u0099\3\2\2\2\u0097\u0095\3\2\2\2")
+        buf.write("\u0097\u0098\3\2\2\2\u0098\33\3\2\2\2\u0099\u0097\3\2")
+        buf.write("\2\2\u009a\u009b\t\4\2\2\u009b\u00a1\5\22\n\2\u009c\u00a1")
+        buf.write("\5\36\20\2\u009d\u00a1\7(\2\2\u009e\u00a1\5*\26\2\u009f")
+        buf.write("\u00a1\5&\24\2\u00a0\u009a\3\2\2\2\u00a0\u009c\3\2\2\2")
+        buf.write("\u00a0\u009d\3\2\2\2\u00a0\u009e\3\2\2\2\u00a0\u009f\3")
+        buf.write("\2\2\2\u00a1\35\3\2\2\2\u00a2\u00a7\t\5\2\2\u00a3\u00a4")
+        buf.write("\7\21\2\2\u00a4\u00a5\5 \21\2\u00a5\u00a6\7\22\2\2\u00a6")
+        buf.write("\u00a8\3\2\2\2\u00a7\u00a3\3\2\2\2\u00a7\u00a8\3\2\2\2")
+        buf.write("\u00a8\u00ad\3\2\2\2\u00a9\u00aa\7\26\2\2\u00aa\u00ab")
+        buf.write("\5 \21\2\u00ab\u00ac\7\27\2\2\u00ac\u00ae\3\2\2\2\u00ad")
+        buf.write("\u00a9\3\2\2\2\u00ad\u00ae\3\2\2\2\u00ae\37\3\2\2\2\u00af")
+        buf.write("\u00b4\5\"\22\2\u00b0\u00b1\7\30\2\2\u00b1\u00b3\5\"\22")
+        buf.write("\2\u00b2\u00b0\3\2\2\2\u00b3\u00b6\3\2\2\2\u00b4\u00b2")
+        buf.write("\3\2\2\2\u00b4\u00b5\3\2\2\2\u00b5!\3\2\2\2\u00b6\u00b4")
+        buf.write("\3\2\2\2\u00b7\u00be\5$\23\2\u00b8\u00be\5\22\n\2\u00b9")
+        buf.write("\u00be\5(\25\2\u00ba\u00be\5.\30\2\u00bb\u00be\7(\2\2")
+        buf.write("\u00bc\u00be\5&\24\2\u00bd\u00b7\3\2\2\2\u00bd\u00b8\3")
+        buf.write("\2\2\2\u00bd\u00b9\3\2\2\2\u00bd\u00ba\3\2\2\2\u00bd\u00bb")
+        buf.write("\3\2\2\2\u00bd\u00bc\3\2\2\2\u00be#\3\2\2\2\u00bf\u00c0")
+        buf.write("\t\6\2\2\u00c0%\3\2\2\2\u00c1\u00c2\7\3\2\2\u00c2\u00c3")
+        buf.write("\7&\2\2\u00c3\u00c4\7\21\2\2\u00c4\u00c5\5 \21\2\u00c5")
+        buf.write("\u00c6\7\22\2\2\u00c6\'\3\2\2\2\u00c7\u00d7\7\26\2\2\u00c8")
+        buf.write("\u00cd\5\"\22\2\u00c9\u00ca\7\30\2\2\u00ca\u00cc\5\"\22")
+        buf.write("\2\u00cb\u00c9\3\2\2\2\u00cc\u00cf\3\2\2\2\u00cd\u00cb")
+        buf.write("\3\2\2\2\u00cd\u00ce\3\2\2\2\u00ce\u00d5\3\2\2\2\u00cf")
+        buf.write("\u00cd\3\2\2\2\u00d0\u00d3\7\20\2\2\u00d1\u00d4\5(\25")
+        buf.write("\2\u00d2\u00d4\7(\2\2\u00d3\u00d1\3\2\2\2\u00d3\u00d2")
+        buf.write("\3\2\2\2\u00d4\u00d6\3\2\2\2\u00d5\u00d0\3\2\2\2\u00d5")
+        buf.write("\u00d6\3\2\2\2\u00d6\u00d8\3\2\2\2\u00d7\u00c8\3\2\2\2")
+        buf.write("\u00d7\u00d8\3\2\2\2\u00d8\u00d9\3\2\2\2\u00d9\u00da\7")
+        buf.write("\27\2\2\u00da)\3\2\2\2\u00db\u00e0\5,\27\2\u00dc\u00dd")
+        buf.write("\t\7\2\2\u00dd\u00df\5,\27\2\u00de\u00dc\3\2\2\2\u00df")
+        buf.write("\u00e2\3\2\2\2\u00e0\u00de\3\2\2\2\u00e0\u00e1\3\2\2\2")
+        buf.write("\u00e1+\3\2\2\2\u00e2\u00e0\3\2\2\2\u00e3\u00e6\5\22\n")
+        buf.write("\2\u00e4\u00e6\5.\30\2\u00e5\u00e3\3\2\2\2\u00e5\u00e4")
+        buf.write("\3\2\2\2\u00e6-\3\2\2\2\u00e7\u00ec\5\60\31\2\u00e8\u00e9")
+        buf.write("\t\b\2\2\u00e9\u00eb\5\60\31\2\u00ea\u00e8\3\2\2\2\u00eb")
+        buf.write("\u00ee\3\2\2\2\u00ec\u00ea\3\2\2\2\u00ec\u00ed\3\2\2\2")
+        buf.write("\u00ed/\3\2\2\2\u00ee\u00ec\3\2\2\2\u00ef\u00f8\7\'\2")
+        buf.write("\2\u00f0\u00f8\7(\2\2\u00f1\u00f2\7\n\2\2\u00f2\u00f8")
+        buf.write("\5\60\31\2\u00f3\u00f4\7\21\2\2\u00f4\u00f5\5.\30\2\u00f5")
+        buf.write("\u00f6\7\22\2\2\u00f6\u00f8\3\2\2\2\u00f7\u00ef\3\2\2")
+        buf.write("\2\u00f7\u00f0\3\2\2\2\u00f7\u00f1\3\2\2\2\u00f7\u00f3")
+        buf.write("\3\2\2\2\u00f8\61\3\2\2\2\36>HQW\\aekpv\u0080\u0088\u008a")
+        buf.write("\u0090\u0097\u00a0\u00a7\u00ad\u00b4\u00bd\u00cd\u00d3")
+        buf.write("\u00d5\u00d7\u00e0\u00e5\u00ec\u00f7")
         return buf.getvalue()
 
 
@@ -142,8 +149,8 @@ class AgentSpeakParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "ATOM", "VAR", "CHAR", "LETTER", "LC_LETTER", "UP_LETTER", 
-                      "DIGIT", "STRING", "NUMBER", "WS", "LC", "BC" ]
+                      "ATOM", "NUMBER", "VAR", "STRING", "LOGICAL_VALUE", 
+                      "WS", "LC", "BC" ]
 
     RULE_agent = 0
     RULE_init_bels = 1
@@ -162,17 +169,20 @@ class AgentSpeakParser ( Parser ):
     RULE_atomic_formula = 14
     RULE_list_of_terms = 15
     RULE_term = 16
-    RULE_list_structure = 17
-    RULE_rel_expr = 18
-    RULE_rel_term = 19
-    RULE_arithm_expr = 20
-    RULE_arithm_term = 21
+    RULE_term_value = 17
+    RULE_internal_action = 18
+    RULE_list_structure = 19
+    RULE_rel_expr = 20
+    RULE_rel_term = 21
+    RULE_arithm_expr = 22
+    RULE_arithm_term = 23
 
     ruleNames =  [ "agent", "init_bels", "beliefs", "rules", "init_goals", 
                    "plans", "plan", "triggering_event", "literal", "context", 
                    "log_expr", "simple_log_expr", "body", "body_formula", 
-                   "atomic_formula", "list_of_terms", "term", "list_structure", 
-                   "rel_expr", "rel_term", "arithm_expr", "arithm_term" ]
+                   "atomic_formula", "list_of_terms", "term", "term_value", 
+                   "internal_action", "list_structure", "rel_expr", "rel_term", 
+                   "arithm_expr", "arithm_term" ]
 
     EOF = Token.EOF
     T__0=1
@@ -211,17 +221,13 @@ class AgentSpeakParser ( Parser ):
     T__33=34
     T__34=35
     ATOM=36
-    VAR=37
-    CHAR=38
-    LETTER=39
-    LC_LETTER=40
-    UP_LETTER=41
-    DIGIT=42
-    STRING=43
-    NUMBER=44
-    WS=45
-    LC=46
-    BC=47
+    NUMBER=37
+    VAR=38
+    STRING=39
+    LOGICAL_VALUE=40
+    WS=41
+    LC=42
+    BC=43
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -271,14 +277,12 @@ class AgentSpeakParser ( Parser ):
         self.enterRule(localctx, 0, self.RULE_agent)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 44
+            self.state = 48
             self.init_bels()
-            self.state = 45
+            self.state = 49
             self.init_goals()
-            self.state = 46
+            self.state = 50
             self.plans()
-            self.state = 47
-            self.match(AgentSpeakParser.T__0)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -323,9 +327,9 @@ class AgentSpeakParser ( Parser ):
         self.enterRule(localctx, 2, self.RULE_init_bels)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 49
+            self.state = 52
             self.beliefs()
-            self.state = 50
+            self.state = 53
             self.rules()
         except RecognitionException as re:
             localctx.exception = re
@@ -370,16 +374,16 @@ class AgentSpeakParser ( Parser ):
         self.enterRule(localctx, 4, self.RULE_beliefs)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 57
+            self.state = 60
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,0,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 52
+                    self.state = 55
                     self.literal()
-                    self.state = 53
+                    self.state = 56
                     self.match(AgentSpeakParser.T__0) 
-                self.state = 59
+                self.state = 62
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,0,self._ctx)
 
@@ -434,19 +438,19 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 67
+            self.state = 70
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__9) | (1 << AgentSpeakParser.ATOM) | (1 << AgentSpeakParser.VAR))) != 0):
-                self.state = 60
-                self.literal()
-                self.state = 61
-                self.match(AgentSpeakParser.T__1)
-                self.state = 62
-                self.log_expr(0)
                 self.state = 63
+                self.literal()
+                self.state = 64
+                self.match(AgentSpeakParser.T__1)
+                self.state = 65
+                self.log_expr(0)
+                self.state = 66
                 self.match(AgentSpeakParser.T__0)
-                self.state = 69
+                self.state = 72
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -494,17 +498,17 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 76
+            self.state = 79
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==AgentSpeakParser.T__2:
-                self.state = 70
+                self.state = 73
                 self.match(AgentSpeakParser.T__2)
-                self.state = 71
+                self.state = 74
                 self.literal()
-                self.state = 72
+                self.state = 75
                 self.match(AgentSpeakParser.T__0)
-                self.state = 78
+                self.state = 81
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -552,13 +556,13 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 82
+            self.state = 85
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__3) | (1 << AgentSpeakParser.T__6) | (1 << AgentSpeakParser.T__7))) != 0):
-                self.state = 79
+                self.state = 82
                 self.plan()
-                self.state = 84
+                self.state = 87
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -615,39 +619,39 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 87
+            self.state = 90
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==AgentSpeakParser.T__3:
-                self.state = 85
+                self.state = 88
                 self.match(AgentSpeakParser.T__3)
-                self.state = 86
+                self.state = 89
                 self.atomic_formula()
 
 
-            self.state = 89
-            self.triggering_event()
             self.state = 92
+            self.triggering_event()
+            self.state = 95
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==AgentSpeakParser.T__4:
-                self.state = 90
+                self.state = 93
                 self.match(AgentSpeakParser.T__4)
-                self.state = 91
+                self.state = 94
                 self.context()
 
 
-            self.state = 96
+            self.state = 99
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==AgentSpeakParser.T__5:
-                self.state = 94
+                self.state = 97
                 self.match(AgentSpeakParser.T__5)
-                self.state = 95
+                self.state = 98
                 self.body()
 
 
-            self.state = 98
+            self.state = 101
             self.match(AgentSpeakParser.T__0)
         except RecognitionException as re:
             localctx.exception = re
@@ -690,18 +694,18 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 100
+            self.state = 103
             _la = self._input.LA(1)
             if not(_la==AgentSpeakParser.T__6 or _la==AgentSpeakParser.T__7):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 102
+            self.state = 105
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==AgentSpeakParser.T__2 or _la==AgentSpeakParser.T__8:
-                self.state = 101
+                self.state = 104
                 _la = self._input.LA(1)
                 if not(_la==AgentSpeakParser.T__2 or _la==AgentSpeakParser.T__8):
                     self._errHandler.recoverInline(self)
@@ -710,7 +714,7 @@ class AgentSpeakParser ( Parser ):
                     self.consume()
 
 
-            self.state = 104
+            self.state = 107
             self.literal()
         except RecognitionException as re:
             localctx.exception = re
@@ -753,15 +757,15 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 107
+            self.state = 110
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==AgentSpeakParser.T__9:
-                self.state = 106
+                self.state = 109
                 self.match(AgentSpeakParser.T__9)
 
 
-            self.state = 109
+            self.state = 112
             self.atomic_formula()
         except RecognitionException as re:
             localctx.exception = re
@@ -802,17 +806,17 @@ class AgentSpeakParser ( Parser ):
         localctx = AgentSpeakParser.ContextContext(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_context)
         try:
-            self.state = 113
+            self.state = 116
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [AgentSpeakParser.T__7, AgentSpeakParser.T__9, AgentSpeakParser.T__11, AgentSpeakParser.T__14, AgentSpeakParser.ATOM, AgentSpeakParser.VAR, AgentSpeakParser.NUMBER]:
+            if token in [AgentSpeakParser.T__7, AgentSpeakParser.T__9, AgentSpeakParser.T__11, AgentSpeakParser.T__14, AgentSpeakParser.ATOM, AgentSpeakParser.NUMBER, AgentSpeakParser.VAR]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 111
+                self.state = 114
                 self.log_expr(0)
                 pass
             elif token in [AgentSpeakParser.T__10]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 112
+                self.state = 115
                 self.match(AgentSpeakParser.T__10)
                 pass
             else:
@@ -867,33 +871,33 @@ class AgentSpeakParser ( Parser ):
         self.enterRecursionRule(localctx, 20, self.RULE_log_expr, _p)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 123
+            self.state = 126
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,10,self._ctx)
             if la_ == 1:
-                self.state = 116
+                self.state = 119
                 self.simple_log_expr()
                 pass
 
             elif la_ == 2:
-                self.state = 117
+                self.state = 120
                 self.match(AgentSpeakParser.T__11)
-                self.state = 118
+                self.state = 121
                 self.log_expr(4)
                 pass
 
             elif la_ == 3:
-                self.state = 119
+                self.state = 122
                 self.match(AgentSpeakParser.T__14)
-                self.state = 120
+                self.state = 123
                 self.log_expr(0)
-                self.state = 121
+                self.state = 124
                 self.match(AgentSpeakParser.T__15)
                 pass
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 133
+            self.state = 136
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -901,37 +905,37 @@ class AgentSpeakParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 131
+                    self.state = 134
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,11,self._ctx)
                     if la_ == 1:
                         localctx = AgentSpeakParser.Log_exprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_log_expr)
-                        self.state = 125
+                        self.state = 128
                         if not self.precpred(self._ctx, 3):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
-                        self.state = 126
+                        self.state = 129
                         self.match(AgentSpeakParser.T__12)
-                        self.state = 127
+                        self.state = 130
                         self.log_expr(4)
                         pass
 
                     elif la_ == 2:
                         localctx = AgentSpeakParser.Log_exprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_log_expr)
-                        self.state = 128
+                        self.state = 131
                         if not self.precpred(self._ctx, 2):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                        self.state = 129
+                        self.state = 132
                         self.match(AgentSpeakParser.T__13)
-                        self.state = 130
+                        self.state = 133
                         self.log_expr(3)
                         pass
 
              
-                self.state = 135
+                self.state = 138
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
 
@@ -982,21 +986,21 @@ class AgentSpeakParser ( Parser ):
         self.enterRule(localctx, 22, self.RULE_simple_log_expr)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 139
+            self.state = 142
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,13,self._ctx)
             if la_ == 1:
-                self.state = 136
+                self.state = 139
                 self.literal()
                 pass
 
             elif la_ == 2:
-                self.state = 137
+                self.state = 140
                 self.rel_expr()
                 pass
 
             elif la_ == 3:
-                self.state = 138
+                self.state = 141
                 self.match(AgentSpeakParser.VAR)
                 pass
 
@@ -1045,17 +1049,17 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 141
+            self.state = 144
             self.body_formula()
-            self.state = 146
+            self.state = 149
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==AgentSpeakParser.T__16:
-                self.state = 142
+                self.state = 145
                 self.match(AgentSpeakParser.T__16)
-                self.state = 143
+                self.state = 146
                 self.body_formula()
-                self.state = 148
+                self.state = 151
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1090,6 +1094,10 @@ class AgentSpeakParser ( Parser ):
             return self.getTypedRuleContext(AgentSpeakParser.Rel_exprContext,0)
 
 
+        def internal_action(self):
+            return self.getTypedRuleContext(AgentSpeakParser.Internal_actionContext,0)
+
+
         def getRuleIndex(self):
             return AgentSpeakParser.RULE_body_formula
 
@@ -1110,38 +1118,44 @@ class AgentSpeakParser ( Parser ):
         self.enterRule(localctx, 26, self.RULE_body_formula)
         self._la = 0 # Token type
         try:
-            self.state = 154
+            self.state = 158
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,15,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 149
+                self.state = 152
                 _la = self._input.LA(1)
                 if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__2) | (1 << AgentSpeakParser.T__6) | (1 << AgentSpeakParser.T__7) | (1 << AgentSpeakParser.T__8) | (1 << AgentSpeakParser.T__17) | (1 << AgentSpeakParser.T__18))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 150
+                self.state = 153
                 self.literal()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 151
+                self.state = 154
                 self.atomic_formula()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 152
+                self.state = 155
                 self.match(AgentSpeakParser.VAR)
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 153
+                self.state = 156
                 self.rel_expr()
+                pass
+
+            elif la_ == 5:
+                self.enterOuterAlt(localctx, 5)
+                self.state = 157
+                self.internal_action()
                 pass
 
 
@@ -1195,34 +1209,34 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 156
+            self.state = 160
             _la = self._input.LA(1)
             if not(_la==AgentSpeakParser.ATOM or _la==AgentSpeakParser.VAR):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 161
+            self.state = 165
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
             if la_ == 1:
-                self.state = 157
+                self.state = 161
                 self.match(AgentSpeakParser.T__14)
-                self.state = 158
+                self.state = 162
                 self.list_of_terms()
-                self.state = 159
+                self.state = 163
                 self.match(AgentSpeakParser.T__15)
 
 
-            self.state = 167
+            self.state = 171
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,17,self._ctx)
             if la_ == 1:
-                self.state = 163
+                self.state = 167
                 self.match(AgentSpeakParser.T__19)
-                self.state = 164
+                self.state = 168
                 self.list_of_terms()
-                self.state = 165
+                self.state = 169
                 self.match(AgentSpeakParser.T__20)
 
 
@@ -1270,17 +1284,17 @@ class AgentSpeakParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 169
+            self.state = 173
             self.term()
-            self.state = 174
+            self.state = 178
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==AgentSpeakParser.T__21:
-                self.state = 170
+                self.state = 174
                 self.match(AgentSpeakParser.T__21)
-                self.state = 171
+                self.state = 175
                 self.term()
-                self.state = 176
+                self.state = 180
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1300,6 +1314,10 @@ class AgentSpeakParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
+        def term_value(self):
+            return self.getTypedRuleContext(AgentSpeakParser.Term_valueContext,0)
+
+
         def literal(self):
             return self.getTypedRuleContext(AgentSpeakParser.LiteralContext,0)
 
@@ -1315,8 +1333,9 @@ class AgentSpeakParser ( Parser ):
         def VAR(self):
             return self.getToken(AgentSpeakParser.VAR, 0)
 
-        def STRING(self):
-            return self.getToken(AgentSpeakParser.STRING, 0)
+        def internal_action(self):
+            return self.getTypedRuleContext(AgentSpeakParser.Internal_actionContext,0)
+
 
         def getRuleIndex(self):
             return AgentSpeakParser.RULE_term
@@ -1337,40 +1356,152 @@ class AgentSpeakParser ( Parser ):
         localctx = AgentSpeakParser.TermContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_term)
         try:
-            self.state = 182
+            self.state = 187
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,19,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 177
-                self.literal()
+                self.state = 181
+                self.term_value()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 178
-                self.list_structure()
+                self.state = 182
+                self.literal()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 179
-                self.arithm_expr()
+                self.state = 183
+                self.list_structure()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 180
-                self.match(AgentSpeakParser.VAR)
+                self.state = 184
+                self.arithm_expr()
                 pass
 
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 181
-                self.match(AgentSpeakParser.STRING)
+                self.state = 185
+                self.match(AgentSpeakParser.VAR)
+                pass
+
+            elif la_ == 6:
+                self.enterOuterAlt(localctx, 6)
+                self.state = 186
+                self.internal_action()
                 pass
 
 
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+
+    class Term_valueContext(ParserRuleContext):
+        __slots__ = 'parser'
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+
+        def LOGICAL_VALUE(self):
+            return self.getToken(AgentSpeakParser.LOGICAL_VALUE, 0)
+
+        def NUMBER(self):
+            return self.getToken(AgentSpeakParser.NUMBER, 0)
+
+        def STRING(self):
+            return self.getToken(AgentSpeakParser.STRING, 0)
+
+        def getRuleIndex(self):
+            return AgentSpeakParser.RULE_term_value
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterTerm_value" ):
+                listener.enterTerm_value(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitTerm_value" ):
+                listener.exitTerm_value(self)
+
+
+
+
+    def term_value(self):
+
+        localctx = AgentSpeakParser.Term_valueContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 34, self.RULE_term_value)
+        self._la = 0 # Token type
+        try:
+            self.enterOuterAlt(localctx, 1)
+            self.state = 189
+            _la = self._input.LA(1)
+            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.NUMBER) | (1 << AgentSpeakParser.STRING) | (1 << AgentSpeakParser.LOGICAL_VALUE))) != 0)):
+                self._errHandler.recoverInline(self)
+            else:
+                self._errHandler.reportMatch(self)
+                self.consume()
+        except RecognitionException as re:
+            localctx.exception = re
+            self._errHandler.reportError(self, re)
+            self._errHandler.recover(self, re)
+        finally:
+            self.exitRule()
+        return localctx
+
+
+    class Internal_actionContext(ParserRuleContext):
+        __slots__ = 'parser'
+
+        def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
+            super().__init__(parent, invokingState)
+            self.parser = parser
+
+        def ATOM(self):
+            return self.getToken(AgentSpeakParser.ATOM, 0)
+
+        def list_of_terms(self):
+            return self.getTypedRuleContext(AgentSpeakParser.List_of_termsContext,0)
+
+
+        def getRuleIndex(self):
+            return AgentSpeakParser.RULE_internal_action
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterInternal_action" ):
+                listener.enterInternal_action(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitInternal_action" ):
+                listener.exitInternal_action(self)
+
+
+
+
+    def internal_action(self):
+
+        localctx = AgentSpeakParser.Internal_actionContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 36, self.RULE_internal_action)
+        try:
+            self.enterOuterAlt(localctx, 1)
+            self.state = 191
+            self.match(AgentSpeakParser.T__0)
+            self.state = 192
+            self.match(AgentSpeakParser.ATOM)
+            self.state = 193
+            self.match(AgentSpeakParser.T__14)
+            self.state = 194
+            self.list_of_terms()
+            self.state = 195
+            self.match(AgentSpeakParser.T__15)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1418,45 +1549,45 @@ class AgentSpeakParser ( Parser ):
     def list_structure(self):
 
         localctx = AgentSpeakParser.List_structureContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 34, self.RULE_list_structure)
+        self.enterRule(localctx, 38, self.RULE_list_structure)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 184
+            self.state = 197
             self.match(AgentSpeakParser.T__19)
-            self.state = 200
+            self.state = 213
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__7) | (1 << AgentSpeakParser.T__9) | (1 << AgentSpeakParser.T__14) | (1 << AgentSpeakParser.T__19) | (1 << AgentSpeakParser.ATOM) | (1 << AgentSpeakParser.VAR) | (1 << AgentSpeakParser.STRING) | (1 << AgentSpeakParser.NUMBER))) != 0):
-                self.state = 185
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__0) | (1 << AgentSpeakParser.T__7) | (1 << AgentSpeakParser.T__9) | (1 << AgentSpeakParser.T__14) | (1 << AgentSpeakParser.T__19) | (1 << AgentSpeakParser.ATOM) | (1 << AgentSpeakParser.NUMBER) | (1 << AgentSpeakParser.VAR) | (1 << AgentSpeakParser.STRING) | (1 << AgentSpeakParser.LOGICAL_VALUE))) != 0):
+                self.state = 198
                 self.term()
-                self.state = 190
+                self.state = 203
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 while _la==AgentSpeakParser.T__21:
-                    self.state = 186
+                    self.state = 199
                     self.match(AgentSpeakParser.T__21)
-                    self.state = 187
+                    self.state = 200
                     self.term()
-                    self.state = 192
+                    self.state = 205
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
-                self.state = 198
+                self.state = 211
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if _la==AgentSpeakParser.T__13:
-                    self.state = 193
+                    self.state = 206
                     self.match(AgentSpeakParser.T__13)
-                    self.state = 196
+                    self.state = 209
                     self._errHandler.sync(self)
                     token = self._input.LA(1)
                     if token in [AgentSpeakParser.T__19]:
-                        self.state = 194
+                        self.state = 207
                         self.list_structure()
                         pass
                     elif token in [AgentSpeakParser.VAR]:
-                        self.state = 195
+                        self.state = 208
                         self.match(AgentSpeakParser.VAR)
                         pass
                     else:
@@ -1466,7 +1597,7 @@ class AgentSpeakParser ( Parser ):
 
 
 
-            self.state = 202
+            self.state = 215
             self.match(AgentSpeakParser.T__20)
         except RecognitionException as re:
             localctx.exception = re
@@ -1508,27 +1639,27 @@ class AgentSpeakParser ( Parser ):
     def rel_expr(self):
 
         localctx = AgentSpeakParser.Rel_exprContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 36, self.RULE_rel_expr)
+        self.enterRule(localctx, 40, self.RULE_rel_expr)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 204
+            self.state = 217
             self.rel_term()
-            self.state = 209
+            self.state = 222
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,24,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 205
+                    self.state = 218
                     _la = self._input.LA(1)
                     if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__22) | (1 << AgentSpeakParser.T__23) | (1 << AgentSpeakParser.T__24) | (1 << AgentSpeakParser.T__25) | (1 << AgentSpeakParser.T__26) | (1 << AgentSpeakParser.T__27) | (1 << AgentSpeakParser.T__28) | (1 << AgentSpeakParser.T__29))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 206
+                    self.state = 219
                     self.rel_term() 
-                self.state = 211
+                self.state = 224
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,24,self._ctx)
 
@@ -1573,20 +1704,20 @@ class AgentSpeakParser ( Parser ):
     def rel_term(self):
 
         localctx = AgentSpeakParser.Rel_termContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 38, self.RULE_rel_term)
+        self.enterRule(localctx, 42, self.RULE_rel_term)
         try:
-            self.state = 214
+            self.state = 227
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,25,self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 212
+                self.state = 225
                 self.literal()
                 pass
 
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 213
+                self.state = 226
                 self.arithm_expr()
                 pass
 
@@ -1631,27 +1762,27 @@ class AgentSpeakParser ( Parser ):
     def arithm_expr(self):
 
         localctx = AgentSpeakParser.Arithm_exprContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 40, self.RULE_arithm_expr)
+        self.enterRule(localctx, 44, self.RULE_arithm_expr)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 216
+            self.state = 229
             self.arithm_term()
-            self.state = 221
+            self.state = 234
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,26,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 217
+                    self.state = 230
                     _la = self._input.LA(1)
                     if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AgentSpeakParser.T__6) | (1 << AgentSpeakParser.T__7) | (1 << AgentSpeakParser.T__30) | (1 << AgentSpeakParser.T__31) | (1 << AgentSpeakParser.T__32) | (1 << AgentSpeakParser.T__33) | (1 << AgentSpeakParser.T__34))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-                    self.state = 218
+                    self.state = 231
                     self.arithm_term() 
-                self.state = 223
+                self.state = 236
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,26,self._ctx)
 
@@ -1702,35 +1833,35 @@ class AgentSpeakParser ( Parser ):
     def arithm_term(self):
 
         localctx = AgentSpeakParser.Arithm_termContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 42, self.RULE_arithm_term)
+        self.enterRule(localctx, 46, self.RULE_arithm_term)
         try:
-            self.state = 232
+            self.state = 245
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [AgentSpeakParser.NUMBER]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 224
+                self.state = 237
                 self.match(AgentSpeakParser.NUMBER)
                 pass
             elif token in [AgentSpeakParser.VAR]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 225
+                self.state = 238
                 self.match(AgentSpeakParser.VAR)
                 pass
             elif token in [AgentSpeakParser.T__7]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 226
+                self.state = 239
                 self.match(AgentSpeakParser.T__7)
-                self.state = 227
+                self.state = 240
                 self.arithm_term()
                 pass
             elif token in [AgentSpeakParser.T__14]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 228
+                self.state = 241
                 self.match(AgentSpeakParser.T__14)
-                self.state = 229
+                self.state = 242
                 self.arithm_expr()
-                self.state = 230
+                self.state = 243
                 self.match(AgentSpeakParser.T__15)
                 pass
             else:

@@ -3,7 +3,7 @@ grammar AgentSpeak;
 // --- rules  ---------------------------------------------------------------------------
 
 agent:
-    init_bels init_goals plans '.'
+    init_bels init_goals plans
     ;
 
 init_bels:
@@ -65,6 +65,7 @@ body_formula:
     | atomic_formula
     | VAR
     | rel_expr
+    | internal_action
     ;
 
 atomic_formula:
@@ -78,11 +79,22 @@ list_of_terms:
     ;
 
 term:
-    literal
+    term_value
+    | literal
     | list_structure
     | arithm_expr
     | VAR
+    | internal_action
+    ;
+
+term_value :
+    LOGICAL_VALUE
+    | NUMBER
     | STRING
+    ;
+
+internal_action:
+    '.' ATOM '(' list_of_terms ')'
     ;
 
 list_structure:
@@ -113,35 +125,47 @@ arithm_term:
 
 // --- terminal symbols -----------------------------------------------------------------
 
-ATOM: 
-    LC_LETTER | '.' CHAR (CHAR | '.' CHAR)*
-    | '\'' (~['])* '\''
-    ;
+//ATOM:
+//    LC_LETTER | '.' CHAR (CHAR | '.' CHAR)*
+//    | '\'' (~['])* '\''
+//    ;
 
-VAR: 
-    LC_LETTER (CHAR)*
-;
-
-CHAR:
-    LETTER
-    | DIGIT 
-    | '_'
-;
-
-LETTER:
+ATOM :
     LC_LETTER
-    | UP_LETTER
+    ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
     ;
 
-LC_LETTER :
+NUMBER:
+    '-'? DIGIT (DIGIT)*
+    | (DIGIT)* '.' (DIGIT)+ ([eE] ([+-])? (DIGIT)+)?
+    | (DIGIT)+ ([eE] ([+-])? (DIGIT)+)
+    ;
+
+//VAR:
+//    LC_LETTER (CHAR)*
+//;
+
+VAR:
+    ( UP_LETTER | LC_LETTER )
+    ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
+    ;
+
+//CHAR:
+//    LC_LETTER
+//    | UP_LETTER
+//    | DIGIT
+//    | '_'
+//;
+
+fragment LC_LETTER :
     [a-z]
 ;
 
-UP_LETTER : 
+fragment UP_LETTER :
     [A-Z]
     ;
 
-DIGIT:
+fragment DIGIT:
     [0-9]
     ;
 
@@ -150,10 +174,10 @@ STRING:
     | '\'' ~('\'')* '\''
     ;
 
-NUMBER:
-    DIGIT (DIGIT)*
-    | (DIGIT)* '.' (DIGIT)+ ([eE] ([+-])? (DIGIT)+)?
-    | (DIGIT)+ ([eE] ([+-])? (DIGIT)+)
+
+LOGICAL_VALUE:
+    'true'
+    | 'false'
     ;
 
 

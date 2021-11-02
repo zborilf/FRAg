@@ -161,6 +161,24 @@ class AgentSpeakListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by AgentSpeakParser#term_value.
+    def enterTerm_value(self, ctx:AgentSpeakParser.Term_valueContext):
+        pass
+
+    # Exit a parse tree produced by AgentSpeakParser#term_value.
+    def exitTerm_value(self, ctx:AgentSpeakParser.Term_valueContext):
+        pass
+
+
+    # Enter a parse tree produced by AgentSpeakParser#internal_action.
+    def enterInternal_action(self, ctx:AgentSpeakParser.Internal_actionContext):
+        pass
+
+    # Exit a parse tree produced by AgentSpeakParser#internal_action.
+    def exitInternal_action(self, ctx:AgentSpeakParser.Internal_actionContext):
+        pass
+
+
     # Enter a parse tree produced by AgentSpeakParser#list_structure.
     def enterList_structure(self, ctx:AgentSpeakParser.List_structureContext):
         pass
