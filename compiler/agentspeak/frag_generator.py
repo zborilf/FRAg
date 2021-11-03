@@ -1,102 +1,57 @@
-from agentspeak.asl.AgentSpeakListener import AgentSpeakListener
-from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
-
-from agentspeak.config import internal_functions, internal_functions_mapping
+from .parser.AgentSpeakListener import AgentSpeakListener
+from .parser.AgentSpeakParser import AgentSpeakParser
 
 
 class FragGenerator(AgentSpeakListener):
     def __init__(self):
         super().__init__()
 
-        self._output = ""
+        self.output = ""
 
-    @property
-    def output(self) -> str:
-        return self._output
+    def enterInit_bels(self, ctx:AgentSpeakParser.Init_belsContext):
+        pass
 
-    def enterBeliefs(self, ctx:AgentSpeakParser.BeliefsContext):
-        for belief in ctx.literal():
-            self._output += f"fact({belief.getText()}).\n"
+    def enterInit_goals(self, ctx: AgentSpeakParser.Init_goalsContext):
+        for literal in ctx.literal():
+            formula = literal.atomic_formula()
+            self.output += f"goal(ach,{formula.getText()},null,[[]],active).\n"
 
-    def enterRules(self, ctx:AgentSpeakParser.RulesContext):
-        if ctx.children:
-            raise Exception("Currently, beliefs rules are not supported.")
+    def enterPlans(self, ctx:AgentSpeakParser.PlansContext):
+        for plan in ctx.plan():
+            triggering_event = plan.triggering_event()
 
-    def enterInit_goal(self, ctx:AgentSpeakParser.Init_goalContext):
-        # TODO: other types!
-        literal = ctx.literal()
-        formula = literal.atomic_formula()
-        self._output += f"goal(ach,{formula.getText()},null,[[]],active).\n"
+            # TODO: add or remove + prefix
+            event_name = triggering_event.getText()[2:]
+            # if prefix := triggering_event.GOAL_PREFIX() and prefix != "!":
+            #     raise Exception("For now, only achievement goals are supported")
 
-    def enterPlan(self, ctx:AgentSpeakParser.PlanContext):
-        triggering_event = ctx.triggering_event()
+            # TODO: context
 
-        # TODO: remove + prefix
-        prefix_symbols = {"+", "!"}
+            converted_body = []
 
-        event_name = triggering_event.getText()
-        event_prefix = ""
-        for s in event_name:
-            if s in prefix_symbols:
-                event_prefix += s
-            else:
-                break
-
-        event_name = event_name.removeprefix(event_prefix)
-
-        _plan_types = {
-            "+!": "ach",
-            "+": "add",
-        }
-
-        plan_type = _plan_types.get(event_prefix)
-        if plan_type is None:
-            raise Exception(f"Unsupported plan type for prefix: {event_prefix}")
-
-        context_str = context.getText() if (context := ctx.context()) else ""
-
-        converted_body = []
-
-        if body := ctx.body():
-            for body_formula in body.body_formula():
-                children_len = len(body_formula.children)
-                if children_len == 1:
-                    child = body_formula.getChild(0)
-                    if isinstance(child, AgentSpeakParser.Internal_actionContext):
-                        fcn_name = child.ATOM().getText()
-                        fnc_call_str = child.getText()[1:]
-                        if fcn_name not in internal_functions:
-                            raise Exception(f"Currently, the internal {fcn_name} function is not supported.")
-
-                        if fcn_prolog_name := internal_functions_mapping.get(fcn_name):
-                            fnc_call_str = fnc_call_str.replace(fcn_name, fcn_prolog_name, 1)
-
-                        converted_body.append(f"act({fnc_call_str})")
-                    elif isinstance(child, AgentSpeakParser.Rel_exprContext):
-                        converted_body.append(f"act({body_formula.getText()})")
+            if body := plan.body():
+                for body_formula in body.body_formula():
+                    children_len = len(body_formula.children)
+                    if children_len == 1:
+                        child = body_formula.getChild(0)
+                        if isinstance(child, AgentSpeakParser.Internal_actionContext):
+                            if child.ATOM().getText() != "print":
+                                raise Exception("For now, only print action is supported.")
+                            converted_body.append(f"act({child.getText()[1:]})")
+                        else:
+                            raise Exception("TODO")
+                    elif children_len == 2:
+                        prefix = body_formula.getChild(0)
+                        if prefix.getText() != "!":
+                            raise Exception("For now, only achievement goals are supported")
+                        literal = body_formula.getChild(1)
+                        converted_body.append(f"ach({literal.getText()})")
                     else:
                         raise Exception("TODO")
-                elif children_len == 2:
-                    prefix = body_formula.getChild(0).getText()
-                    literal = body_formula.getChild(1)
-                    if prefix == "!":
-                        predicate = "ach"
-                    elif prefix == "+":
-                        predicate = "add"
-                    elif prefix == "?":
-                        predicate = "test"
-                    else:
-                        raise Exception(
-                            "Currently, only achievement goals, test goals and add belief operation are supported"
-                        )
 
-                    converted_body.append(f"{predicate}({literal.getText()})")
-                else:
-                    raise Exception("TODO")
+            body_str = "[" + ",".join(converted_body) + "]"
 
-        body_str = "[" + ",".join(converted_body) + "]"
-
-        self._output += f"plan({plan_type},{event_name},[{context_str}],{body_str}).\n"
+            self.output += f"plan(ach,{event_name},[],{body_str}).\n"
 
     def exitAgent(self, ctx: AgentSpeakParser.AgentContext):
-        print(self._output)
+        print(self.output)

@@ -1,7 +1,8 @@
 import sys
-from antlr4 import CommonTokenStream, FileStream
-from agentspeak.antlr.AgentSpeakLexer import AgentSpeakLexer
-from agentspeak.antlr.AgentSpeakParser import AgentSpeakParser
+from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
+from agentspeak.frag_generator import FragGenerator
+from agentspeak.parser.AgentSpeakLexer import AgentSpeakLexer
+from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
 
 
 def main(argv):
@@ -10,6 +11,10 @@ def main(argv):
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
     tree = parser.agent()
+
+    frag_generator = FragGenerator()
+    walker = ParseTreeWalker()
+    walker.walk(frag_generator, tree)
 
 
 if __name__ == '__main__':
