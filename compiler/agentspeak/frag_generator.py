@@ -1,12 +1,16 @@
-from .parser.AgentSpeakListener import AgentSpeakListener
-from .parser.AgentSpeakParser import AgentSpeakParser
+from agentspeak.parser.AgentSpeakListener import AgentSpeakListener
+from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
 
 
 class FragGenerator(AgentSpeakListener):
     def __init__(self):
         super().__init__()
 
-        self.output = ""
+        self._output = ""
+
+    @property
+    def output(self) -> str:
+        return self._output
 
     def enterInit_bels(self, ctx:AgentSpeakParser.Init_belsContext):
         pass
@@ -14,7 +18,7 @@ class FragGenerator(AgentSpeakListener):
     def enterInit_goals(self, ctx: AgentSpeakParser.Init_goalsContext):
         for literal in ctx.literal():
             formula = literal.atomic_formula()
-            self.output += f"goal(ach,{formula.getText()},null,[[]],active).\n"
+            self._output += f"goal(ach,{formula.getText()},null,[[]],active).\n"
 
     def enterPlans(self, ctx:AgentSpeakParser.PlansContext):
         for plan in ctx.plan():
@@ -51,7 +55,7 @@ class FragGenerator(AgentSpeakListener):
 
             body_str = "[" + ",".join(converted_body) + "]"
 
-            self.output += f"plan(ach,{event_name},[],{body_str}).\n"
+            self._output += f"plan(ach,{event_name},[],{body_str}).\n"
 
     def exitAgent(self, ctx: AgentSpeakParser.AgentContext):
-        print(self.output)
+        print(self._output)

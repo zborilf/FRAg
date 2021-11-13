@@ -6,7 +6,7 @@ from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
 
 
 def main(argv):
-    input_stream = FileStream(argv[1] if len(argv) > 1 else 'agentspeak/examples/e1_a1.asl')
+    input_stream = FileStream(argv[1] if len(argv) > 1 else 'agentspeak/examples/factorial.asl')
     lexer = AgentSpeakLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
