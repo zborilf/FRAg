@@ -80,9 +80,9 @@ list_of_terms:
 
 term:
     term_value
+    | arithm_expr
     | literal
     | list_structure
-    | arithm_expr
     | VAR
     | internal_action
     ;
@@ -136,7 +136,7 @@ ATOM :
     ;
 
 NUMBER:
-    '-'? DIGIT (DIGIT)*
+    DIGIT (DIGIT)*
     | (DIGIT)* '.' (DIGIT)+ ([eE] ([+-])? (DIGIT)+)?
     | (DIGIT)+ ([eE] ([+-])? (DIGIT)+)
     ;

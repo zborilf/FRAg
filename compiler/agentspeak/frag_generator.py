@@ -29,7 +29,7 @@ class FragGenerator(AgentSpeakListener):
             # if prefix := triggering_event.GOAL_PREFIX() and prefix != "!":
             #     raise Exception("For now, only achievement goals are supported")
 
-            # TODO: context
+            context_str = context.getText() if (context := plan.context()) else ""
 
             converted_body = []
 
@@ -42,6 +42,8 @@ class FragGenerator(AgentSpeakListener):
                             if child.ATOM().getText() != "print":
                                 raise Exception("For now, only print action is supported.")
                             converted_body.append(f"act({child.getText()[1:]})")
+                        elif isinstance(child, AgentSpeakParser.Rel_exprContext):
+                            converted_body.append(f"act({body_formula.getText()})")
                         else:
                             raise Exception("TODO")
                     elif children_len == 2:
@@ -55,7 +57,7 @@ class FragGenerator(AgentSpeakListener):
 
             body_str = "[" + ",".join(converted_body) + "]"
 
-            self._output += f"plan(ach,{event_name},[],{body_str}).\n"
+            self._output += f"plan(ach,{event_name},[{context_str}],{body_str}).\n"
 
     def exitAgent(self, ctx: AgentSpeakParser.AgentContext):
         print(self._output)

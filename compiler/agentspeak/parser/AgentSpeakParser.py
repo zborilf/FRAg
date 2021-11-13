@@ -88,8 +88,8 @@ def serializedATN():
         buf.write("\u00b4\5\"\22\2\u00b0\u00b1\7\30\2\2\u00b1\u00b3\5\"\22")
         buf.write("\2\u00b2\u00b0\3\2\2\2\u00b3\u00b6\3\2\2\2\u00b4\u00b2")
         buf.write("\3\2\2\2\u00b4\u00b5\3\2\2\2\u00b5!\3\2\2\2\u00b6\u00b4")
-        buf.write("\3\2\2\2\u00b7\u00be\5$\23\2\u00b8\u00be\5\22\n\2\u00b9")
-        buf.write("\u00be\5(\25\2\u00ba\u00be\5.\30\2\u00bb\u00be\7(\2\2")
+        buf.write("\3\2\2\2\u00b7\u00be\5$\23\2\u00b8\u00be\5.\30\2\u00b9")
+        buf.write("\u00be\5\22\n\2\u00ba\u00be\5(\25\2\u00bb\u00be\7(\2\2")
         buf.write("\u00bc\u00be\5&\24\2\u00bd\u00b7\3\2\2\2\u00bd\u00b8\3")
         buf.write("\2\2\2\u00bd\u00b9\3\2\2\2\u00bd\u00ba\3\2\2\2\u00bd\u00bb")
         buf.write("\3\2\2\2\u00bd\u00bc\3\2\2\2\u00be#\3\2\2\2\u00bf\u00c0")
@@ -1318,16 +1318,16 @@ class AgentSpeakParser ( Parser ):
             return self.getTypedRuleContext(AgentSpeakParser.Term_valueContext,0)
 
 
+        def arithm_expr(self):
+            return self.getTypedRuleContext(AgentSpeakParser.Arithm_exprContext,0)
+
+
         def literal(self):
             return self.getTypedRuleContext(AgentSpeakParser.LiteralContext,0)
 
 
         def list_structure(self):
             return self.getTypedRuleContext(AgentSpeakParser.List_structureContext,0)
-
-
-        def arithm_expr(self):
-            return self.getTypedRuleContext(AgentSpeakParser.Arithm_exprContext,0)
 
 
         def VAR(self):
@@ -1368,19 +1368,19 @@ class AgentSpeakParser ( Parser ):
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 182
-                self.literal()
+                self.arithm_expr()
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 183
-                self.list_structure()
+                self.literal()
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 184
-                self.arithm_expr()
+                self.list_structure()
                 pass
 
             elif la_ == 5:
