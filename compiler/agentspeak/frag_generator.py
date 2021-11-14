@@ -19,7 +19,8 @@ class FragGenerator(AgentSpeakListener):
             self._output += f"fact({belief.getText()}).\n"
 
     def enterRules(self, ctx:AgentSpeakParser.RulesContext):
-        raise Exception("Currently, beliefs rules are not supported.")
+        if ctx.children:
+            raise Exception("Currently, beliefs rules are not supported.")
 
     def enterInit_goals(self, ctx: AgentSpeakParser.Init_goalsContext):
         for literal in ctx.literal():
@@ -53,11 +54,14 @@ class FragGenerator(AgentSpeakListener):
                         else:
                             raise Exception("TODO")
                     elif children_len == 2:
-                        prefix = body_formula.getChild(0)
-                        if prefix.getText() != "!":
-                            raise Exception("Currently, only achievement goals are supported")
+                        prefix = body_formula.getChild(0).getText()
                         literal = body_formula.getChild(1)
-                        converted_body.append(f"ach({literal.getText()})")
+                        if prefix == "!":
+                            converted_body.append(f"ach({literal.getText()})")
+                        elif prefix == "+":
+                            converted_body.append(f"add({literal.getText()})")
+                        else:
+                            raise Exception("Currently, only achievement goals and add belief operation are supported")
                     else:
                         raise Exception("TODO")
 
