@@ -1,5 +1,5 @@
-from agentspeak.parser.AgentSpeakListener import AgentSpeakListener
-from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
+from agentspeak.asl.AgentSpeakListener import AgentSpeakListener
+from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
 from agentspeak.config import internal_functions
 

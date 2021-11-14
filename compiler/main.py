@@ -1,8 +1,8 @@
 import sys
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 from agentspeak.frag_generator import FragGenerator
-from agentspeak.parser.AgentSpeakLexer import AgentSpeakLexer
-from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
+from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
+from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
 
 def main(argv):

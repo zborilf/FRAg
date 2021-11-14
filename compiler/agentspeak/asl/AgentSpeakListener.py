@@ -44,12 +44,21 @@ class AgentSpeakListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by AgentSpeakParser#init_goal.
-    def enterInit_goal(self, ctx:AgentSpeakParser.Init_goalContext):
+    # Enter a parse tree produced by AgentSpeakParser#init_goals.
+    def enterInit_goals(self, ctx:AgentSpeakParser.Init_goalsContext):
         pass
 
-    # Exit a parse tree produced by AgentSpeakParser#init_goal.
-    def exitInit_goal(self, ctx:AgentSpeakParser.Init_goalContext):
+    # Exit a parse tree produced by AgentSpeakParser#init_goals.
+    def exitInit_goals(self, ctx:AgentSpeakParser.Init_goalsContext):
+        pass
+
+
+    # Enter a parse tree produced by AgentSpeakParser#plans.
+    def enterPlans(self, ctx:AgentSpeakParser.PlansContext):
+        pass
+
+    # Exit a parse tree produced by AgentSpeakParser#plans.
+    def exitPlans(self, ctx:AgentSpeakParser.PlansContext):
         pass
 
 

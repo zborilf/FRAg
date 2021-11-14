@@ -3,8 +3,8 @@ import unittest
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
 from frag_generator import FragGenerator
-from agentspeak.parser.AgentSpeakLexer import AgentSpeakLexer
-from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
+from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
+from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
 
 def _compile(example_name: str) -> str:
