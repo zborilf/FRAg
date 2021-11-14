@@ -33,11 +33,15 @@ def _get_example(example_name: str) -> tuple[str, str]:
     return output, expected_output
 
 
-class TestFragGenerator(unittest.TestCase):
-    def test_factorial(self):
-        output, expected_output = _get_example('factorial')
+_examples = ('factorial', 'do_it')
 
-        self.assertEqual(output, expected_output)
+
+class TestFragGenerator(unittest.TestCase):
+    def test_examples(self):
+        for example in _examples:
+            output, expected_output = _get_example(example)
+
+            self.assertEqual(output, expected_output)
 
 
 if __name__ == '__main__':
