@@ -14,8 +14,12 @@ class FragGenerator(AgentSpeakListener):
     def output(self) -> str:
         return self._output
 
-    def enterInit_bels(self, ctx:AgentSpeakParser.Init_belsContext):
-        pass
+    def enterBeliefs(self, ctx:AgentSpeakParser.BeliefsContext):
+        for belief in ctx.literal():
+            self._output += f"fact({belief.getText()}).\n"
+
+    def enterRules(self, ctx:AgentSpeakParser.RulesContext):
+        raise Exception("Currently, beliefs rules are not supported.")
 
     def enterInit_goals(self, ctx: AgentSpeakParser.Init_goalsContext):
         for literal in ctx.literal():
