@@ -1,0 +1,6 @@
+fact(precond(a)).
+goal(ach,do_it_a,null,[[]],active).
+plan(ach,do_it_a,[true],[act(writeln("a solving")),ach(do_it_b),act(writeln("a solved"))]).
+plan(ach,do_it_a,[true],[]).
+plan(ach,do_it_b,[precond(a)],[act(writeln("b solving")),act(writeln("b solved"))]).
+plan(ach,do_it_c,[true],[act(writeln("c solving")),add(precond(a)),act(writeln("c solved"))]).
