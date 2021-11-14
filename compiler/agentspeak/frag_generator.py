@@ -1,7 +1,7 @@
 from agentspeak.asl.AgentSpeakListener import AgentSpeakListener
 from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
-from agentspeak.config import internal_functions
+from agentspeak.config import internal_functions, internal_functions_mapping
 
 
 class FragGenerator(AgentSpeakListener):
@@ -46,9 +46,15 @@ class FragGenerator(AgentSpeakListener):
                     if children_len == 1:
                         child = body_formula.getChild(0)
                         if isinstance(child, AgentSpeakParser.Internal_actionContext):
-                            if (fcn_name := child.ATOM().getText()) not in internal_functions:
+                            fcn_name = child.ATOM().getText()
+                            fnc_call_str = child.getText()[1:]
+                            if fcn_name not in internal_functions:
                                 raise Exception(f"Currently, the internal {fcn_name} function is not supported.")
-                            converted_body.append(f"act({child.getText()[1:]})")
+
+                            if fcn_prolog_name := internal_functions_mapping.get(fcn_name):
+                                fnc_call_str = fnc_call_str.replace(fcn_name, fcn_prolog_name, 1)
+
+                            converted_body.append(f"act({fnc_call_str})")
                         elif isinstance(child, AgentSpeakParser.Rel_exprContext):
                             converted_body.append(f"act({body_formula.getText()})")
                         else:
