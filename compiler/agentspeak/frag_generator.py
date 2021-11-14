@@ -1,6 +1,8 @@
 from agentspeak.parser.AgentSpeakListener import AgentSpeakListener
 from agentspeak.parser.AgentSpeakParser import AgentSpeakParser
 
+from agentspeak.config import internal_functions
+
 
 class FragGenerator(AgentSpeakListener):
     def __init__(self):
@@ -39,8 +41,8 @@ class FragGenerator(AgentSpeakListener):
                     if children_len == 1:
                         child = body_formula.getChild(0)
                         if isinstance(child, AgentSpeakParser.Internal_actionContext):
-                            if child.ATOM().getText() != "print":
-                                raise Exception("For now, only print action is supported.")
+                            if (fcn_name := child.ATOM().getText()) not in internal_functions:
+                                raise Exception(f"Currently, the internal {fcn_name} function is not supported.")
                             converted_body.append(f"act({child.getText()[1:]})")
                         elif isinstance(child, AgentSpeakParser.Rel_exprContext):
                             converted_body.append(f"act({body_formula.getText()})")
@@ -49,7 +51,7 @@ class FragGenerator(AgentSpeakListener):
                     elif children_len == 2:
                         prefix = body_formula.getChild(0)
                         if prefix.getText() != "!":
-                            raise Exception("For now, only achievement goals are supported")
+                            raise Exception("Currently, only achievement goals are supported")
                         literal = body_formula.getChild(1)
                         converted_body.append(f"ach({literal.getText()})")
                     else:
