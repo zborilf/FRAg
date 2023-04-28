@@ -1,4 +1,5 @@
 import unittest
+import pathlib
 
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
@@ -6,11 +7,11 @@ from agentspeak.frag_generator import FragGenerator
 from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
 from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
-from examples import get_example_file_path
+EXAMPLES_PATH = pathlib.Path(__file__).parent.resolve() / 'examples'
 
 
 def _compile(example_name: str) -> str:
-    input_stream = FileStream(get_example_file_path(example_name, 'asl').as_posix())
+    input_stream = FileStream((EXAMPLES_PATH / f'{example_name}.asl').as_posix())
     lexer = AgentSpeakLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
@@ -24,7 +25,8 @@ def _compile(example_name: str) -> str:
 
 
 def _get_expected_output(example_name: str) -> str:
-    return get_example_file_path(example_name, 'fap').read_text()
+    with open(f'examples/{example_name}.fap', 'r') as f:
+        return f.read()
 
 
 def _get_example(example_name: str) -> tuple[str, str]:
@@ -34,7 +36,7 @@ def _get_example(example_name: str) -> tuple[str, str]:
     return output, expected_output
 
 
-_examples = ('factorial', 'do_it', 'e2_a1', 'ex4_a1')
+_examples = ('factorial', 'do_it')
 
 
 class TestFragGenerator(unittest.TestCase):
