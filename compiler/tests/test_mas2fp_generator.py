@@ -10,7 +10,7 @@ from examples import get_example_file_path
 
 
 def _compile(example_name: str) -> str:
-    input_stream = FileStream(get_example_file_path(example_name, 'mas2j').as_posix())
+    input_stream = FileStream(get_example_file_path(example_name, 'mas2j'))
     lexer = MAS2JavaLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MAS2JavaParser(stream)
@@ -24,7 +24,8 @@ def _compile(example_name: str) -> str:
 
 
 def _get_expected_output(example_name: str) -> str:
-    return get_example_file_path(example_name, 'mas2fp').read_text()
+    with open(get_example_file_path(example_name, 'mas2fp'), 'r') as f:
+        return f.read()
 
 
 def _get_example(example_name: str) -> tuple[str, str]:
