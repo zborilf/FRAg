@@ -10,7 +10,7 @@ from examples import get_example_file_path
 
 
 def _compile(example_name: str) -> str:
-    input_stream = FileStream(get_example_file_path(example_name, 'asl'))
+    input_stream = FileStream(get_example_file_path(example_name, 'asl').as_posix())
     lexer = AgentSpeakLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
@@ -24,8 +24,7 @@ def _compile(example_name: str) -> str:
 
 
 def _get_expected_output(example_name: str) -> str:
-    with open(get_example_file_path(example_name, 'fap'), 'r') as f:
-        return f.read()
+    return get_example_file_path(example_name, 'fap').read_text()
 
 
 def _get_example(example_name: str) -> tuple[str, str]:
