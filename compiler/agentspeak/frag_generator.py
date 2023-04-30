@@ -31,10 +31,27 @@ class FragGenerator(AgentSpeakListener):
         for plan in ctx.plan():
             triggering_event = plan.triggering_event()
 
-            # TODO: add or remove + prefix
-            event_name = triggering_event.getText()[2:]
-            # if prefix := triggering_event.GOAL_PREFIX() and prefix != "!":
-            #     raise Exception("For now, only achievement goals are supported")
+            # TODO: remove + prefix
+            prefix_symbols = {"+", "!"}
+
+            event_name = triggering_event.getText()
+            event_prefix = ""
+            for s in event_name:
+                if s in prefix_symbols:
+                    event_prefix += s
+                else:
+                    break
+
+            event_name = event_name.removeprefix(event_prefix)
+
+            _plan_types = {
+                "+!": "ach",
+                "+": "add",
+            }
+
+            plan_type = _plan_types.get(event_prefix)
+            if plan_type is None:
+                raise Exception(f"Unsupported plan type for prefix: {event_prefix}")
 
             context_str = context.getText() if (context := plan.context()) else ""
 
@@ -79,7 +96,7 @@ class FragGenerator(AgentSpeakListener):
 
             body_str = "[" + ",".join(converted_body) + "]"
 
-            self._output += f"plan(ach,{event_name},[{context_str}],{body_str}).\n"
+            self._output += f"plan({plan_type},{event_name},[{context_str}],{body_str}).\n"
 
     def exitAgent(self, ctx: AgentSpeakParser.AgentContext):
         print(self._output)
