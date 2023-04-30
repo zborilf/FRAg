@@ -63,11 +63,17 @@ class FragGenerator(AgentSpeakListener):
                         prefix = body_formula.getChild(0).getText()
                         literal = body_formula.getChild(1)
                         if prefix == "!":
-                            converted_body.append(f"ach({literal.getText()})")
+                            predicate = "ach"
                         elif prefix == "+":
-                            converted_body.append(f"add({literal.getText()})")
+                            predicate = "add"
+                        elif prefix == "?":
+                            predicate = "test"
                         else:
-                            raise Exception("Currently, only achievement goals and add belief operation are supported")
+                            raise Exception(
+                                "Currently, only achievement goals, test goals and add belief operation are supported"
+                            )
+
+                        converted_body.append(f"{predicate}({literal.getText()})")
                     else:
                         raise Exception("TODO")
 
