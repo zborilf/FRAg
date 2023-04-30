@@ -21,13 +21,13 @@ goal(ach,sell,null,[[]],active).
 
 plan(ach,sell,[],[
 			act(me(ME)),
-			act(printfg(ME)),
+			act(writeln(ME)),
 			test(has(ME,CARD)),
 			test(wants(betty,CARD,OFFERS)),
 			test(price(CARD,PRICE)),
 			act(DIF is (PRICE-OFFERS)/PRICE),
 			act(DIF<0.2),
-			act(printfg(CARD))
+			act(writeln(CARD))
 		]).
 
-plan(ach,sell,[a(a)],[act(printfg(nevysloTo))]).
+plan(ach,sell,[a(a)],[act(writeln(nevysloTo))]).
