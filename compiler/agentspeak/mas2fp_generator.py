@@ -23,6 +23,10 @@ class Mas2fpGenerator(MAS2JavaListener):
     def output(self) -> str:
         return self._output
 
+    @property
+    def agent(self) -> Agent:
+        return self._agent
+
     def enterMas(self, ctx:MAS2JavaParser.MasContext):
         self._name = ctx.ID().getText()
 
