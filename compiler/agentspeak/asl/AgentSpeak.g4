@@ -3,8 +3,12 @@ grammar AgentSpeak;
 // --- rules  ---------------------------------------------------------------------------
 
 agent:
-    init_bels init_goals plans
+    init_bels ( plan | init_goal)+
     ;
+
+//agent:
+//    init_bels init_goals plans
+//    ;
 
 init_bels:
     beliefs rules
@@ -18,13 +22,17 @@ rules:
     ( literal ':-' log_expr '.')*
     ;
 
-init_goals:
-    ( '!' literal '.' )*
+//init_goals:
+//    ( init_goal )*
+//    ;
+
+init_goal:
+    '!' literal '.'
     ;
 
-plans:
-    ( plan )*
-    ;
+//plans:
+//    ( plan )*
+//    ;
 
 plan: 
     ('@' atomic_formula )? triggering_event
