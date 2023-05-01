@@ -11,6 +11,6 @@ goal(ach,goF(x),[[]]).
 goal(ach,goF(b,n),[[]]).
 
 
-plan(ach,goF(x),[],[test(d(A,B,C)),ach(goF(C,D)),add(vysledek(A,B,C,D)),act(writeln(res(A,B,C,D))),test(c(E)), act(printfg(E))]).
+plan(ach,goF(x),[],[test(d(A,B,C)),ach(goF(C,D)),add(vysledek(A,B,C,D)),act(printfg(res(A,B,C,D))),test(c(E)), act(printfg(E))]).
 plan(ach,goF(A,B),[],[test(c(A,B)), del(c(A,B)), act(printfg(res(A,B))),ach(ggg)]).
 plan(ach,ggg,[],[act(printfg('nazdar'))]).

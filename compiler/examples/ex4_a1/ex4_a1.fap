@@ -1,3 +1,3 @@
 goal(ach,call_loud,null,[[]],active).
 plan(ach,call_loud,[true],[act(my_name(X)),act(broadcast(tell,message("I am ",X)))]).
-plan(add,message(X,Y),[true],[act(writeln(X,Y))]).
+plan(add,message(X,Y),[true],[act(printfg(X,Y))]).
