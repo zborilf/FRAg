@@ -1,0 +1,50 @@
+
+
+Jazyk
+   Plany rozsirit o dalsi reasoning attributes
+	maintain(GOAL)
+	priority(PRIORITY)
+	atomic
+
+   Poresit klicova slova, nejaka makra?
+
+
+
+Reasoning
+   Simple opravdu simple, intention FIFO (s nejnizsim cislem, ktera neni zablokovana), ostatni prvni v seznamu
+   Round robin pro zamery, ostatni simple
+   Priority pro zamery a plany, plan pri volbe planu, zamer s nejvyssi prioritou Top level planu ???, nebo zatim jen plany
+
+   Maintain ... kdy zrusit plan
+   Moznost synchronniho provadeni agentu (pozdeji bude dobre pro multiagentni MCTS)
+
+
+
+Prostredi
+   Vnitrni akce, poresit, roztridit, terminal na obrazovku
+   Nastaveni simulaci, simulovane prostredi (zatim pro jednoho agenta, pozdeji pro skupinu agentu)
+   pozdeji uceni chovani prostredi, treba nastudovat
+   Joint akce pro prostredi
+   Blokujici a failujici test
+   Jasonovske !! (create?)
+
+Priklady
+   Provazani s JAVA
+   Craftworld
+   Cooking, Diplomaci, v souboru na GoogleDisku
+
+
+
+expand_term dle Prolog coding guidelines
+
+
+Dokumentace
+   v PIDoc
+
+
+Chyby
+pokud v metafile chci nahrat agenta toho sameho jmena, hlasi to chybu (spravne), mel by to ale chytat frag
+kdyz v mas2fp v load klauzuli v atributech je spatne (atom misto dvvojice) frag vytuhne, mel by ale zartav
+
+
+

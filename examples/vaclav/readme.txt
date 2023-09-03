@@ -1,0 +1,1 @@
+ Ladici, pro vyber planu, vyhodnocovani formuli atd.

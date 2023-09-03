@@ -1,0 +1,80 @@
+
+
+Model je strom tvoreny uzly
+ uzel: tree_node(id node, action, children, visited, points)
+	id node: unikatni idcko
+	action: 
+		model_reasoning_node(goal / wgi , plan) 	/ bylo provedeno zvazovani 
+			goal or wgi: 	selected wgi          
+			plan:		chosen plan for wgi?
+
+		model_act_node(intention, action, decision)     / byla provedena akce
+								- intention is neccessary for exclusive actions
+			intention:  	intention is neccessary for exclusive actions or no_intention (non exclusive action)  
+			action:    	action predicate
+			decision: 	substitution for actions / only for external and internal actions	
+
+	children: seznam id-cek 
+	visited: pocet pruchodu pri simulacich
+	points: reward
+
+
+model_select_best_path(id_node, listo_of_id_nodes).
+
+
+Postup pro mcts
+	Silence plan? // umlci kecaci akce
+	Vytvori engine pro provadeni agenta //
+
+	... 	rizeni behu agenta podle aktualniho modelu
+	...... 	pruchod stromem, pokazde vybere nejlepsi ucb akci a provede, dokud nenarazi na neexpandovanou
+	... 	expanze uzlu 
+	......	vygenerovani vsech 1, dalsich akci 2, pokus je aktualni akce achiev. goal, vsechny mozne plany
+			simulate_program TODO, udelat nejak vlakna
+	...	simulace, vyhodnoceni (???)  // 
+	...	propagace vysledku, opet asi pruchod podle ucb 
+		get_plan ma vracet plan na vyzadanej event, v mcts ale vraci i event, ktery se ma zpracovavat, prusvih :(
+
+Pozn. pri early bindings je problem pouzit MCTS, protoze substituce se vetvi az pri provedeni aktu a spolehaji, ze jsou nelezeny vsechny mozne
+      pri early jsou vsak tyto ztraceny jiz pri vykonani testu (agent po provedeni kroku je zapomene)
+
+     Thread agent
+     ------------
+	update_mcts_model
+		mcts_simulation(SILENTPROGRAM, EXPANSIONS, SIMULATIONS)     				% program bez externich akci, poèet expanzí, poèet simulací pro expanzi
+			while(EXPANSIONS >0)
+				mcts_simulation_loop(PROGRAM, EXPANSIONS, GOALSTOTAL, SIMULATIONS)    % EXPANSIONS - krat
+
+					% PROGRAM 		- silenced program
+					% INTENTIONFRESH
+					% EVENTFRESH
+					% PATH
+					% EXPANDED
+					% EXPANSIONS
+					% SIMULATIONSTEPS       - steps limit for simulation run
+					% SIMULATIONS		- per expansions					
+
+				    	engine(mcts_frag_engine(PROGRAM, INTENTIONFRESH, EVENTFRESH, PATH, EXPANDED, EXPANSIONS, SIMULATIONSTEPS, SIMULATIONS), ENGINE))
+
+     Thread mcts
+     -----------
+	mcts_frag_engine(PROGRAM, INTENTIONFRESH, EVENTFRESH, PATH, EXPANDED, EXPANSIONS, SIMULATIONSTEPS, SIMULATIONS)
+		frag_simulate_program(PROGRAM, STEPS, EXPANDED, SIMULATIONS):-
+	        	while(SIMULATIONS>0)
+			  	frag_simulate_program2(PROGRAM, STEPS, SIMULATIONS, RESULTS, EXPANDED):-
+					loop(STEPS, STEPSLEFT)
+
+
+
+Modul FRAgMCTS Model
+
+je volano reasonerem
+
+  divide_path /3                % reasoningovou cast a actovou cast
+  expand_node /2                % vytvareni modelu
+  fa_mcts_model_init /0         % inicializace modelu
+  increment_path /2             % posileni o reward (vstup je asi path)
+  mode_get_best_ucb_path /2     % vystup modelu
+  model_print_model /0		% printaci
+  print_path /1                 % printaci
+

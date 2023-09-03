@@ -1,0 +1,8 @@
+
+set_default(bindings, late).
+set_default(reasoning,biggest_joint_reasoning).
+% set_default(mcts_params,[10,5]).
+
+% load("worker","worker.fap",1,[]).
+
+load("snake2","snakes2.fap",1,[(debug, jointdbg)]).

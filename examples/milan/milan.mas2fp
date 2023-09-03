@@ -1,0 +1,13 @@
+
+
+
+set_default(bindings, early).
+set_default(reasoning, random_reasoning).
+set_default(reasoning_params, mcts_params(20,3,10)).
+
+% load("milan","examples/milan/milan",10,[(debug, systemdbg), (debug, reasoningdbg)]).
+
+load("milan","../examples/milan/milan",10,[(debug, systemdbg)]).
+
+			   
+			  

@@ -1,0 +1,54 @@
+
+%goal(ach,serve,[[]]).
+
+% goal(ach, destin(p1,f4), [[]]).
+% goal(ach, destin(p2,f6), [[]]).
+% goal(ach, destin(p3,f4), [[]]).
+% goal(ach, destin(p4,f2), [[]]).
+% goal(ach, destin(p5,f3), [[]]).
+% goal(ach, destin(p6,f7), [[]]).
+% goal(ach, destin(p7,f1), [[]]).
+                      
+
+%plan(ach,serve,[],[
+%			act(miconic10,go(gg)),
+%			act(me(ME)),
+%			act(format(atom(S),"Jsem ~w a budu vas vozit",[ME])),
+%			act(printfg(S)),
+%			act(printfg(konec))
+%		]).
+
+
+plan(add,destin(Passenger, Floor),[],
+		[
+			ach(transport(Passenger, Floor))
+		]).
+
+
+
+plan(ach,transport(Passenger, Floor),[served(Passenger)],
+		[
+		]).
+
+
+% todo upravdu to musi byt zabaleno jako fact(?? ... asi jo
+plan(ach,transport(Passenger, Floor),[origin(Passenger, Floor_P), 
+                                      not(boarded(Passenger, Floor))],		
+    [
+        act(format(atom(S),"Pojedu si pro pasazera ~w na poschodi ~w", [Passenger, Floor_P])),
+	act(printfg(S)),
+	act(miconic10, go(Floor_P)),
+	ach(transport(Passenger, Floor))
+    ]).
+
+% todo upravdu to musi byt zabaleno jako fact(?? ... asi jo
+plan(ach,transport(Passenger, Floor),[boarded(PASSENGER, Floor), 
+                                      not(lift_at(Floor))],		
+    [
+	act(format(atom(S),"Povezu pasazer ~w do poschodi ~w",
+                   [Passenger, Floor])),
+	act(printfg(S)),
+	act(miconic10, go(Floor)),
+	ach(transport(Passenger, Floor))
+    ]).
+

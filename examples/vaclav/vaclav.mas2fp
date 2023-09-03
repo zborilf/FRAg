@@ -1,0 +1,14 @@
+
+
+include_environment("../../environments/shop.pl").
+
+set_default(bindings, late).
+set_default(reasoning, mcts_reasoning).
+set_default(reasoning_params, mcts_params(20,3,10)).
+
+% load("vaclav","examples/vaclav/vaclav",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+
+load("vaclav","examples/vaclav/vaclav", 2, [(debug, systemdbg), (debug, mctsdbg)]).
+
+			   
+			  

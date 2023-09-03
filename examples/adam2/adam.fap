@@ -1,0 +1,14 @@
+                
+fact(a(1)).
+fact(a(3)).
+fact(a(5)).
+
+goal(ach,sell,[[]]).
+
+plan(ach,sell,[],[
+			act(printfg('ahoj')),
+			test(a(X)),
+			rel(X>1),
+			act(printfg(X))
+		]).
+                                       

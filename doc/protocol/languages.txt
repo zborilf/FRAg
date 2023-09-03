@@ -1,0 +1,61 @@
+
+Metasoubor
+
+set_default((ATTR, VAL)*)
+	"(" "bindings" "," ("early"|"late") ")"
+	"(" "reasoning" "," (" XXX "|" XXX " |) ")"		TODO toto by si mel chytat kazdej reasoning modul zvlast
+	"(" "debug" "," ("XXX"|"XXX") ")"
+	"(" "mcts_params" "," "(" EXPANSIONS "," STEPS ")" ")"	, jen pro mcts
+	"(" "environment" "," "( Environment_File, Environment_Name ")" ")"
+
+load
+
+
+Klauzule
+
+set_default(+Atribute, +Value)
+
+*Attribute:
+    bindings
+    	early
+    	late
+    reasoning
+
+    reasoning_params
+    
+    debug
+
+    environment
+     
+
+load(Filename, Agent, Number, Attributes)
+                                                                  
+
+
+
+debug
+	no_debug, suppress all debugs
+	mctsdbg
+	mctsdbg_path
+
+
+
+
+Agent
+
+Facts:
+------
+
+
+
+
+Goals:
+------
+
+Plans:
+------
+
+plan(+Event_Type, +Event_Term, +Conditions, +Context, +Body)
+
+
+

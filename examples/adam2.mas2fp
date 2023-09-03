@@ -1,0 +1,6 @@
+
+set_default(reasoning, random_reasoning).
+set_default(bindings, early).
+
+load("adam","adam.fap",1,[(debug, reasoningdbg)]).
+			   

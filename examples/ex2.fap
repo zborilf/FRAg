@@ -1,0 +1,12 @@
+
+fact(c(6)).
+fact(c(a,m)).
+fact(c(b,n)).
+fact(c(c,o)).
+fact(d(b,a,d)).
+fact(d(a,b,c)).
+fact(d(f,f,f)).
+
+goal(ach,goF(A),[[]]).
+
+plan(ach,goF(A),[],[test(c(A,B)),test(A,B,C),act(writeln(A))]).

@@ -1,0 +1,86 @@
+
+
+
+10.6.2022
+ ... rekonstrukce, co jsem delal
+ ... posledni akce model_select_best(path)/2
+	... v FRAgMCTSModel.pl
+
+4.10.2022
+	zmermonocnuji MCTS, force reasoning (praci s cili)
+		jak pracuji s cili behem interpretace
+			top level je zachovan, jen je mu prirazeno cislo zameru
+			ostatni podcile jsou smazany pri volbe planu, predpoklada se, ze pripadne se objevi, pokud plan spadne a vyssi plan, ktery je vyvolal, je deklaruje znovu
+
+16.11.2022
+	// clanek na MAPC pocka, opet se divam, co je spatne, asi ty spadle cile
+
+18.11.2022
+	MCTS asi funguje, problem je, jak interpretovat vysledny strom, resp. jak urcit konkretni intention
+	cisla totiz nemusi odpovidat, nove intention v modelu se davaji od cisla 1000, ve skutecnosti je to vzdy asi 'nova intention'
+	Pokus ... co se na to vykaslat a cislovat to stejne jako v realu (resp. zkopirovat fresh intention number)
+	prozkoumavam, co to udela kdyztak za neporadek
+	Problem ... reasoning jen pro goly, ke kterym nasel plan (jinak musi vratit nulu)
+
+27.11
+	pri spusteni 'mas1', priklad pro vice tlg, pri simulaci reasoning expanze pro nejaky cil generuje trikrat to same (vyber toho sameho planu)
+	VYRESENO, prehledl jsem kontext planu, lisi se...
+
+29.11
+	resime, kdyz vyber planu pro cil neni zadny (no_plan), reasoning module by toto mela pak preskocit
+	podobne i vyber zameru by mel vratit no_inention, kdyz vyber neni na rade
+
+6.2.23
+	Problem je v clear intentions pokud je posledni akci achieve goal. Plan na nizsi urovni skonci, ale tim i MCTS model a nenabizi dal puvodni zamer k procisteni
+	... reseni, bud v MCTS pamatovat na to, ze nemuze skoncit, dokud nejaka intention zbyva, byt bez akce
+	... nebo po provedeni akce a update intentions (?) se musi odrolovat v hierarchii zamery komplet az nahoru
+
+8.2.23
+	Vypada to, ze MCTS zacina byt rozumne, v nejake prealfa verzi funguje
+	Chystam se na Snakes
+
+10.2.23
+	MCTS asi jede, Joint akce asi take (vyzkouset s promennymi). Dodelal jsem moznost zapnout early bindings (zkracuje se kontext na delku jedna po reasoning i execution)
+	chtelo by to poladit co se deje, kdyz plan spadne. Adam pri early execution je podivny. Zbyva dodelat Snakes, cistit kod, spoustu ladeni, priklady a dokumentaci
+
+18.2.23
+       MCTS jede, pridal jsem early bindings, ale seznal, ze toto zpusobuje problem u MCTS. Protoze program pro early bindings nevybira substituce po provedeni testu a ten
+       bere vzdy tu prvni (simulate early by melo byt smeneno). Dale jsem seznal, ze bude treba udelat CAN
+       AKTUALNI TODO ... predelat zamer aby obsahoval instance cilu takove, ze si budou pomatovat posledni pouzity plan a substituce, ktere byly behem PR provedeny (pro CAN)
+
+
+19.2.23
+       Je treba pro vyse uvedene predelat goal(event_type, event_atom, origin_intention, context, assigned /active nebo origin_intention, attributes) na 
+					   event(event_index, event_type, event_atom, origin_intention, context, assigned /active nebo origin_intention, attributes)
+	+ attributes obsehuje goal_index(fresh goal index)
+	+ zachazeni s udalosti, kdyz spadne plan, mela by byt prepnuta do aktivni, volba planu by mela mit jako argument i udalost
+	++ pokud nalezeni planu vrati prazdno, pak by mela neuspet akce ach, stejne jako v pripade testovani
+
+6.3.23
+	Pracuji na 'early bindings', provedu reseni takove, ze se ve FRAgu nevola broad_unification, ale jen frag_unification, ktery je
+	bud normal, pokud je early, nebo broad_unification, pokud late (podobne intersectionF)
+
+	... early nejak funguji, ale u historie eventu mi to uzemnuje promenne, musi byt jasne, k cemu se kontext vaze (dat te a strazce)
+
+8.3.23	test akt se pri early mcts simulaci rozbaluje nejak pozde (ex3)
+
+5.6.23  je po semestru, vracim se k FRAgovi, budu
+		laidt
+		vytvaret priklad na drevena kolecka na ruznych mistech
+
+8.6.23  Konfigurace, atributy do mas2fpj, nastaveni reasoningu
+
+12.6.23 Parametry a metasoubor jakztakz, jdu prekontrolovat mcts pro late / early bindings. V druhem pripade by simulace mely byt delany
+	take early s random reasoningem, v souladu se znamymi publikacemi
+
+30.6.23 Udelano prostredi. pracuju na not-testech, pro akty testovani a kontextkond to asi funguje, je treba to ale dodelat do MCTS
+
+5.7.23 Dodelana negace, testuji spravnost
+
+16.7.23 Opet fungujeme s negacemi, nyni se chystam na kopie prostredi pro ruzne agenty ci agentni skupiny
+
+30.8.23 Pracuji na prostredich, klony, nahravani stavu, potreba utestovat. Potreba se poprat s nazvy v modulech, pak rozjet MCTS
+
+
+
+

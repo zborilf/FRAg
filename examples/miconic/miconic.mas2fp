@@ -1,0 +1,14 @@
+
+
+set_default(debug, error).
+set_default(bindings, late).
+set_default(reasoning, random_reasoning).
+include_environment("environments/miconic/miconic.pl").
+set_default(environment, miconic10).	
+set_default(reasoning_params, mcts_params(8,10,60)).
+
+% load("franta","../examples/miconic/miconic",1,[(reasoning, mcts_reasoning), (debug, mctsdbg), (debug, mctsdbg_path), (debug, reasoningdbg)]).
+
+% load("miconic","../examples/miconic/miconic",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+			   
+load("franta","../examples/miconic/miconic",1,[(reasoning, mcts_reasoning), (debug, systemdbg)]).

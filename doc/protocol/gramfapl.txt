@@ -1,0 +1,127 @@
+
+% MAS <mas_name> {
+%                    agents: 
+%			<ag1_name> [<#count1>];
+%			<ag2_name> [<#count2>];
+%			...
+%		}
+%
+% compiles to ->
+%
+% load(ag1_name,ag1_name.fap,number1).
+% load(ag2_name,ag2_name.fap,number2).
+
+
+FRAg gramatika
+     
+ATOMIC_FORMULA -> fakta_prologu - predsymbol(termy) jako v ASL
+
+TRIGGERING -> 'ach' ATOMIC_FORMULA
+TRIGGERING -> 'add' ATOMIC_FORMULA
+
+S -> plan( TRIGGERING GUARDS '[' PB ']).' S
+S -> 'fact(' ATOMIC_FORMULA ').' S
+S -> 'goal(ach,' ATOMIC_FORMULA ,'null,[[]],active).' S		// asi ale staci goal(ATOMIC_FORMULA)
+S -> e
+
+
+%  S -> '+' { print( 'plan(' ) } TRIGGERING GUARDS { print( '[' ) }  PB { print( ']).' ) } S
+%  S -> '-' { print( 'plan(' ) } TRIGGERING GUARDS PB S			// ???
+%  S -> '@' $label S	// vyignoruje label, jinak by mel byt nejaky print
+%  S -> $predicate_symbol { print( 'fact(' ) ) } ATOMIC_FORMULA { print ').' ) } S // belief
+%  S -> '!' { print( 'goal(ach,' ) } ATOMIC FORMULA { print( ',null,[[]],active).' ) } S
+%  S -> e
+
+
+
+
+
+
+ASL gramatika
+
+	S -> ATOMIC_FORMULA S
+	S -> '!' ATOMIC FORMULA S
+	S -> TRIGGERING_EVENG ':'
+	S -> e
+
+        TRIGGERING -> ach ATOMIC_FORMULA
+        TRIGGERING -> add ATOMIC_FORMULA
+
+	ATOMIC_FORMULA -> 'ATOM' TERMS '.' S
+	TERMS -> e
+	TERMS -> '(' TERMS2
+	TERMS2 -> 'TERM' TERMCONT
+	TERMCONT-> ')'
+	TERMCONT -> ',' TRERMS2
+
+
+	Plan body
+	---------
+	PB -> '.' PBACT_INTERNAL
+        PB -> '+' PBADD
+	PB -> '-' PBDELETE
+	PB -> '!' PBACHIEVE
+	PB -> '?' PBTEST
+	PB -> 'ATOM' PBACT_PROLOG(ATOM.Name)
+	PB -> 'VAR' PBEXPRES(VAR.Name)
+	PB -> 'NUMBER' PBEXPRES(NUMBER.Value)
+
+
+
+
+
+
+Z KNIZKY
+
+agent -> init_bels init_goals plans
+init_bels -> beliefs rules
+beliefs -> ( literal "." )*                		 "fact("literal")".
+rules -> ( literal ":-" log_expr ".")*
+init_goals -> ( "!" literal "." )*                       "goal(ach",literal ",[[]])." 
+
+plans -> ( plan )*
+plan -> [ "@" atomic_formula ] triggering_event
+[ ":" context ]
+[ "<-" body ] "."
+
+triggering_event -> ( "+" | "-" ) [ "!" | "?" ] literal
+literal -> [ "~" ] atomic_formula
+context -> log_expr | "true"
+log_expr -> simple_log_expr
+| "not" log_expr
+| log_expr "&" log_expr
+| log_expr "|" log_expr
+| "(" log_expr ")"
+simple_log_expr -> ( literal | rel_expr | <VAR> )
+body -> body_formula ( ";" body_formula )*
+| "true"
+body_formula -> ( "!" | "!!" | "?" | "+" | "-" | "-+" ) literal
+| atomic_formula
+| <VAR>
+| rel_expr
+atomic_formula -> ( <ATOM> | <VAR> )
+[ "(" list_of_terms ")" ]
+[ "[" list_of_terms "]" ]
+list_of_terms -> term ( "," term )*
+
+term -> literal
+| list
+| arithm_expr
+| <VAR>
+| <STRING>
+
+
+list -> "[" [ term ( "," term )* [ "|" ( list | <VAR> ) ] ] "]"
+
+rel_expr -> rel_term
+[ ("<"|"<="|">"|">="|"=="|"\=="|"="|"=..") rel_term ]+
+rel_term -> (literal|arithm_expr)
+arithm_expr -> arithm_term
+[ ( "+" | "-" | "*" | "**" | "/" | "div" | "mod" )
+arithm_term ]*
+arithm_term -> <NUMBER>
+| <VAR>
+| "-" arithm_term
+| "(" arithm_expr ")"
+
+

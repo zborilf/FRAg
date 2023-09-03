@@ -1,0 +1,35 @@
+% 6 25 7
+% 1648466801.919712 
+% 1648466801.919712 
+
+% _614768 / _614774 
+% ASTAR Optimum _614774
+goal(ach,a,null,[[]],active).
+plan(ach,a,[], [act(do(b)),act(do(d)),act(do(e)),act(do(a)),act(do(b)),act(do(a)),act(do(c)),act(do(e)),act(do(c)),act(do(e)),act(do(b)),act(do(a)),act(do(b)),act(do(e)),act(do(c)),act(do(a))]).
+
+goal(ach,b,null,[[]],active).
+plan(ach,b,[], [act(do(c))]).
+
+goal(ach,c,null,[[]],active).
+plan(ach,c,[], [act(do(d))]).
+
+goal(ach,d,null,[[]],active).
+plan(ach,d,[], [act(do(a)),act(do(d)),act(do(c)),act(do(b)),act(do(c)),act(do(e)),act(do(d)),act(do(c)),act(do(b)),act(do(d)),act(do(a)),act(do(e)),act(do(d)),act(do(e)),act(do(a)),act(do(e)),act(do(c))]).
+
+goal(ach,e,null,[[]],active).
+plan(ach,e,[], [act(do(e)),act(do(a)),act(do(d)),act(do(b)),act(do(c)),act(do(d))]).
+
+goal(ach,f,null,[[]],active).
+plan(ach,f,[], [act(do(d)),act(do(e)),act(do(b)),act(do(a)),act(do(b)),act(do(e)),act(do(d)),act(do(c)),act(do(b)),act(do(e)),act(do(b)),act(do(a)),act(do(c)),act(do(a)),act(do(d)),act(do(e)),act(do(a)),act(do(d)),act(do(e)),act(do(a))]).
+
+goal(ach,g,null,[[]],active).
+plan(ach,g,[], [act(do(d)),act(do(b)),act(do(a)),act(do(e)),act(do(b)),act(do(c))]).
+
+% size=67
+% Snake solution [3,7,1,6,4,5,2] / 35 
+% nejklubko(19,0,35,[[sb(3,1,7,1),sb(7,1,1,2),sb(1,2,6,1),sb(6,1,4,0)],[sb(7,2,1,5),sb(1,5,6,5),sb(6,5,4,0)],[sb(7,3,1,6),sb(1,6,6,0)],[sb(7,4,1,8),sb(1,8,6,10),sb(6,10,4,6),sb(4,6,5,0)],[sb(7,5,1,11),sb(1,11,6,0)],[sb(7,6,1,15),sb(1,15,6,0)],[sb(1,3,6,2),sb(6,2,4,0)],[sb(1,4,6,4),sb(6,4,4,1),sb(4,1,5,2),sb(5,2,2,0)],[sb(1,7,6,8),sb(6,8,4,3),sb(4,3,5,0)],[sb(1,9,6,13),sb(6,13,4,8),sb(4,8,5,0)],[sb(1,10,6,16),sb(6,16,4,0)],[sb(1,12,6,17),sb(6,17,4,11),sb(4,11,5,0)],[sb(1,14,6,19),sb(6,19,4,14),sb(4,14,5,0)],[sb(1,16,6,20),sb(6,20,4,15),sb(4,15,5,0)],[sb(6,7,4,2),sb(4,2,5,3),sb(5,3,2,0)],[sb(6,9,4,4),sb(4,4,5,4),sb(5,4,2,0)],[sb(6,15,4,10),sb(4,10,5,0)],[sb(6,18,4,13),sb(4,13,5,0)],[sb(4,5,5,5),sb(5,5,2,1),sb(2,1,x,0)],[sb(4,7,5,6),sb(5,6,2,-1)]]).
+
+
+% 1648466802.074098
+% casy(0.0,0.15438604354858398).
+

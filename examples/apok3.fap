@@ -1,0 +1,11 @@
+
+fact(g(111)).
+
+
+goal(ach,cil(33),null,[[]],active).
+goal(ach,cil2,null,[[]],active).
+
+plan(ach,cil(X),[],[act(write(zdarec)),add(g(111)),act(write(hotovo)),test(g(Y))]).
+plan(ach,cil(X),[g(111)],[test(g(110)),act(write(hotovo1)),act(write(X))]).
+plan(ach,cil(X),[g(Y)],[test(gg(X)),act(write(hotovo))]).
+plan(ach,cil2,[g(111)],[test(g(Y)),act(write(hotovo2)),add(g(110)),act(write(slus))]).

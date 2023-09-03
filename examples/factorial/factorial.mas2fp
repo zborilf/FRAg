@@ -1,0 +1,5 @@
+set_default(bindings, late).
+set_default(reasoning, mcts_reasoning).
+
+load("factorial","../examples/factorial/factorial",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+			   

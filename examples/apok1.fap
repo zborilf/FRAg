@@ -1,0 +1,11 @@
+
+fact(ff(22)).
+fact(ff(12)).
+fact(gg(a)).
+fact(gg(b)).
+
+
+goal(ach,cil(100),null,[[]],active).
+
+plan(ach,cil(X),[ff(Y),gg(Z)],[act(write(Y)),act(write(X)),act(write(Y))]).
+

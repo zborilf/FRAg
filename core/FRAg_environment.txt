@@ -1,0 +1,53 @@
+
+Doc
+use_module(library(doc_files)).
+
+
+
+/*
+Environment file is consulted when it is imported in the multiagent metafile
+Must declare environment(-Environment_Name). // may differ from filename
+In the next lines we consider environment namec 'sample_environment'
+
+Clauses
+	sample_environment(add_agent, Agent_Name).
+        % Clone - clone instance of the environment
+	sample_environment(add_agent, Agent_Name, Clone).  
+	
+
+        sample_environment(remove_agent, Agent_Name).
+	sample_environment(remove_agent, Agent_Name, Clone).
+	sample_environment(perceive, Agent_Name, Add_List, Delete_List).
+	sample_environment(act, Agent_Name, Act, Result).
+	sample_environment(clone, Clone_Name).
+	sample_environment(remove_clone, Clone_Name).
+   
+        sample_environment(save_state, Instance, State).
+        sample_environment(load_state, Instance, State).
+        sample_environment(remove_state, Instance, State).
+
+	sample_environment(set_property, Promperty_List).
+		customable properties of the environment.
+		Usually to set rate of dynamism etc.
+
+Works with facts
+	sample_environment(fact, Fact)
+	clone_environment(fact, Fact)
+
+Maintains clones
+
+Maintans agents assigned to clones
+
+Co je do add a delete (bude tam i environment, nebo jenom fakty? asi i environment) ...
+
+Zalezi na klonech, jaka addlist budou generovat
+
+
+Util construct above queries for Agent (finds corresponding environment copy)
+ 
+*/
+
+
+
+
+

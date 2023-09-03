@@ -1,0 +1,38 @@
+% 8 10 5
+% 1647604332.472732 
+% 1647604332.703716 
+
+% [d,b,c,e,b,a,g,f,f,b,g,c,g,f,e,d,a] / 17 
+% ASTAR Optimum 17
+
+fact(a(a)).
+fact(a(b)).
+fact(a(c)).
+fact(a(d)).
+fact(a(e)).
+
+
+
+goal(ach,a,null,[[]],active).
+plan(ach,a,[], [test(a(X)),test(a(Y)),act(do(X)),act(do(a)),act(do(c)),act(do(Y))]).
+
+goal(ach,b,null,[[]],active).
+plan(ach,b,[], [test(a(X)),act(do(X)),act(do(d)),act(do(e)),act(do(b)),act(do(X)),act(do(b)),act(do(c))]).
+
+goal(ach,c,null,[[]],active).
+plan(ach,c,[], [test(a(X)),act(do(X)),act(do(e)),act(do(b)),act(do(f)),act(do(b)),act(do(g)),act(do(c)),act(do(g)),act(do(f)),act(do(e))]).
+
+goal(ach,d,null,[[]],active).
+plan(ach,d,[], [test(a(X)),act(do(X)),act(do(b)),act(do(b)),act(do(a)),act(do(b)),act(do(g)),act(do(a))]).
+
+goal(ach,e,null,[[]],active).
+plan(ach,e,[], [test(a(X)),act(do(c)),act(do(g)),act(do(f)),act(do(X)),act(do(f)),act(do(c)),act(do(f)),act(do(d))]).
+
+% size=29
+% Snake solution [5,3,2,4,1] / 10 
+% nejklubko(1,0,10,[[sb(5,3,3,3),sb(3,3,2,0)],[sb(5,5,3,6),sb(3,6,2,6),sb(2,6,4,0)],[sb(5,6,3,8),sb(3,8,2,0)],[sb(3,1,2,2),sb(2,2,4,0)],[sb(3,2,2,3),sb(2,3,4,1),sb(4,1,1,1),sb(1,1,x,0)],[sb(3,5,2,4),sb(2,4,4,5),sb(4,5,1,-1)]]).
+
+
+% 1647604332.709633
+% casy(0.23098397254943848,0.005917072296142578).
+

@@ -1,0 +1,22 @@
+
+
+LADICI:
+	ex1 ... tri plany, jeden vyvolava podplan 
+	adam
+	factorial
+	multiint
+	snakes ...
+
+WORKER
+        priklad na trevena, kovova, cervena, ctverecky, kruhy
+
+
+UKOL ... posbirat volne popsany tvar, 
+         pridame nastroj, ktery je nutne mit, sroubovak, kleste, pilu
+	  pila na zelene, drevene a na kolecka
+	  sroubovak na stribrne, kovove a na trojuhelnky
+	  kleste na modre, plastove a ctverecky
+
+
+Ukolohy se zadavaji na vydejne uloh, pozice tvaru je vydavana v logistice, nastroj je vydavan ve skladu 
+	(je vzdy treba provest vzdy akci goto(vydejna) goto(pozice) ...)
