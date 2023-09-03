@@ -1,0 +1,4 @@
+goal(ach,print_fact(5),null,[[]],active).
+plan(ach,print_fact(N),[],[ach(fact(N,F)),act(print("Factorial of ",N," is ",F))]).
+plan(ach,fact(N,1),[N==0],[]).
+plan(ach,fact(N,F),[N>0],[ach(fact(N-1,F1)),act(F=F1*N)]).
