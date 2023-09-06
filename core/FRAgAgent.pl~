@@ -1106,12 +1106,13 @@ force_reasoning(model_reasoning_node(
   % write(SI),nl.
 
 
-% printints:-
-%    findall(intention(Intention_IS ,Plan_Stack ,State),
-%            intention(Intention_IS ,Plan_Stack ,State), Intentions),
-%    writeln('Intentions:'),
-%    writeln(Intentions).
-% printints.
+printints:-
+    findall(intention(Intention_IS ,Plan_Stack ,State),
+            intention(Intention_IS ,Plan_Stack ,State), Intentions),
+    writeln('Intentions:'),
+    writeln(Intentions).
+
+printints.
 
 
 % sub-plan finished
@@ -1120,25 +1121,22 @@ force_execution(model_act_node(Intention_Index, true, _)):-
     update_intention(intention(Intention_Index, Plan_Stack, Status), _).
 
 force_execution(model_act_node(Intention_Index, Act, Decision)):-
-    retract(intention(Intention_Index,
-                      [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
-                            [Plan_Act| Plan_Acts])| Plans],
+    retract(intention(Intention_Index, [plan(IDX, GT, G, PC, CTX, [PLANACT| TACTS])| T],
                       Status)),
     % action in node and in the plan could have renamed vars, unify them
-    unifiable(Plan_Act, Act, Unifier),
-    apply_substitutions(Unifier),
-    restrict(Context, Decision, Context2),
+    unifiable(PLANACT, Act, ACTUNIFIER),
+    apply_substitutions(ACTUNIFIER),
+    restrict(CTX, Decision, CTXNew),
     % update intention ... plan has now a new context restricted by decision
-    assert(intention(Intention_Index,
-                     [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
-                           [Plan_Act| Plan_Acts])| Plans],
-                     Status)),
-    execute_plan(Intention_Index,
-                 [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
-                       [Plan_Act| Plan_Acts])| Plans], P2,
+    assert(intention(Intention_Index, [plan(IDX, GT, G, PC, CTXNew, [PLANACT| TACTS])| T],
+                     Status)),          % update intention ... plan has now a new context restricted by decision
+    execute_plan(Intention_Index, [plan(IDX, GT, G, PC, CTXNew, [PLANACT| TACTS])| T], P2,
                  Result),
     update_intention(intention(Intention_Index, P2, Status), Result),
     update_intentions(Result).
+
+
+%   write('acting finished'),nl.                % if RES is a joint_action, it should be removed from the top of any intention
 
 
   force_execution(model_act_node( _, _, _)).

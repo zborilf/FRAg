@@ -660,7 +660,7 @@ get_first_act(_, null, no_action).   % root only, finished
 
 get_plan_for_goal(event(EVENTINDEX, GOALTYPE, GOALPREDICATE, INTENTION, 
                         GOALCTX, STATE, HISTORY), 
-                  REASONINGNODES, NUMBER):-
+                  REASONINGNODES, Plan_ID):-
     	
 % plan(Plan_ID,PLANTYPE,PLANPREDICATE,CTXCONDITIONS,BODY,PLANCTX)):-
   

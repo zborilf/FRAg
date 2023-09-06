@@ -28,8 +28,7 @@ This module contains code for threads of individual agents
 	get_default_reasoning /3,
 	set_plan_selection /1,
 	set_default_plan_selection /1,
-	set_intention_selection /1,
-             % je toto opravdu nutne z venku?
+	set_intention_selection /1,			% je toto opravdu nutne z venku?
 	set_default_intention_selection /1,
 	set_substitution_selection /1,
 	set_default_substitution_selection /1,
@@ -78,6 +77,9 @@ This module contains code for threads of individual agents
 :-use_module('FRAgAgentInterface').
 
 
+% :-include('environments/FRAgPLEnvironmentBasic.pl').		% internal actions library
+
+
 max_agent_iterations(200).
 
 %
@@ -87,27 +89,18 @@ max_agent_iterations(200).
 :-dynamic default_environment /1.
 
 %
-% thread_local predicates ... plans, facts (beliefs), intentions, events
-% (desires, goal), fresh intention index, simulation loop number
+%  thread_local predicates ... plans, facts (beliefs), intentions, events (desires, goal), fresh intention index, simulation loop number
 %
 
-% type, triggering event, guards (context conditions), context, body
-:-thread_local plan/5.
-% belief is fact, inside fact(.) predicate
-:-thread_local fact/1.
-% intention(intention_index, content - plan_stack, active?)
-:-thread_local intention /3.
-% goal(type - ach/add, pridicate, parent intention , context, state - active /
-% intention number, historie pouzitych planu)
-:-thread_local goal /3.
-% event(index, type - ach/add, pridicate, parent intention , context, state -
-% active / intention number, historie pouzitych planu)
-:-thread_local event /7.
+:-thread_local plan/5.						% type, triggering event, guards (context conditions), context, body
+:-thread_local fact/1.						% belief is fact, inside fact(.) predicate
+:-thread_local intention /3.					% intention(intention_index, content - plan_stack, active?)
+:-thread_local goal /3.						% goal(type - ach/add, pridicate, parent intention , context, state - active / intention number, historie pouzitych planu)
+:-thread_local event /7.                                      % event(index, type - ach/add, pridicate, parent intention , context, state - active / intention number, historie pouzitych planu)
 :-thread_local intention_fresh / 1.
 :-thread_local event_fresh / 1.
 :-thread_local loop_number /1.
-% todo takze centralne z nastenky, nebo lokalne?
-:-thread_local agent_debug /1.
+:-thread_local agent_debug /1.				% todo takze centralne z nastenky, nebo lokalne?
 :-thread_local late_bindings /1.
 
 
@@ -143,9 +136,8 @@ print_debug(Content, Debug):-
 
 print_debug(_, _).
 
- % 'format' print / no sense fot new line version
 
-print_debug(String, Data, Debug):-
+print_debug(String, Data, Debug):-      % 'format' print / no sense fot new line version
     agent_debug(Debug),
     format(String, Data).
 
@@ -173,8 +165,7 @@ print_list_state([H|T], S, String_Out):-
 
 print_plans([], String, String).
 
-print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)|
-             Plans], String_In, String_Out):-
+print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)| Plans], String_In, String_Out):-
     format(atom(String1), "   plan(~w, ~w, ~w, ~w ~w ~n       ~w)~n ",
            [Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body]),
     concat(String_In, String1, String2),
@@ -183,8 +174,7 @@ print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)|
 
 print_intention([], String, String).
 
-print_intention([intention(Intention_ID, Plan_Stack, Status)| Intentions],
-                String_In, String_Out):-
+print_intention([intention(Intention_ID, Plan_Stack, Status)| Intentions], String_In, String_Out):-
     concat(String_In, "intention:", String1),
     concat(String1, Intention_ID, String2),
     concat(String2, "\n", String3),
@@ -208,15 +198,11 @@ print_intentions(String, String_Intention):-
     concat(String,":: INTENTIONS: No intentions\n",String_Intention).
 
 
-print_goals(String, String_Goal):-
-    bagof(event(Event_ID, Type, Atom, Parent_Intention, Context, Status,
-                History),
-          event(Event_ID, Type, Atom, Parent_Intention, Context, Status,
-                History),
-          Events),
-    concat(String,":: EVENTS {\n", STRING2),
-    print_list_state(Events, STRING2, SEVENTS),
-    concat(SEVENTS, "}\n", String_Goal).
+print_goals(STRING, SG):-
+    bagof(event(EVENTINDEX, T, A, B, C, D, E), event(EVENTINDEX, T, A, B, C, D, E), EVENTS),
+    concat(STRING,":: EVENTS {\n", STRING2),
+    print_list_state(EVENTS, STRING2, SEVENTS),
+    concat(SEVENTS, "}\n", SG).
 
 print_goals(String, String_Goal):-
     concat(String, ":: EVENTS: No events\n", String_Goal).
@@ -232,23 +218,23 @@ print_beliefs(Label, Belief):-
     concat(Label, ":: BELIEFS: No beliefs\n", Belief).
 
 
-print_agent_state(Debug):-
-    loop_number(Loop),
-    thread_self(Agent),
-    format(atom(String1),":: vvvvvvvvvvvvvvvvvvvvvvvvvv~n",[]),
-    format(atom(String2),":: Name:~w~n", [Agent]),
-    format(atom(String3),":: LOOP ~w~n", [Loop]),
-    concat(String1, String2, String4),
-    concat(String4 ,String3,String5),
-    print_intentions(String5, String6),
-    print_goals(String6, String7),
-    print_beliefs(String7, String8),
-    format(atom(String9),":: ^^^^^^^^^^^^^^^^^^^^^^^^^^~n",[]),
-    concat(String8, String9, String10),
-    print_debug(String10, Debug).
+print_agent_state(DEBUG):-
+    loop_number(LOOP),
+    thread_self(NAME),
+    format(atom(S1),":: vvvvvvvvvvvvvvvvvvvvvvvvvv~n",[]),
+    format(atom(S2),":: Name:~w~n", [NAME]),
+    format(atom(S3),":: LOOP ~w~n", [LOOP]),
+    concat(S1,S2,S4),
+    concat(S4,S3,S5),
+    print_intentions(S5, SI),
+    print_goals(SI, SG),
+    print_beliefs(SG,SB),
+    format(atom(SE),":: ^^^^^^^^^^^^^^^^^^^^^^^^^^~n",[]),
+    concat(SB,SE,SD),
+    print_debug(SD, DEBUG).
 
 
-print_state( _ ):-
+print_state( _ ):-					% print system state ???
     agent_debug(no_debug).
 
 print_state(Message):-
@@ -260,18 +246,6 @@ print_state(Message):-
 print_state(_).
 
 
-write_stats([Steps_Left]):-
-    open('stats2', append, Stats_File),
-    thread_self(Agent),
-    max_agent_iterations(Max_Iterations),
-    Steps_Total is Max_Iterations - Steps_Left,
-    write(Stats_File, Agent), write(Stats_File,','),
-    writeln(Stats_File, Steps_Total),
-    close(Stats_File).
-
-
-
-
 %===============================================================================
 %                                                                              |
 %    Beliefs processing                                                        |
@@ -281,19 +255,19 @@ write_stats([Steps_Left]):-
 
 process_add_list([]).
 
-process_add_list([Belief| Beliefs]):-
-    fact(Belief),  % is already in BB
-    process_add_list(Beliefs).
+process_add_list([BELIEF |TBELIEFS]):-
+    fact(BELIEF),					% is already in BB
+    process_add_list(TBELIEFS).
 
-process_add_list([Belief| Beliefs]):-
-    assert(fact(Belief)),
-    create_event(add, Belief),
-    process_add_list(Beliefs).
+process_add_list([BELIEF |TBELIEFS]):-
+    assert(fact(BELIEF)),
+    create_event(add, BELIEF),
+    process_add_list(TBELIEFS).
 
 process_delete_list([]).
 
 process_delete_list([Belief | Beliefs]):-
-    fact(Belief), % is in BB, should be deletd
+    fact(Belief),					% is in BB, should be deletd
     retract(fact(Belief)),
     create_event(del, Belief),
     process_delete_list(Beliefs).
@@ -336,19 +310,18 @@ create_event(Event_Type, Belief):-
 
 % execute(+Intention, +PlanBefore, - PlanAfter)
 % execute(zamer, plan(trigevent, context condition, plan context, plan body),
-%                plan(trigevent, context condition, new plan context, new plan
-%                     body)).
+%                plan(trigevent, context condition, new plan context, new plan body)).
 %
+
+
 
 
 % add belief execution add(pred(t1,t2...))
 
-
 execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
                  [add(Belief)| Acts]),
 		 plan(Event_Type, Event_Atom, Conditions, Context2, Acts),
-        true)
-    :-
+        true):-
     % term_variables(Belief, BELIEFVARIABLES),
     decisioning(Belief, Context, Context2),
     assert(fact(Belief)),
@@ -359,11 +332,15 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
 
 % delete action succeeds even when there is nothing to delete
 
-try_retract(Belief):-
-    retract(Belief),
+nonempty([], false).
+
+nonempty( _, true).
+
+
+try_retract(F):-
+    retract(F),
     get_fresh_event_number(Event_ID),
-% generates 'del' event
-    assert(event(Event_ID, del, fact(Belief), null, [[]], active, [])).
+    assert(event(Event_ID, del, fact(F), null, [[]], active, [])). % generates 'del' event
 
 try_retract(_).
 
@@ -372,7 +349,7 @@ execute(_ ,
         plan(Goal_Type, Goal_Term, Conditions, Context, [del(Belief)| Acts]),
 	plan(Goal_Type, Goal_Term, Conditions, New_Context, Acts),
         true):-
-% term_variables(Belief, Action_Vars),
+    % term_variables(Belief, Action_Vars),
     decisioning(Belief, Context, New_Context),
     try_retract(fact(Belief)),
     create_event(del, Belief).
@@ -389,65 +366,48 @@ execute(_ ,plan(Goal_Type, Goal_Term, Conditions, Context,
 % performas -- test goal --
 % test(+TestGoalPredicate)
 % f.e. test(mean(task,Mean)) - unifies with possible fact(mean(task,hammer))
-% bags up all the facts matchig the +TestGoalPredicate and then makes broad
-% unification and restricts with the original plan context
+% bags up all the facts matchig the +TestGoalPredicate and then makes broad unification and restricts with the original plan context
 
-
-nonempty([], false).
-
-nonempty( _, true).
-
-
-execute( _, plan(Goal_Type, Goal_Term, Conditions, Context, [test(Goal)| Acts]),
-	    plan(Goal_Type, Goal_Term, Conditions, Context_New, Acts),
-            Result):-
-    query(Goal, Context, Context2),
-    simulate_early_bindings(Goal, Context2, Context_New),
-    nonempty(Context_New, Result).             % true / fail as the act result
+execute( _, plan(GOALTYPE, GOALTERM, CONTEXCONDITIONS, PLANCONTEXT, [test(GOAL)| PACTS]),
+	    plan(GOALTYPE, GOALTERM, CONTEXCONDITIONS, PLANCONTEXTNEW, PACTS),
+            RESULT):-
+	query(GOAL, PLANCONTEXT, CONTEXT2),
+	simulate_early_bindings(GOAL, CONTEXT2, PLANCONTEXTNEW),
+	nonempty(PLANCONTEXTNEW, RESULT).             % true / fail as the act result
 
 
 % vykona cil dosazeni, asi nejnarocnejsi
 
-execute(Intention_ID,
-        plan(Goal_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
-        plan(Goal_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
-        true)
-    :-
-    retract(intention(Intention_ID, Plan_Stack, active)),
+execute(INTENTIONINDEX, plan(EVENTTYPE, EVENTATOM, PC, PLANCONTEXT, [ach(GOAL) |TPLANS]),
+			plan(EVENTTYPE,EVENTATOM, PC, PLANCONTEXT, [ach(GOAL)|TPLANS]),
+                        true):-
+    retract(intention(INTENTIONINDEX, PLANSTACK, active)),
 % this intention is blocked now
-    assertz(intention(Intention_ID, Plan_Stack, blocked)),
+    assertz(intention(INTENTIONINDEX, PLANSTACK, blocked)),
 % variables of the goal declared
-    term_variables(Goal, Goal_Variables),
+    term_variables(GOAL, GOALVARIABLES),
 % nashortujeme kontext puvodni urovne podle promennych v dekl. cili
-    shorting(Goal, Goal2, Context, Goal_Variables, Context_New,_),
-    get_fresh_event_number(Event_ID),
-% zadame pod-cil i s odkazem na tuto intensnu INT, nashortovanym kontextem
-% CTXSH, cil je ted aktivni
-    assert(event(Event_ID, ach, Goal2, Intention_ID, Context_New, active, [])).
+    shorting(GOAL, G3, PLANCONTEXT, GOALVARIABLES,NEWCONTEXT,_),
+    get_fresh_event_number(EVENTINDEX),
+% zadame pod-cil i s odkazem na tuto intensnu INT, nashortovanym kontextem CTXSH, cil je ted aktivni
+    assert(event(EVENTINDEX, ach, G3, INTENTIONINDEX, NEWCONTEXT, active, [])).
 
+% v planu nic neni, nedelame nic a ani jej nemenime, on bude odstranen z intensny na vyssi urovni
 
-% v planu nic neni, nedelame nic a ani jej nemenime, on bude odstranen z
-% intensny na vyssi urovni
-execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context, []),
-        plan(Goal_Type, Goal_Atom, Conditions, Context, []), true).
+execute(_ ,plan(EventType,G,PC,CTX,[]),plan(EventType,G,PC,CTX,[]),true).
 
 
 % vykona aritmeticko-logickou operaci alop(operace)
 % napriklad alop(X<3) alop (X is Y+1)
-% vykona toto pro veskery kontext (nedela decision narozdil od act, ale provede
-% pro vsechny a redukuje kontext)
+% vykona toto pro veskery kontext (nedela decision narozdil od act, ale provede pro vsechny a redukuje kontext)
 
-execute(_ ,
-        plan(Goal_Type, Goal_Atom, Conditions, Context_In, [rel(Term1 is Term2)|
-                                                            Acts]),
-        plan(Goal_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
-    :-
-	alop(Term1 is Term2, Context_In, Context_Out, Result).
+execute(_ ,plan(EVENTTYPE, EVENTTERM, CONDITIONS, Context, [rel(A is B)| TBODY]),
+			plan(EVENTTYPE, EVENTTERM, CONDITIONS, ContextOut, TBODY), Result):-
+	alop(A is B, Context, ContextOut, Result).
 
-execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context,
-                [rel(Relation)| Acts]),
-	plan(Goal_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
-    :-
+execute(_ ,plan(Event_Type, Event_Term, Conditions, Context,
+                [rel(Relation)| TBODY]),
+	plan(Event_Type, Event_Term, Conditions, Context_Out, TBODY), Result):-
     functor(Relation, Operator, _),
     is_relational_operator(Operator),
     alop(Relation, Context, Context_Out, Result).
@@ -465,49 +425,39 @@ execute_environment( _, _, false).
 % agent acts in specified environment
 execute(_ ,plan(Event_Type, Event_Term, Conditions, Context,
                 [act(Environment, Action)| Acts]),
-	plan(Event_Type, Event_Term, Conditions, Context_Out, Acts), Restult)
-    :-
+	plan(Event_Type, Event_Term, Conditions, Context_Out, Acts), Restult):-
     decisioning(Action, Context, Context_Out),
     !,
     execute_environment(Environment, Action, Restult).
 
-execute(_ , plan(EventType, EventTerm, Conditions, Context, [act(Action)|
-                                                             Plans]),
-            plan(EventType, EventTerm, Conditions, ContextOut, Plans), Result)
-    :-
-% rozhodnem o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX
-% pro promenne v ACTION)
+execute(_ , plan(EventType, EventTerm, Conditions, Context, [act(Action)| Plans]),
+		 plan(EventType, EventTerm, Conditions, ContextOut, Plans), Result):-
+    % rozhodnem o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX pro promenne v ACTION)
     decisioning(Action, Context, ContextOut),
     !,
     % execute action in 'basic' FRAg environment
     execute_environment(basic, Action, Result).
 
 
-%  vykonani interni akce, act(action(t1,t2,...))., udela nejakej decisioning
-% kontextu pro t1,t2... a vykona ji (udela to opravdu ty substituce, jak
-% vlastne?? decisioning?? MAGIC!!) obsolete, uz v execute_action
+%  vykonani interni akce, act(action(t1,t2,...))., udela nejakej decisioning kontextu pro t1,t2... a vykona ji (udela to opravdu ty substituce, jak vlastne?? decisioning?? MAGIC!!)
+%  obsolete, uz v execute_action
 %  execute(_ ,plan(GT,G,PC,CTX,[act(Action)|AT]),plan(GT,G,PC,CTX2,AT), true):-
-%  write('eplan4 '),write(Action),nl, Action=..ACTIONTERMS, % TODO
-% nepekne, term_variables decisioning(ACTIONTERMS,CTX,CTX2), % rozhodnem
-% o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX pro
-% promenne v ACTION) Acti-on.
+%   write('eplan4 '),write(Action),nl,
+%   Action=..ACTIONTERMS,                           % TODO nepekne, term_variables
+%   decisioning(ACTIONTERMS,CTX,CTX2),      % rozhodnem o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX pro promenne v ACTION)
+%   Acti-on.
 
-% TODO false nezmeni kontext, hlavne by mel vratit event zpatky, pokud failne
-%    TLP, tak zrusit zamer a vratit goal
-
-execute(_ ,
-        plan(Goal_Type ,Goal_Atom, Conditions, Context, Acts),
-        plan(Goal_Type ,Goal_Atom, Conditions, Context, Acts),
-        false).
+% TODO false nezmeni kontext, hlavne by mel vratit event zpatky, pokud failne TLP, tak zrusit zamer a vratit goal
+  execute(_ ,plan(GT,G,PC,CTX,[AH|AT]),plan(GT,G,PC,CTX,[AH|AT]), false).
 
 
 % Plan is linear and only one act is executed per cycle
 
 execute_plan(Intention_Index,
-             [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context,
-                   Body)| Plans],
-	     [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context2,
-                   Body2)| Plans],
+             [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context, Body)|
+                 Plans],
+	     [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context2, Body2)|
+                 Plans],
              Result)
     :-
     execute(Intention_Index,
@@ -523,10 +473,8 @@ execute_plan(Intention_Index,
 %                                                                              |
 %===============================================================================
 
-% vybrany plan spadnul, dame jej na konec programu, aby se pripadne priste
-% vybral jiny pro PGT/PG
 
-put_back_plan(IDX, false):-
+put_back_plan(IDX, false):-                % vybrany plan spadnul, dame jej na konec programu, aby se pripadne priste vybral jiny pro PGT/PG
     %   printfg("Giving the plan to the end of PB",[IDX]),
     retract(plan(IDX,PGT,PG,PGU,PB)),
     assertz(plan(IDX,PGT,PG,PGU,PB)).
@@ -559,79 +507,57 @@ get_fresh_event_number(Event_Index):-
 
 % means found for top level goal
 
-extend_intention(null, [plan(Plan_ID, Goal_Type, Goal_Term, Conditions, Body),
-                        Context], Intention_ID)
+extend_intention(null, [plan(PLANINDEX, EVENTTYPE, EVENTTERM, CONDITIONS, BODY), INTENTIONCONTEXT], INTENTIONINDEX)
     :-
 	%   put_back_plan(IDX),
-	get_fresh_intention_number(Intention_ID),
+	get_fresh_intention_number(INTENTIONINDEX),
 	assertz(
-	   intention(Intention_ID, [plan(Plan_ID, Goal_Type, Goal_Term,
-                                         Conditions, Context, Body)], active)
+	   intention(INTENTIONINDEX, [plan(PLANINDEX, EVENTTYPE, EVENTTERM, CONDITIONS, INTENTIONCONTEXT, BODY)], active)
 	   ).
 
 % means found for a subgoal
 
-extend_intention(Intention_ID, [plan(Plan_ID, Goal_Type, Goal_Term, Conditions,
-                                     Body), Context], Intention_ID)
+extend_intention(INTENTIONINDEX, [plan(PLANINDEX, EVENTTYPE, EVENTTERM, CONDITIONS, BODY), INTENTIONCONTEXT], INTENTIONINDEX)
     :-
 	%   put_back_plan(PGT,PG),
-	retract(intention(Intention_ID, Plan_Stack, blocked)),
+	retract(intention(INTENTIONINDEX, PLANSTACK, blocked)),
 	assertz(
-	   intention(Intention_ID,
-		[plan(Plan_ID, Goal_Type, Goal_Term, Conditions, Context, Body)
-                | Plan_Stack],active
+	   intention(INTENTIONINDEX,
+		[plan(PLANINDEX, EVENTTYPE, EVENTTERM, CONDITIONS, INTENTIONCONTEXT, BODY)| PLANSTACK],active
 	            )
 		).
 
-extend_intention(Intention_ID, Plan_Stack, Status):-
-    format(atom(String),"[ERROR] Lost intention ~w",
-           [intention(Intention_ID, n, Plan_Stack, Status)]),
-    println_debug(String, error).
+extend_intention(INTENTIONINDEX, PLANSTACK, Status):-
+    format(atom(STRING),"[ERROR] Lost intention ~w",[intention(INTENTIONINDEX, n, PLANSTACK, Status)]),
+    println_debug(STRING, error).
 
 
 %
-% INTENTION SELECTION, 'returns' one active intention due to active reasoning
-% method (see FRAgPLFRAg.pl and FRAg*Reasoning.pl files)
+%  INTENTION SELECTION, 'returns' one active intention due to active reasoning method (see FRAgPLFRAg.pl and FRAg*Reasoning.pl files)
 %
 
 
-select_intention(intention(Intention_ID_Out, Plan_Stack_Out, Status_Out)):-
-    findall(intention(Intention_ID, Plan_Stack, Status),
-            intention(Intention_ID, Plan_Stack, Status), Intentions),
-    get_intention(Intentions, intention(Intention_ID_Out, Plan_Stack_Out,
-                                        Status_Out)).
+select_intention(intention(IDXO,CNTO,ACTO)):-
+    bagof(intention(IDX,CNT,STS),intention(IDX,CNT,STS),INTENTIONS),
+    get_intention(INTENTIONS,intention(IDXO,CNTO,ACTO)).
 
 
-%!  update_event(New_Intention_Index, Event, Result, History).
+%
 %  UPDATE EVENT
 %
 
 
-update_event(-1, event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
-                       active, History),
-             _, _):-
-    % No applicable means for any achieve goal, put the goal back
-    assert(event(Event_ID, ach, Event_Atom, Parent_Intention, Context, active,
-                 History)).
+update_event(-1, event(EVENTINDEX, ach, EVENTATOM, PARENTINTENTIONINDEX, CONTEXT, active, HISTORY), _, _):-
+    assert(event(EVENTINDEX, ach, EVENTATOM, PARENTINTENTIONINDEX, CONTEXT, active, HISTORY)).   % No applicable means for any achieve goal, put the goal back
 
-update_event(Intention_ID_New, event(Event_ID, ach, Event_Atom, Intention_ID,
-                                     Context, active, History),
-             true,
-             [plan(Plan_ID, _, Goal_Atom, Conditions, _), Context])
-    :-
-% Means for the top level ach goal found, active -> intention =blocked
-    assert(event(Event_ID, ach, Event_Atom, Intention_ID, Context,
-                 Intention_ID_New,
-		 [used_plan(Plan_ID, Goal_Atom, Conditions, Context)| History]
-                )
-          ).
-
+update_event(NEWINTENTIONINDEX, event(EVENTINDEX, ach, EVENTATOM, INTENTIONINDEX, CONTEXT, active, HISTORY), true,
+    [plan(PLANINDEX, _, TRIGGERATOM, CONTEXTCONDITIONS, _), PLANCONTEXT]):-
+    % Means for the top level ach goal found, active -> intention number (it means blocked)
+    assert(event(EVENTINDEX, ach, EVENTATOM, INTENTIONINDEX, CONTEXT, NEWINTENTIONINDEX,
+		 [used_plan(PLANINDEX, TRIGGERATOM, CONTEXTCONDITIONS, PLANCONTEXT)| HISTORY])).
   % No means for any achieve goal, put the goal back
-update_event( _, event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
-                       active, History), false, _)
-    :-
-    assert(event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
-                 active, History)).
+update_event( _, event(EVENTINDEX, ach, EVENTATOM, PARENTINTENTIONINDEX, CONTEXT, active, HISTORY), false, _):-
+    assert(event(EVENTINDEX, ach, EVENTATOM, PARENTINTENTIONINDEX, CONTEXT, active, HISTORY)).
 
  % Other types of events (add/del) are kept deleted in both cases (means found / not found)
 update_event( _, event( _, _, _, _, _, active, _), _, _).
@@ -645,11 +571,11 @@ update_event( _, event( _, _, _, _, _, active, _), _, _).
 
   % smaze event zpracovavany INTENTIONINDEX s nejvetsim vlastnim indexem (aktualni pro tento zamer)
 
-try_retract_event(Intention_ID):-
-    findall(Event_ID, event(Event_ID, _, _, _, _, Intention_ID, _),
-            Event_IDs),
-    max_list(Event_IDs, Event_ID_Max),
-    retract(event(Event_ID_Max, _, _, _, _, _, _)).
+try_retract_event(INTENTIONINDEX):-
+    findall(EVENTINDEX, event(EVENTINDEX, _, _, _, _, INTENTIONINDEX, _),
+            EVENTINDEXES),
+    max_list(EVENTINDEXES, ACTUALEVENTINDEX),
+    retract(event(ACTUALEVENTINDEX, _, _, _, _, _, _)).
 
 try_retract_event( _).
 
@@ -657,120 +583,100 @@ try_retract_event( _).
   % BLOKOVANA
   % pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl provedeno vyvolani podcile. Nemeni se, dokud se podcil nepovede
 
-update_intention(intention(Intention_ID, _, _), true):-
-    intention(Intention_ID, _, blocked),
-    % no update for blocked intention / waiting for subgoal
-    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED", reasoningdbg).
+update_intention(intention(INTENTIONINDEX, _, _), true):-
+    intention(INTENTIONINDEX, _, blocked),
+    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED", reasoningdbg).  % no update for blocked intention / waiting for subgoal
+
   % USPEL TOPLEVEL
   % prazdny toplevel plan, resp. telo tohoto planu znamena, ze je hotovo, tedy smazeme intensnu a cil, ktery ji byl dosazen
 
-update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), _):-
+update_intention(intention(INTENTIONINDEX, [plan(_,_,_,_,_,[])], _), _):-
     println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED", reasoningdbg),
-    retract(intention(Intention_ID, _, _)),
+    retract(intention(INTENTIONINDEX, _, _)),
     %  try_retract_event(EVENTATOM, ORIGIN, EVENCONTEXT, INTENTIONINDEX)
     %  pro external event je jasne, o ktery event se jedna jen podle INTENTIONINDEX
-    try_retract_event(Intention_ID).
+    try_retract_event(INTENTIONINDEX).
 
 % USPEL PODPLAN
 % skoncil podplan, musime udelat prenos kontextu na vyssi uroven!!! Dale vyhodi akci vyvolani podcile
 % znovu zavolame update intention, muze dojit k tomu, ze splnenim podcile byl splnen i nadplan (6.2.2023)
 
-update_intention(intention(Indention_ID,
-                           [plan( _, _, Event_Atom, _, Context, []),
-                            plan(Plan_ID2, Event_Type2, Event_Atom2,
-                                  Conditions, Context2, [ach(Goal)| Acts])
-                            | Plans],
-                           Status),
-                 _ )
-    :-
+update_intention(intention(INTENTIONINDEX,
+		 [plan( _, _, EVENTATOM2, _, CONTEXT2, []),
+		       plan(PLANINDEX, EVENTTYPE, EVENTATOM, COND, CONTEXT, [ach( GOAL )| TACTS])|
+		  TPLANS],
+					STATUS), _ ):-
     println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED", reasoningdbg),
-    intersectionF(Event_Atom, Context, Goal, Context2, Context3),
-    retract(intention(Indention_ID, [ _, _| Plans], Status)),
-    assertz(intention(Indention_ID, [plan(Plan_ID2, Event_Type2, Event_Atom2,
-                                          Conditions, Context3, Acts)| Plans],
-                      Status)),
-    try_retract_event(Indention_ID),
-    update_intention(intention(Indention_ID,
-                               [plan(Plan_ID2, Event_Type2, Event_Atom2,
-                                     Conditions, Context3, Acts)| Plans],
-                                Status),
+    intersectionF(EVENTATOM2, CONTEXT2, GOAL, CONTEXT, NEWCONTEXT),
+    retract(intention(INTENTIONINDEX, [ _, _| TPLANS], STATUS)),
+    assertz(intention(INTENTIONINDEX, [plan(PLANINDEX, EVENTTYPE, EVENTATOM, COND, NEWCONTEXT, TACTS)| TPLANS], STATUS)),
+    % writeln(intention(INTENTIONINDEX, [plan(PLANINDEX, EVENTTYPE, EVENTATOM, COND, NEWCONTEXT, TACTS)| TPLANS], STATUS)),
+    try_retract_event(INTENTIONINDEX),
+    update_intention(intention(INTENTIONINDEX,
+                               [plan(PLANINDEX, EVENTTYPE, EVENTATOM,
+                                     COND, NEWCONTEXT, TACTS)| TPLANS],
+                                STATUS),
                       true).
 
 % NEUSPEL TOPLEVEL
 % neuspela akce v toplevel planu zameru, zrusi zamer a obnovi cil
 
-update_intention(intention(Intention_ID, [ _ ], Status), false):-
+update_intention(intention(INTENTION, [ _ ], Status), false):-
     println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED", reasoningdbg),
-    retract(intention(Intention_ID, _, Status)),
+    retract(intention(INTENTION, _, Status)),
     % event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, INTENTION2, HISTORY),
     % zapoznamkoval jsem, zdalo se mi to zbytecne
     % bagof(event(A,B,C,D,E,F,G), event(A,B,C,D,E,F,G), ES),
     % cil, pro ktery byl zamer udelan, ma predposledni term INTENTION
-    retract(event(Event_Index, Type, Atom, null, Context, Intention_ID, History)),
-    assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
+    retract(event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, INTENTION, HISTORY)),
+    assertz(event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, active, HISTORY)).
 
 
-% neuspela akce v podplanu, plan vyhodime z intensny a plan vyssi urovne bude
-% aktivni, znovu vytvori event pro cil dosazeni atd...
+% neuspela akce v podplanu, plan vyhodime z intensny a plan vyssi urovne bude aktivni, znovu vytvori event pro cil dosazeni atd...
 % TODO, jako v predchozim, cil by mel byt zadan a nastaven na aktivni
 
-update_intention(intention(Intention_ID, [Plan| Plans], Status), false):-
+update_intention(intention(INTENTION, [Plan| Plans], Status), false):-
     println_debug("[RSNDBG] Update intention: SUBPLAN FAILED", reasoningdbg),
-    retract(intention(Intention_ID, [Plan| Plans], Status)),
-    assertz(intention(Intention_ID, Plans, active)).
+    retract(intention(INTENTION, [Plan| Plans], Status)),
+    assertz(intention(INTENTION, Plans, active)).
 
 
-% zmenil se plan / zasobnik vykonanim predchozi akce, ale neni na jeho vrcholu
-% prazdny plan, tedy na zaklade identifikatoru INT si vytahneme starou
-% tuto intensnu, resp. ji vymazeme a vlozime znovu s novym zasobnikem
-% PLANSTACK (proc je v hlavicce cil jako _ nevim, to by snad mohlo byt
-% primo G??)
+  % zmenil se plan / zasobnik vykonanim predchozi akce, ale neni na jeho vrcholu prazdny plan, tedy ...
+  % na zaklade identifikatoru INT si vytahneme starou tuto intensnu, resp. ji vymazeme a vlozime znovu s novym zasobnikem PLANSTACK (proc je v hlavicce cil jako _ nevim, to by snad mohlo byt primo G??)
 
-update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
+update_intention(intention(INTENTION, PLANSTACK, STATUS), _):-
     println_debug("[RSNDBG] Update intention: ACTION SUCCEEDED", reasoningdbg),
-    retract(intention(Intention_ID, _, Status)),
-    % stary zasobnik nevim, je
-    %to jedno, stejne ho chceme prepsat, udelame anonymni _
-    assertz(intention(Intention_ID, Plan_Stack, Status)).
+    retract(intention(INTENTION, _, STATUS)),   % stary zasobnik nevim, je to jedno, stejne ho chceme prepsat, udelame anonymni _
+    assertz(intention(INTENTION, PLANSTACK, STATUS)).
 
 
 
-%!  check_early_reasoning(+Plans, -Means).
-% if late_bindings(false) -> cut contexes of top level (it should be enough)
-% plans of each intention to size max 1
+  % if late_bindings(false) -> cut contexes of top level (it should be enough) plans of each intention to size max 1
 
-check_early_reasoning([], []).
+expand_plans([plan( _, _, _, _, _), []]  , []).   % no mode substitutions in context
 
-check_early_reasoning(Means, Means):-
-    late_bindings(true).
-
-check_early_reasoning(Plans, Means):-
-    simulate_early_reasoning(Plans, Means).
+expand_plans([plan(INDEX, TRIGGERTYPE, TRIGGERATOM, CONTEXTCONDITIONS, BODY), [SUBSTITUTION| TCONTEXT]],
+		   [[plan(INDEX, TRIGGERTYPE, TRIGGERATOM, CONTEXTCONDITIONS, BODY), [SUBSTITUTION]] | TPLANS]):-
+    expand_plans([plan(INDEX, TRIGGERTYPE, TRIGGERATOM, CONTEXTCONDITIONS, BODY), TCONTEXT], TPLANS).
 
 
 simulate_early_reasoning([], []).
 
-simulate_early_reasoning([[plan(Plan_ID, Goal_Type, Goal_Atom,
-                                Conditions, Body), Context]| Plans],
-                           Means)
-    :-
-    expand_plans([plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Body),
-                  Context], Means1),
+simulate_early_reasoning([[plan(INDEX, TRIGGERTYPE, TRIGGERATOM,
+                                CONTEXTCONDITIONS, BODY), CONTEXT]| Plans],
+                           Means):-
+    expand_plans([plan(INDEX, TRIGGERTYPE, TRIGGERATOM, CONTEXTCONDITIONS, BODY), CONTEXT], Means1),
     simulate_early_reasoning(Plans, Means2),
     append(Means1, Means2, Means).
 
 
-%!  expand_plans(Plans1, Plans2)
+check_early_reasoning([], []).
 
-expand_plans([plan( _, _, _, _, _), []]  , []).   % no mode substitutions in context
+check_early_reasoning(MEANS, MEANS):-
+    late_bindings(true).
 
-expand_plans([plan(Plan_ID, Type, Atom, Conditions, Body),
-              [Substitution| Contexts]],
-             [[plan(Plan_ID, Type, Atom, Conditions, Body),
-               [Substitution]] | Plans]):-
-    expand_plans([plan(Plan_ID, Type, Atom, Conditions, Body),
-                  Contexts], Plans).
-
+check_early_reasoning(PLANS, MEANS):-
+    simulate_early_reasoning(PLANS, MEANS).
 
 
 
@@ -781,14 +687,9 @@ update_intentions(Result):-
     % following query bounds the free variable in plan's act(Result) and later
     % it leads to reduction of the plan context
     % takes 'another' intention with act(Result) on its top
-    intention(Intention_ID,
-              [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
-                    [act(Result)| Acts])| Plans], active),
-    shortNoVars(Context, Context_New),
-    update_intention(intention(Intention_ID,
-                               [plan(Plan_ID, Goal_Type, Goal_Atom,
-                                     Conditions, Context_New, Acts)
-                               | Plans],
+    intention(INT, [plan(IDX,GT,G,PC,CTXP,[act(Result)| TACTS])| TPLANS], active),
+    shortNoVars(CTXP, NCTXP),
+    update_intention(intention(INT,[plan(IDX,GT,G,PC,NCTXP, TACTS)| TPLANS],
                                active),
                      true),
     update_intentions(Result).
@@ -806,28 +707,25 @@ update_intentions( _):-
 
 
 % for context [] Means is not taken
-%!  check+applicable(+Context, +Conditions, -Context).
 
 is_means([],_,[]).
 
 is_means(_, Means, Means).
 
 
-check_applicable(Context, [], Context).
+check_applicable(CONTEXT, [], CONTEXT).
 
 % 'true' allways succeeds
-check_applicable(Context, [true| Conditions], Context_Out):-
-    check_applicable(Context, Conditions , Context_Out).
+check_applicable(CONTEXT, [true| T], NEWCONTEXT):-
+    check_applicable(CONTEXT, T , NEWCONTEXT).
 
 % condition is a relation <  >  =  ==
 
 check_applicable(Context, [Relation| T], Context_Out):-
     Relation=..[Operator, _, _],
-    !,
     is_relational_operator(Operator),
-    !,
-    alop(Relation, Context, Context2, true),
-    check_applicable(Context2, T, Context_Out).
+    alop(Relation, Context, NEWPUS, true),
+    check_applicable(NEWPUS, T, Context_Out).
 
 % condition is a query
 
@@ -838,17 +736,17 @@ check_applicable(Context, [Context_Condition| Context_Conditions],
     check_applicable(Context2, Context_Conditions, Context_Out).
 
 
-check_relevant_applicable_plan(Event_Atom, Context,
-				plan(Plan_Index, Event_Type, Goal_Atom2,
-				     Conditions, Body),
+check_relevant_applicable_plan(EVENTATOM, Context,
+				plan(Plan_Index, Event_Type, TRIGGERATOM,
+				     Context_Conditions, PLANBODY),
 				Means):-
-    intersectionF(Event_Atom, Context, Goal_Atom2, Context2),
+    intersectionF(EVENTATOM, Context, TRIGGERATOM, CONTEXT2),
 %	simulate_early_bindings(TRIGGERATOM, CONTEXT2, CONTEXT3),
 %	!,
-    check_applicable(Context2, Conditions, Context3),
+    check_applicable(CONTEXT2, Context_Conditions, Context4),
 % Means is either the second term, if Context is not [], or [] if it is
-    is_means(Context3, [[plan(Plan_Index, Event_Type, Goal_Atom2,
-			 Conditions, Body), Context3]],
+    is_means(Context4, [[plan(Plan_Index, Event_Type, TRIGGERATOM,
+			 Context_Conditions, PLANBODY), Context4]],
 	     Means).
 
 
@@ -858,31 +756,38 @@ check_relevant_applicable_plan(Event_Atom, Context,
 
 check_relevant_applicable_plans(_,_,[],[]).  % no more adepts
 
-check_relevant_applicable_plans(Event_Atom, Context,[Plan| Plans], Means)
-    :-
+check_relevant_applicable_plans(G,CTX,[H| TPLANS],T3):-
     % H pokud projde, bude v H2 jako [[H,Kontext]], jinak []
-    check_relevant_applicable_plan(Event_Atom, Context, Plan, Means1),
-    check_relevant_applicable_plans(Event_Atom, Context, Plans, Means2),
-    append(Means1, Means2, Means).
+    check_relevant_applicable_plan(G,CTX,H,H2),
+    check_relevant_applicable_plans(G, CTX, TPLANS, T2),
+    append(H2,T2,T3).
 
-check_relevant_applicable_plans(G, Context_Conditions, [_ | Plans], T2)
-    :-
+check_relevant_applicable_plans(G, Context_Conditions, [_ | Plans], T2):-
     check_relevant_applicable_plans(G, Context_Conditions, Plans, T2).
 
 % RELEVANT PLAN for GOAL in CTX, -> REL
 
-get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means_Out)
-    :-
-    findall(plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
+get_relevant_applicable_plans(Event_Type, Event_Atom, Context, MEANSBINDINGS):-
+    bagof(plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
 	  plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
-          Means1),
-    check_relevant_applicable_plans(Event_Atom, Context, Means1, Means2),
-    check_early_reasoning(Means2, Means_Out).
+          PREREL),
+    check_relevant_applicable_plans(Event_Atom, Context, PREREL, MEANS),
+    check_early_reasoning(MEANS, MEANSBINDINGS).
 
 
 
 get_relevant_applicable_plans(_,_,[],[]).
 
+
+  % CHECK GUARDS (in the input list)
+
+%
+%  valid([]).
+%
+%  valid([CONTEXTCONDITION|TCONTEXTCONDITIONS]):-
+%	fact(CONTEXTCONDITION),
+%	valid(TCONTEXTCONDITIONS).
+%
 
 
 
@@ -892,26 +797,15 @@ get_relevant_applicable_plans(_,_,[],[]).
 %                                                                              |
 %===============================================================================
 
-%!  execution
-% Executes one Act. Intention is selected by actual intention selection
-% method, then the plan on the top of its plan stack is executed. Then
-% the plan is put back on the back of the plan base and intention is
-% appropriately updated due to the result. Then, for the case of joint
-% actions, rest of the intentions is updated as well
 
 execution:-
-    select_intention(intention(Intention_ID,
-                               [plan(Plans_ID, Goal_Type, Goal_Term, Conditions,
-                                     Context, Body)| Plans],
-                               Status)),
+    select_intention(intention(INT,[plan(IDX,GT,G,PC,CTXP,P)| TPLANS],STATUS)),
     !,
-    execute_plan(Intention_ID,
-                 [plan(Goal_Type, Goal_Term, Conditions, Context, Body)| Plans],
-                 Plan2, Result),
+    execute_plan(INT,[plan(IDX,GT,G,PC,CTXP,P)| TPLANS], P2, Result),
     % if RES is false, the plan failed, it is good to put it to the end of PB
     % (cyclic RR approach as default for failing plans)
-    put_back_plan(Plans_ID, Result),
-    update_intention(intention(Intention_ID, Plan2,Status), Result),
+    put_back_plan(IDX, Result),
+    update_intention(intention(INT,P2,STATUS), Result),
     % if RES is a joint_action, it should be removed from the top of intention
     update_intentions(Result).
 
@@ -922,48 +816,45 @@ execution.  % nothing left to do
 %   Reasoning
 %
 
+
+
   % reasoning3(goal, result, assigned intention)
 
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
-                 Context, active, History)):-
-    get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
-    get_intended_means(Means, event(Event_ID, Event_Type, Event_Atom,
-                                    Parent_Intention, Context, active,
-                                    History),
-                       Intended_Means),
-    extend_intention(Parent_Intention, Intended_Means, Intention_ID),
-    update_event(Intention_ID,
-	         event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
-                       Context, active, History),
-                 true, Intended_Means).
+reasoning3(event(EVENTINDEX, EVENTTTYPE, EVENTATOM, Parent_Intention_ID,
+                 CONTEXT, active, HISTORY)):-
+    get_relevant_applicable_plans(EVENTTTYPE, EVENTATOM, CONTEXT, MEANS),
+    get_intended_means(MEANS, event(EVENTINDEX, EVENTTTYPE, EVENTATOM,
+                                    Parent_Intention_ID, CONTEXT, active,
+                                    HISTORY), INTENDEDMEANS),
+    extend_intention(Parent_Intention_ID, INTENDEDMEANS, INTENTIONINDEX),
+    update_event(INTENTIONINDEX,
+	         event(EVENTINDEX, EVENTTTYPE, EVENTATOM, Parent_Intention_ID,
+                       CONTEXT, active, HISTORY), true, INTENDEDMEANS).
 
   % reasoning -> no means
 
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
+reasoning3(event(Event_ID, Event_Type, Event_Atom, Intention_ID, Context,
                  active, History)):-
-    update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
-                           Context, active, History),
-                 false, _).
+    update_event(-1, event(Event_ID, Event_Type, Event_Atom, Intention_ID,
+                           Context, active, History), false, _).
 
 
 
 
 reasoning2([]).
 
-reasoning2([Event | Events]):-
-    retract(Event),
-    reasoning3(Event),
+reasoning2([EVENT | TEVENTS]):-
+    retract(EVENT),
+    reasoning3(EVENT),
  %  reasoning_finisher(INTN, EVENT, SUCC),
-    reasoning2(Events).
+    reasoning2(TEVENTS).
 
 
 reasoning:-
-    findall(event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
-                  History),
-            event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
-                  History),
-            Events),
-   reasoning2(Events).
+    bagof(event(EVENTINDEX, EVENTTYPE, EVENTATOM, INTENTION, CONTEXT, active, HISTORY),
+		event(EVENTINDEX, EVENTTYPE, EVENTATOM, INTENTION, CONTEXT, active, HISTORY),
+		      EVENTS),
+   reasoning2(EVENTS).
 
 reasoning.  % no events
 
@@ -984,16 +875,24 @@ reasoning.  % no events
 
 
 finished:-
+    thread_self(NAME),
+    loop_number(STEPS),
+    format(atom(STRINGS), "~n[SYSDBG] Agent ~w finished in ~w steps. ~n",[NAME, STEPS]),
+    println_debug(STRINGS, systemdbg).
+
+write_stats([Steps_Left]):-
+    open('stats2', append, Stats_File),
     thread_self(Agent),
-    loop_number(Steps),
-    format(atom(String), "~n[SYSDBG] Agent ~w finished in ~w steps. ~n",
-           [Agent, Steps]),
-    println_debug(String, systemdbg).
+    max_agent_iterations(Max_Iterations),
+    Steps_Total is Max_Iterations - Steps_Left,
+    write(Stats_File, Agent), write(Stats_File,','),
+    writeln(Stats_File, Steps_Total),
+    close(Stats_File).
 
 
 
-next_loop(-1,-1):-
-    loop(-1,-1).
+next_loop(-1):-
+    loop(-1).
 
 next_loop(0,0):-
     print_state('Finished'),
@@ -1033,38 +932,36 @@ loop(-1, -1).			% born dead
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-    format(atom(String1), "~n~n[RSNDBG] =========================================================================================
+    format(atom(STRINGS), "~n~n[RSNDBG] =========================================================================================
 [RSNDBG] ==================================== Loop ~w started =====================================
 [RSNDBG] =========================================================================================~n~n",
           [Loop_Number]),
-    println_debug(String1, reasoningdbg),
-    format(atom(String2), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
-    print_state(String2),
+    println_debug(STRINGS, reasoningdbg),
+    format(atom(STRINGL), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
+    print_state(STRINGL),
 
     late_bindings(Bindings),    % ???
-    format(atom(String3), "[INTER] Bindings ~w~n", [Bindings]),
-    println_debug(String3, interdbg),
+    format(atom(STRINGB), "[INTER] Bindings ~w~n", [Bindings]),
+    println_debug(STRINGB, interdbg),
 
     sensing,
-    !,
 
     update_models,
+
     !,
 
-    format(atom(String4), "+|+ RE ~w", [Loop_Number]),
-    println_debug(String4, interdbg),
-
+    format(atom(STRINGPM), "+|+ RE ~w", [Loop_Number]),
+    println_debug(STRINGPM, interdbg),
     reasoning,
     !,
 
-    format(atom(String5), "+|+ EX ~w", [Loop_Number]),
-    println_debug(String5, interdbg),
-
+    format(atom(STRINGRE), "+|+ EX ~w", [Loop_Number]),
+    println_debug(STRINGRE, interdbg),
     execution,
     !,
 
-    format(atom(String6), "+|+ FIN ~w", [Loop_Number]),
-    println_debug(String6, interdbg),
+    format(atom(STRINGEX), "+|+ FIN ~w", [Loop_Number]),
+    println_debug(STRINGEX, interdbg),
     println_debug("loop_finished", interdbg),
     % increases loop number / loop_number(number).
     incrementLoop,
@@ -1083,35 +980,35 @@ loop(Steps, Steps_Left):-
 %===============================================================================
 
 
-%!  force_reasoning(+Model_Node, +Plan, +Context).
-%
+
 
 force_reasoning(model_reasoning_node(
-                    event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
-                          Event_Context, active, History),
+                    event(Event_Index, Event_Type, EVENTATOM, INTENTIONINDEX,
+                          EVENTCONTEXT, active, HISTORY),
                     Plan,
-                    Plan_Context)
+                    PLANCONTEXT)
                )
 :-
-    retract(event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
-                  Event_Context, active, History)),
-    extend_intention(Parent_Intention, [Plan, Plan_Context], Intention_ID2),
-    update_event(Intention_ID2,
-                 event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
-                       Event_Context, active, History),
+    retract(event(Event_Index, Event_Type, EVENTATOM, INTENTIONINDEX,
+                  EVENTCONTEXT, active, HISTORY)),
+    extend_intention(INTENTIONINDEX, [Plan, PLANCONTEXT], NEWINTENTIONINDEX),
+    update_event(NEWINTENTIONINDEX,
+                 event(Event_Index, Event_Type, EVENTATOM, INTENTIONINDEX,
+                       CONTEXT, active, HISTORY),
                  true,
-                 [Plan, Plan_Context]).
+                 [Plan, CONTEXT]).
 
   % printInentions("",SI),
   % write(SI),nl.
 
 
-% printints:-
-%    findall(intention(Intention_IS ,Plan_Stack ,State),
-%            intention(Intention_IS ,Plan_Stack ,State), Intentions),
-%    writeln('Intentions:'),
-%    writeln(Intentions).
-% printints.
+printints:-
+    findall(intention(Intention_IS ,Plan_Stack ,State),
+            intention(Intention_IS ,Plan_Stack ,State), Intentions),
+    writeln('Intentions:'),
+    writeln(Intentions).
+
+printints.
 
 
 % sub-plan finished
@@ -1120,28 +1017,27 @@ force_execution(model_act_node(Intention_Index, true, _)):-
     update_intention(intention(Intention_Index, Plan_Stack, Status), _).
 
 force_execution(model_act_node(Intention_Index, Act, Decision)):-
-    retract(intention(Intention_Index,
-                      [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
-                            [Plan_Act| Plan_Acts])| Plans],
+    retract(intention(Intention_Index, [plan(IDX, GT, G, PC, CTX, [PLANACT| TACTS])| T],
                       Status)),
     % action in node and in the plan could have renamed vars, unify them
-    unifiable(Plan_Act, Act, Unifier),
-    apply_substitutions(Unifier),
-    restrict(Context, Decision, Context2),
+    unifiable(PLANACT, Act, ACTUNIFIER),
+    apply_substitutions(ACTUNIFIER),
+    restrict(CTX, Decision, CTXNew),
     % update intention ... plan has now a new context restricted by decision
-    assert(intention(Intention_Index,
-                     [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
-                           [Plan_Act| Plan_Acts])| Plans],
-                     Status)),
-    execute_plan(Intention_Index,
-                 [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
-                       [Plan_Act| Plan_Acts])| Plans], P2,
+    assert(intention(Intention_Index, [plan(IDX, GT, G, PC, CTXNew, [PLANACT| TACTS])| T],
+                     Status)),          % update intention ... plan has now a new context restricted by decision
+    execute_plan(Intention_Index, [plan(IDX, GT, G, PC, CTXNew, [PLANACT| TACTS])| T], P2,
                  Result),
     update_intention(intention(Intention_Index, P2, Status), Result),
     update_intentions(Result).
 
 
+%   write('acting finished'),nl.                % if RES is a joint_action, it should be removed from the top of any intention
+
+
   force_execution(model_act_node( _, _, _)).
+
+%   write('Execution failed '), write(model_act_node(Intention, no_action, Decision)),nl,!.     % Execution failed
 
 
 
@@ -1151,37 +1047,32 @@ force_execution(model_act_node(Intention_Index, Act, Decision)):-
 %                                                                              |
 %===============================================================================
 
-%!  set_clauses(+Clauses, +Plan_Index)
-%* Clauses:
-%* Plan_Index: actual index for a plan, if it is added to agent's plan
-% base
 
 set_clauses([],_).
 
-set_clauses([plan(Goal_Type, Goal_Atom, Conditions, Body)|Clauses], Plan_Index)
-    :-
-    assert(plan(Plan_Index ,Goal_Type, Goal_Atom, Conditions, Body)),
-    Plan_Index2 is Plan_Index+1,
-    set_clauses(Clauses, Plan_Index2),
+set_clauses([plan(GT,G,GDS,BODY)|Clauses],IDX):-
+    assert(plan(IDX,GT,G,GDS,BODY)),
+    IDX2 is IDX+1,
+    set_clauses(Clauses,IDX2),
     !.
 
 % process declared top-level goal -> creates events for them
-set_clauses([goal(Goal_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
+set_clauses([goal(Goal_Type, Goal_Atom, Context)| Clauses],IDX):-
     get_fresh_event_number(Event_Index),
     assert(event(Event_Index, Goal_Type, Goal_Atom, null, Context, active,
                  [])),
-    set_clauses(Clauses, Plan_Index),
+    set_clauses(Clauses, IDX),
     !.
 
-set_clauses([Clause| Clauses], Plan_Index):-
+set_clauses([Clause|Clauses],IDX):-
     assert(Clause),
-    set_clauses(Clauses, Plan_Index).
+    set_clauses(Clauses,IDX).
 
 
 clear_agent:-
     retractall(fact(_)),
     retractall(event( _, _, _, _, _, _, _)),
-%    retractall(plan( _, _, _, _)),
+    retractall(plan( _, _, _, _)),
     retractall(plan( _, _, _, _, _)),
     retractall(intention( _, _, _)).
 
@@ -1192,13 +1083,13 @@ read_clauses(Clause, [Clause|Clauses], String):-
     read_clause(String, Clause2, []),
     read_clauses(Clause2, Clauses, String).
 
-load_program(Agent, Clauses):-
-    access_file(Agent, read),! ,
-    open(Agent, read, String, [close_on_abort(true)]),
-    read_clause(String, Clause, []),
+load_program(AGENTFILE, CLAUSES):-
+    access_file(AGENTFILE, read),! ,
+    open(AGENTFILE, read, STRING, [close_on_abort(true)]),
+    read_clause(STRING, CLAUSE, []),
     !,
-    read_clauses(Clause, Clauses, String),
-    close(String, [force(true)]).
+    read_clauses(CLAUSE, CLAUSES, STRING),
+    close(STRING, [force(true)]).
 
 load_program(Agent_File, []):-
     format("[FRAG] Agent file ~w does not exists.~n", [Agent_File]),
@@ -1227,28 +1118,24 @@ take_snapshot_goals(Event_Snapshot):-
 take_snapshot_goals([]).
 
 
-take_snapshot_plans(Plan_Snapshot):-
-    bagof(plan(Number, Type, Predicate, Context, Body),
-          plan(Number, Type, Predicate, Context, Body), Plan_Snapshot).
+take_snapshot_plans(PLANSSNAPSHOT):-
+    bagof(plan(Number, Type, Predicate, Context, Body), plan(Number, Type, Predicate, Context, Body), PLANSSNAPSHOT).
 
 take_snapshot_plans([]).
 
 
-take_snapshot_intentions(Intention_Snapshot):-
-    bagof(intention(Number, PlanStack, Status),
-          intention(Number, PlanStack, Status), Intention_Snapshot).
+take_snapshot_intentions(INTENTIONSSNAPSHOT):-
+    bagof(intention(Number, PlanStack, Status), intention(Number, PlanStack, Status), INTENTIONSSNAPSHOT).
 
 take_snapshot_intentions([]).
-%!  take_snapshot(+Snapshot)
-%Wraps agent's state to one list
 
-take_snapshot(Snapshot):-
-    take_snapshot_beliefs(Belief_Snapshot),
-    take_snapshot_goals(Event_Snapshot),
-    take_snapshot_plans(Plan_Snapshot),
-    take_snapshot_intentions(Intention_Snapshot),
-    append([Belief_Snapshot, Event_Snapshot, Plan_Snapshot,
-            Intention_Snapshot], Snapshot).
+
+take_snapshot(SNAPSHOT):-
+    take_snapshot_beliefs(BELIEFSNAPSHOT),
+    take_snapshot_goals(EVENTSSNAPSHOT),
+    take_snapshot_plans(PLANSSNAPSHOT),
+    take_snapshot_intentions(INTENTIONSSNAPSHOT),
+    append([BELIEFSNAPSHOT, EVENTSSNAPSHOT, PLANSSNAPSHOT, INTENTIONSSNAPSHOT], SNAPSHOT).
 
 
 
@@ -1322,9 +1209,9 @@ set_early_bindings:-
 
 
 
-set_late_bindings(Bindings):-
+set_late_bindings(BINDINGS):-
     retractall(late_bindings( _ )),
-    assert(late_bindings(Bindings)).
+    assert(late_bindings(BINDINGS)).
 
 
 
@@ -1381,7 +1268,7 @@ fa_set_reasoning:-
     !.
 
 fa_set_reasoning:-
-    format(atom(STRING),"[ERROR] Unspecified default reasoning mehods~n", []),
+    format(atom(STRING),"[ERROR] Default reasoning mehods not specified~n", []),
     println_debug(STRING, error),
     !,
     fail.
@@ -1398,8 +1285,7 @@ fa_init_reasoning:-
 
 
 fa_init_reasoning:-
-    format(atom(STRING),"[ERROR] Reasoning methods initialization failed~n",
-           []),
+    format(atom(STRING),"[ERROR] Reasoning methods initialization failed~n", []),
     println_debug(STRING, error),
     !,
     fail.
@@ -1414,8 +1300,7 @@ fa_init_environments2([Environment| Environments]):-
     fa_init_environments2(Environments).
 
 fa_init_environments2([Environment| Environments]):-
-    format(atom(STRING),"[ERROR] Environment '~w' initialization failed~n",
-           [Environment]),
+    format(atom(STRING),"[ERROR] Environment '~w' initialization failed~n", [Environment]),
     println_debug(STRING, error),
     fa_init_environments2(Environments).
 
@@ -1426,16 +1311,16 @@ fa_init_environments:-
     fa_init_environments2(Environments).
 
 fa_init_environments:-
-    thread_self(Agent),
-    format(atom(STRINGS), "[SYSDBG] No environment for agent ~w~n", [Agent]),
+    thread_self(AGENTNAME),
+    format(atom(STRINGS), "[SYSDBG] No environment for agent ~w~n", [AGENTNAME]),
     println_debug(STRINGS, systemdbg).
 
 
 
 fa_init_run:-
     retractall(late_bindings( _ )),
-    default_late_bindings(Bindings),
-    assert(late_bindings(Bindings)),
+    default_late_bindings(BINDINGS),
+    assert(late_bindings(BINDINGS)),
     retractall(loop_number( _ )),
     retractall(intention_fresh( _ )),
     retractall(event_fresh( _ )),
@@ -1445,8 +1330,8 @@ fa_init_run:-
     !.
 
 fa_init_run:-
-    format(atom(String),"[ERROR] Bindings method missing~n", []),
-    println_debug(String, error),
+    format(atom(STRING),"[ERROR] Bindings method missing~n", []),
+    println_debug(STRING, error),
     !,
     fail.
 
@@ -1455,20 +1340,18 @@ fa_init_set_attrs(environment, Environment):-
     thread_self(Agent),
     situate_agent(Agent, Environment).
 
-fa_init_set_attrs(environment, Environment):-
-    thread_self(Agent),
-    format(atom(String),
-           "[ERROR] Failed assignment of envrironment ~w to agent ~w",
-           [Environment, Agent]),
-    println_debug(String, error).
+fa_init_set_attrs(environment, ENVIRONMENT):-
+    thread_self(AGENTNAME),
+    format(atom(STRING),"[ERROR] Failed assignment of envrironment ~w to agent ~w", [ENVIRONMENT, AGENTNAME]),
+    println_debug(STRING, error).
 
 
 fa_init_set_attrs(reasoning, Reasoning):-
     set_reasoning(Reasoning).
 
 
-fa_init_set_attrs(debug, Debug):-
-	assert(agent_debug(Debug)).
+fa_init_set_attrs(debug, DBG):-
+	assert(agent_debug(DBG)).
 
 
 fa_init_set_attrs(bindings, late):-
@@ -1511,10 +1394,9 @@ fa_init_agent(Filename, Attributes):-
 
 
 fa_init_agent( _, _):-
-    go_sync(-1, _),		% born dead
+    go_sync(-1, _),				% born dead  (0 interations to do)
     thread_self(Agent),
-    format(atom(String), "[FATAL ERROR] Agent ~w initialization failed~n",
-           [Agent]),
+    format(atom(String), "[FATAL ERROR] Agent ~w initialization failed~n",[Agent]),
     println_debug(String, error),
     fa_finalize_com,
     thread_exit(1).

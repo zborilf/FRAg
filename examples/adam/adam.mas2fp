@@ -10,9 +10,9 @@ set_default(environment, blbost).
 
 % load("adam","../examples/adam",1,[(debug, systemdbg), (debug, mctsdbg), (debug, mctsdbg_path), (debug, reasoningdbg)]).
 
-% load("adam","../examples/adam/adam",1,[(debug, systemdbg)]).
+load("adam","../examples/adam/adam",1,[(debug, systemdbg)]).
 
-load("adam","../examples/adam/adam",1,[(reasoning, mcts_reasoning), (debug, systemdbg), (debug, mctsdbg)]).
+% load("adam","../examples/adam/adam",1,[(reasoning, mcts_reasoning), (debug, systemdbg), (debug, mctsdbg)]).
 
 % load("adam","../examples/adam/adam",1,[(reasoning, mcts_reasoning), (debug, mctsdbg), (debug, systemdbg), (debug, reasoningdbg), (debug, mctsdbg_path)]).
 
