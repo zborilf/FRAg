@@ -10,12 +10,12 @@ fact(wants(tereza, cd3,60)).
 
 
 goal(ach,sell,[[]]).
-goal(ach,sell,[[]]).
-goal(ach,sell,[[]]).
-goal(ach,sell,[[]]).
-goal(ach,sell,[[]]).
+% goal(ach,sell,[[]]).
+% goal(ach,sell,[[]]).
+% goal(ach,sell,[[]]).
+% goal(ach,sell,[[]]).
 
-plan(ach,
+plan(ach,                        
      sell,
      [], 
      [

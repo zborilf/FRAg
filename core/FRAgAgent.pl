@@ -633,17 +633,21 @@ update_event( _, event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
     assert(event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
                  active, History)).
 
- % Other types of events (add/del) are kept deleted in both cases (means found / not found)
+% Other types of events (add/del) are kept deleted in both cases (means found 
+% // not found)
 update_event( _, event( _, _, _, _, _, active, _), _, _).
 
 
 
 %
-%  UPDATE INTENTION (cisteni zameru po vykonani akctu, pokud v intention 0, je blokovana, neresime; 1, skoncil toplevel plan, 2; podplan 3; nic z toho, ale akt byl vykonan a zasobnik zmenen
-%       TODO ... ktera pravidla z clanku k submitnuti toto vlastne realizuje???
+%  UPDATE INTENTION (cisteni zameru po vykonani akctu, pokud v intention 0, je 
+% blokovana, neresime; 1, skoncil toplevel plan, 2; podplan 3; nic z toho, ale 
+% akt byl vykonan a zasobnik zmenen
+%    TODO ... ktera pravidla z clanku k submitnuti toto vlastne realizuje???
 %
 
-  % smaze event zpracovavany INTENTIONINDEX s nejvetsim vlastnim indexem (aktualni pro tento zamer)
+% smaze event zpracovavany INTENTIONINDEX s nejvetsim vlastnim indexem 
+% (aktualni pro tento zamer)
 
 try_retract_event(Intention_ID):-
     findall(Event_ID, event(Event_ID, _, _, _, _, Intention_ID, _),
@@ -654,26 +658,31 @@ try_retract_event(Intention_ID):-
 try_retract_event( _).
 
 
-  % BLOKOVANA
-  % pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl provedeno vyvolani podcile. Nemeni se, dokud se podcil nepovede
+% BLOKOVANA
+% pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl 
+% provedeno vyvolani podcile. Nemeni se, dokud se podcil nepovede
 
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
-    % no update for blocked intention / waiting for subgoal
-    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED", reasoningdbg).
-  % USPEL TOPLEVEL
-  % prazdny toplevel plan, resp. telo tohoto planu znamena, ze je hotovo, tedy smazeme intensnu a cil, ktery ji byl dosazen
+% no update for blocked intention / waiting for subgoal
+    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED", 
+                  reasoningdbg).
+% USPEL TOPLEVEL
+% prazdny toplevel plan, resp. telo tohoto planu znamena, ze je hotovo, tedy
+% smazeme intensnu a cil, ktery ji byl dosazen
 
 update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), _):-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED", reasoningdbg),
+    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED", 
+                  reasoningdbg),
     retract(intention(Intention_ID, _, _)),
-    %  try_retract_event(EVENTATOM, ORIGIN, EVENCONTEXT, INTENTIONINDEX)
-    %  pro external event je jasne, o ktery event se jedna jen podle INTENTIONINDEX
+%  try_retract_event(EVENTATOM, ORIGIN, EVENCONTEXT, INTENTIONINDEX)
+%  pro external event je jasne, o ktery event se jedna jen podle INTENTIONINDEX
     try_retract_event(Intention_ID).
 
 % USPEL PODPLAN
-% skoncil podplan, musime udelat prenos kontextu na vyssi uroven!!! Dale vyhodi akci vyvolani podcile
-% znovu zavolame update intention, muze dojit k tomu, ze splnenim podcile byl splnen i nadplan (6.2.2023)
+% skoncil podplan, musime udelat prenos kontextu na vyssi uroven!!! Dale vyhodi
+% akci vyvolani podcile znovu zavolame update intention, muze dojit k tomu, ze 
+% splnenim podcile byl splnen i nadplan (6.2.2023)
 
 update_intention(intention(Indention_ID,
                            [plan( _, _, Event_Atom, _, Context, []),
@@ -683,7 +692,8 @@ update_intention(intention(Indention_ID,
                            Status),
                  _ )
     :-
-    println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED", reasoningdbg),
+    println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED", 
+                  reasoningdbg),
     intersectionF(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
     assertz(intention(Indention_ID, [plan(Plan_ID2, Event_Type2, Event_Atom2,
@@ -700,13 +710,15 @@ update_intention(intention(Indention_ID,
 % neuspela akce v toplevel planu zameru, zrusi zamer a obnovi cil
 
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED", reasoningdbg),
+    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED", 
+                  reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
-    % event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, INTENTION2, HISTORY),
-    % zapoznamkoval jsem, zdalo se mi to zbytecne
-    % bagof(event(A,B,C,D,E,F,G), event(A,B,C,D,E,F,G), ES),
-    % cil, pro ktery byl zamer udelan, ma predposledni term INTENTION
-    retract(event(Event_Index, Type, Atom, null, Context, Intention_ID, History)),
+% event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, INTENTION2, HISTORY),
+% zapoznamkoval jsem, zdalo se mi to zbytecne
+% bagof(event(A,B,C,D,E,F,G), event(A,B,C,D,E,F,G), ES),
+% cil, pro ktery byl zamer udelan, ma predposledni term INTENTION
+    retract(event(Event_Index, Type, Atom, null, Context, Intention_ID, 
+                  History)),
     assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
 
 
@@ -762,7 +774,8 @@ simulate_early_reasoning([[plan(Plan_ID, Goal_Type, Goal_Atom,
 
 %!  expand_plans(Plans1, Plans2)
 
-expand_plans([plan( _, _, _, _, _), []]  , []).   % no mode substitutions in context
+% no more substitutions in context
+expand_plans([plan( _, _, _, _, _), []]  , []).   
 
 expand_plans([plan(Plan_ID, Type, Atom, Conditions, Body),
               [Substitution| Contexts]],
@@ -901,16 +914,17 @@ get_relevant_applicable_plans(_,_,[],[]).
 
 execution:-
     select_intention(intention(Intention_ID,
-                               [plan(Plans_ID, Goal_Type, Goal_Term, Conditions,
+                               [plan(Plan_ID, Goal_Type, Goal_Term, Conditions,
                                      Context, Body)| Plans],
                                Status)),
     !,
     execute_plan(Intention_ID,
-                 [plan(Goal_Type, Goal_Term, Conditions, Context, Body)| Plans],
+                 [plan(Plan_ID,Goal_Type, Goal_Term, Conditions, Context, Body)
+                   | Plans],
                  Plan2, Result),
     % if RES is false, the plan failed, it is good to put it to the end of PB
     % (cyclic RR approach as default for failing plans)
-    put_back_plan(Plans_ID, Result),
+    put_back_plan(Plan_ID, Result),
     update_intention(intention(Intention_ID, Plan2,Status), Result),
     % if RES is a joint_action, it should be removed from the top of intention
     update_intentions(Result).
@@ -1033,9 +1047,12 @@ loop(-1, -1).			% born dead
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-    format(atom(String1), "~n~n[RSNDBG] =========================================================================================
-[RSNDBG] ==================================== Loop ~w started =====================================
-[RSNDBG] =========================================================================================~n~n",
+    format(atom(String1), 
+"~n
+[RSNDBG] =====================================================================
+[RSNDBG] ========================== Loop ~w started ==========================
+[RSNDBG] =====================================================================
+~n",
           [Loop_Number]),
     println_debug(String1, reasoningdbg),
     format(atom(String2), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),

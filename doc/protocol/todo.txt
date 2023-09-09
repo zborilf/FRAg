@@ -42,9 +42,14 @@ Dokumentace
    v PIDoc
 
 
+Debug
+misto meho udelatka standartni debug (pak asi neni treba nastavovat pres metafile)
+
 Chyby
 pokud v metafile chci nahrat agenta toho sameho jmena, hlasi to chybu (spravne), mel by to ale chytat frag
 kdyz v mas2fp v load klauzuli v atributech je spatne (atom misto dvvojice) frag vytuhne, mel by ale zartav
+
+
 
 
 

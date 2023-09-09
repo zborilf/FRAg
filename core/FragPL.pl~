@@ -126,8 +126,7 @@ frag_choice(53):-
 
 frag_choice(54):-
     get_frag_attributes(default_bindings, Bindings),
-    get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
-                                     Substitution_Selection]),
+    get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection, Substitution_Selection]),
     get_frag_attributes(debugs, Debugs),
     nl,
     writeln("Settings"),

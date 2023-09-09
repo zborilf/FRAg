@@ -219,9 +219,9 @@ model_expand_deliberations3(Goal,[[plan(PlanNumber,PlanType,PlanGoal,PlanGuards,
     model_expand_deliberations3(Goal, PT, MDNT2),
     append(MDNT1,MDNT2,MDNTS).
 
-model_expand_deliberations2([],[]).
+model_expand_deliberations2([], []).
 
-model_expand_deliberations2([event(EVENTINDEX, Type,Predicate,Intention,Context,State, HISTORY)| TEVENTS], Deliberations):-
+model_expand_deliberations2([event(EVENTINDEX, Type, Predicate,Intention,Context,State, HISTORY)| TEVENTS], Deliberations):-
     get_relevant_applicable_plans(Type, Predicate, Context, RAPlans),
     println_debug("[MCTS] Expand RA, RAPlans:", mctsdbg),
     println_debug(RAPlans, mctsdbg),
@@ -235,13 +235,13 @@ model_expand_deliberations2([event( _, _, _, _, _, _, _)| Events], MEANS):-
     	
 
 model_expand_deliberations(Deliberations):-                                             
-    findall(event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
+    bagof(event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
 	    event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
 	    Events),
     !,
     model_expand_deliberations2(Events, Deliberations).
 
-  model_expand_deliberations([]).   % in the case there is no goal
+model_expand_deliberations([]).   % in the case there is no goal
     
 
 
