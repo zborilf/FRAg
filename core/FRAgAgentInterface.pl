@@ -216,21 +216,17 @@ virtualize_agent(_, _).
 %* Agent: agent name / identifier
 %* Virtual_Agents: list of agents for virtualization
                           
+virtualize_agents(Agent, Virtual_Agents):-
+% vytvori klony pro vsechna prostredi, ve kterem je agent
+% remove already situated, new virtual agents must not be anywhere
+    remove_situated(Virtual_Agents, [Agent2| Agents]),
+    virtualize_agent(Agent, Agent2),
+% priradi do stejnych klonu zbytek skupiny
+    get_agent_environments(Agent2, Environments),
+    accompany_agents(Agent2, Agents, Environments).
 
-accompany_agent(_, _, []).
-    
-accompany_agent(Agent, Agent2, [Environment| Environments]):-
-    agent_environment(Agent, Environment, Clone),
-    situate_agent(Agent2, Environment, Clone),
-    accompany_agent(Agent, Agent2, Environments).
 
 
-accompany_agents(_, [], _).
-
-accompany_agents(Agent, [Agent2| Agents], Environments):-
-    accompany_agent(Agent, Agent2, Environments),
-    accompany_agents(Agent, Agents, Environments).    
-               
 remove_situated([], []).
 
 remove_situated([Agent| Agents], Agents2):-
@@ -242,14 +238,22 @@ remove_situated([Agent| Agents], [Agent| Agents2]):-
 
 
 
-virtualize_agents(Agent, Virtual_Agents):-
-    % vytvori klony pro vsechna prostredi, ve kterem je agent
-    % remove already situated, new virtual agents must not be anywhere
-    remove_situated(Virtual_Agents, [Agent2| Agents]),
-    virtualize_agent(Agent, Agent2),
-    % priradi do stejnych klonu zbytek skupiny
-    get_agent_environments(Agent2, Environments),
-    accompany_agents(Agent2, Agents, Environments).
+accompany_agents(_, [], _).
+
+accompany_agents(Agent, [Agent2| Agents], Environments):-
+    accompany_agent(Agent, Agent2, Environments),
+    accompany_agents(Agent, Agents, Environments).    
+
+
+
+accompany_agent(_, _, []).
+    
+accompany_agent(Agent, Agent2, [Environment| Environments]):-
+    agent_environment(Agent, Environment, Clone),
+    situate_agent(Agent2, Environment, Clone),
+    accompany_agent(Agent, Agent2, Environments).
+
+               
 
 %
 %	Agent AGENT senses ENVIRONMENT and obtainns ADDLIST and DELETELIST
@@ -485,7 +489,8 @@ remove_all_instances_state(Agent, State):-
 
 md:-
     use_module(library(pldoc/doc_library)),
- %   doc_load_library,
-    doc_save('FRAgAgentInterface.pl',[format(html), recursive(true), doc_root("../doc")]).
+%   doc_load_library,
+    doc_save('FRAgAgentInterface.pl',
+             [format(html), recursive(true), doc_root("../doc")]).
 
 

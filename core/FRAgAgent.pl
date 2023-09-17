@@ -239,7 +239,7 @@ print_agent_state(Debug):-
     format(atom(String2),":: Name:~w~n", [Agent]),
     format(atom(String3),":: LOOP ~w~n", [Loop]),
     concat(String1, String2, String4),
-    concat(String4 ,String3,String5),
+    concat(String4 ,String3, String5),
     print_intentions(String5, String6),
     print_goals(String6, String7),
     print_beliefs(String7, String8),
@@ -329,7 +329,7 @@ process_messages.
 
 create_event(Event_Type, Belief):-
     get_fresh_event_number(Event_Index),
-    % generates 'add' event
+% generates 'add' event
     assert(event(Event_Index, Event_Type, Belief, null, [[]], active, [])).
 
 
@@ -349,7 +349,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
 		 plan(Event_Type, Event_Atom, Conditions, Context2, Acts),
         true)
     :-
-    % term_variables(Belief, BELIEFVARIABLES),
+% term_variables(Belief, BELIEFVARIABLES),
     decisioning(Belief, Context, Context2),
     assert(fact(Belief)),
     create_event(add, Belief).
@@ -471,13 +471,13 @@ execute(_ ,plan(Event_Type, Event_Term, Conditions, Context,
     !,
     execute_environment(Environment, Action, Restult).
 
-execute(_ , plan(EventType, EventTerm, Conditions, Context, [act(Action)|
-                                                             Plans]),
-            plan(EventType, EventTerm, Conditions, ContextOut, Plans), Result)
+execute(_ , plan(Event_Type, Event_Term, Conditions, Context, [act(Action)|
+                                                             Acts]),
+            plan(Event_Type, Event_Term, Conditions, Context_Out, Acts), Result)
     :-
 % rozhodnem o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX
 % pro promenne v ACTION)
-    decisioning(Action, Context, ContextOut),
+    decisioning(Action, Context, Context_Out),
     !,
     % execute action in 'basic' FRAg environment
     execute_environment(basic, Action, Result).
@@ -694,7 +694,7 @@ update_intention(intention(Indention_ID,
     :-
     println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED", 
                   reasoningdbg),
-    intersectionF(Event_Atom, Context, Goal, Context2, Context3),
+    intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
     assertz(intention(Indention_ID, [plan(Plan_ID2, Event_Type2, Event_Atom2,
                                           Conditions, Context3, Acts)| Plans],
@@ -797,7 +797,7 @@ update_intentions(Result):-
     intention(Intention_ID,
               [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
                     [act(Result)| Acts])| Plans], active),
-    shortNoVars(Context, Context_New),
+    short_variables_binds(Context, Context_New),
     update_intention(intention(Intention_ID,
                                [plan(Plan_ID, Goal_Type, Goal_Atom,
                                      Conditions, Context_New, Acts)
@@ -836,7 +836,6 @@ check_applicable(Context, [true| Conditions], Context_Out):-
 
 check_applicable(Context, [Relation| T], Context_Out):-
     Relation=..[Operator, _, _],
-    !,
     is_relational_operator(Operator),
     !,
     alop(Relation, Context, Context2, true),
@@ -847,20 +846,21 @@ check_applicable(Context, [Relation| T], Context_Out):-
 % CONTEXTOUT = [] -> not applicable, else applicable
 check_applicable(Context, [Context_Condition| Context_Conditions],
                  Context_Out):-
-    query(Context_Condition, Context, Context2),!,
+    query(Context_Condition, Context, Context2),
+    !,
     check_applicable(Context2, Context_Conditions, Context_Out).
 
 
 check_relevant_applicable_plan(Event_Atom, Context,
-				plan(Plan_Index, Event_Type, Goal_Atom2,
+				plan(Plan_Index, Goal_Type, Goal_Atom,
 				     Conditions, Body),
 				Means):-
-    intersectionF(Event_Atom, Context, Goal_Atom2, Context2),
+    intersection(Event_Atom, Context, Goal_Atom, Context2),
 %	simulate_early_bindings(TRIGGERATOM, CONTEXT2, CONTEXT3),
-%	!,
+	!,
     check_applicable(Context2, Conditions, Context3),
-% Means is either the second term, if Context is not [], or [] if it is
-    is_means(Context3, [[plan(Plan_Index, Event_Type, Goal_Atom2,
+%   Means is either the second term, if Context is not [], or [] if it is
+    is_means(Context3, [[plan(Plan_Index, Goal_Type, Goal_Atom,
 			 Conditions, Body), Context3]],
 	     Means).
 
@@ -871,12 +871,13 @@ check_relevant_applicable_plan(Event_Atom, Context,
 
 check_relevant_applicable_plans(_,_,[],[]).  % no more adepts
 
-check_relevant_applicable_plans(Event_Atom, Context,[Plan| Plans], Means)
+check_relevant_applicable_plans(Event_Atom, Context,[Plan| Plans], Means_Out)
     :-
     % H pokud projde, bude v H2 jako [[H,Kontext]], jinak []
     check_relevant_applicable_plan(Event_Atom, Context, Plan, Means1),
+    !,
     check_relevant_applicable_plans(Event_Atom, Context, Plans, Means2),
-    append(Means1, Means2, Means).
+    append(Means1, Means2, Means_Out).
 
 check_relevant_applicable_plans(G, Context_Conditions, [_ | Plans], T2)
     :-
@@ -936,11 +937,9 @@ execution.  % nothing left to do
 %   Reasoning
 %
 
-  % reasoning3(goal, result, assigned intention)
-
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
-                 Context, active, History)):-
-    get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
+% no means
+reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+                       Context, History, Means):-
     get_intended_means(Means, event(Event_ID, Event_Type, Event_Atom,
                                     Parent_Intention, Context, active,
                                     History),
@@ -951,13 +950,40 @@ reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, active, History),
                  true, Intended_Means).
 
-  % reasoning -> no means
+    
 
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
-                 active, History)):-
+% is means
+reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+                       Context, History, _):-
     update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                            Context, active, History),
                  false, _).
+
+
+
+
+  % reasoning3(goal, result, assigned intention)
+
+reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+                 Context, active, History)):-
+    get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
+    reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+                       Context, History, Means).
+
+
+%    extend_intention(Parent_Intention, Intended_Means, Intention_ID),
+%    update_event(Intention_ID,
+%	         event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+%                      Context, active, History),
+%               true, Intended_Means).
+%
+% reasoning -> no means
+
+%reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
+%                 active, History)):-
+%    update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+%                           Context, active, History),
+%                 false, _).
 
 
 
@@ -1015,10 +1041,12 @@ next_loop(0,0):-
 
 next_loop(Steps, Steps_Left):-
     intention(_, _, active),
+    !,
     loop(Steps, Steps_Left).		% should be gosync
 
 next_loop(Steps, Steps_Left):-
     event( _, _, _, _, _, active, _),
+    !,
     loop(Steps, Steps_Left).         % should be gosync
 
 next_loop(Steps, Steps):-
@@ -1144,7 +1172,7 @@ force_execution(model_act_node(Intention_Index, Act, Decision)):-
     % action in node and in the plan could have renamed vars, unify them
     unifiable(Plan_Act, Act, Unifier),
     apply_substitutions(Unifier),
-    restrict(Context, Decision, Context2),
+    restriction(Context, Decision, Context2),
     % update intention ... plan has now a new context restricted by decision
     assert(intention(Intention_Index,
                      [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,

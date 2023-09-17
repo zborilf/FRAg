@@ -15,7 +15,7 @@
 %		###                  ###           ###    ###           ###       ################
 %                                                                                               ###
 %                                                                                ###           ###
-%                                                                  ###############
+%                                                                            .     ###############
 %						                                    ############
 %
 %
@@ -24,7 +24,7 @@
 %
 %	* * * FRAg * * *
 %	-- MAIN MODULE --
-%	AgentSpeak(L) dialect interpreter in Prolog with FRAg's late bindings
+%	AgentSpeak(L) dialect interpreter in Prolog with late bindings
 %	Frantisek Zboril jr. 2021 - 2023
 %
 
@@ -300,7 +300,7 @@ frag_process_clause(Stream, include_environment(Filename), Clauses):-
     load_multiagent(Stream, Clauses).
 
 
-  % loads a new agent in some number and attributes
+% loads a new agent in some number and attributes
 
 frag_process_clause(Stream, load(Filename, Agent, Number, Attributes),
 		    [load(Filename, Agent, Number, Attributes)| Clauses]):-

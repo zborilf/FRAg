@@ -10,7 +10,7 @@ fact(wants(tereza, cd3,60)).
 
 
 goal(ach,sell,[[]]).
-% goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
 % goal(ach,sell,[[]]).
 % goal(ach,sell,[[]]).
 % goal(ach,sell,[[]]).
