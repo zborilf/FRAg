@@ -1,0 +1,39 @@
+
+
+update_event(1,
+            event(1,ach,sell,null,[[]],active,[]),
+            true,
+            [plan(1,
+                  ach,
+                  sell,
+                  [buyer(buyer15_1,cd5,46)],
+                  [act(printfg(jedu)),
+                    test(seller(_14290,cd5,_14294)),
+                    rel(46>_14294),
+                    act(card_shop,sell(_14290,buyer15_1,cd5)),
+                    ach(sell)
+                  ]
+                ),
+                [[46=46,buyer15_1=buyer15_1,cd5=cd5]]
+ ])
+
+
+
+
+update_event(Intention_ID_New, 
+            event(
+               Event_ID, 
+               ach, 
+               Event_Atom, 
+               Intention_ID,
+               Context, 
+               active, 
+               History),
+             true,
+             [plan(
+                 Plan_ID, 
+                 _,  
+                 Goal_Atom, 
+                 Conditions, 
+                 _), 
+              Context])

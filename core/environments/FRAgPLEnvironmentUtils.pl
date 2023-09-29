@@ -431,13 +431,23 @@ delete_facts_agent(_, _, []).
 
 delete_facts_agent(Environment, Agent, [Fact| Facts]):-
     get_clone_query(Environment, Agent, Fact, Clone_Fact),
-    retract(Clone_Fact),
+    try_retract(Clone_Fact),
     delete_facts_agent(Environment, Agent, Facts).
 
 delete_facts_agent(Environment, Agent, [Belief| Beliefs]):-
-    retract(fact(Environment, Environment, Belief)),
+    try_retract(fact(Environment, Environment, Belief)),
     delete_facts_agent(Environment, Agent, Beliefs).
 
+
+try_retract(Clone_Fact):-
+    retract(Clone_Fact).
+
+try_retract(Clone_Fact):-
+    format("[ERROR] retracting ~w failed~n", [Clone_Fact]).
+%   findall(fact(A,B,C), fact(A,B,C), F2),
+%   writeln(F2),
+%   findall(fact(A,B,C,D), fact(A,B,C,D), F3),
+%   writeln(F3). 
 
 %!  delete_facts_beliefs(+Environment, +Agent, +Beliefs) is det
 %Delete the beliefs to the Environment or its clone where Agent is

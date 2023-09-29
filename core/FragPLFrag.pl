@@ -9,11 +9,12 @@
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%	Reasoning methods - intention, plan and substitution selections
-%
-
+%===============================================================================
+%                                                                              |
+%	Reasoning methods - intention, plan and substitution selections        |
+%                                                                              |
+%                                                                              |
+%===============================================================================
 
 
 % reasoning - plan selection + substitution selection (decide op.) + intention
@@ -264,8 +265,8 @@ remove_renamings([H| T1],[H| T2]):-
 %!  instance_set(+Atom, +PUS, -Atoms) is det
 % Creates a set of instances of Atom by applying substitutions from PUS
 %* Atom
-%* PUS
-%* Atoms
+%* PUS: set of substitutions 
+%* Atoms: Atoms that are created by applying PUS substitutions to the Atom
 
 
 instance_set(_ ,[],[]).

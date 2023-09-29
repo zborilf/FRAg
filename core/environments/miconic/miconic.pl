@@ -172,7 +172,8 @@ miconic10(act, Agent, go(Destination), true):-
     query_environment(miconic10, Agent, lift_at(Floor_Actual)),
     process_waiting(Agent, Floor_Actual),
     floors_distance(Floor_Actual, Destination, Distance), % static beliefs
-    delete_facts_beliefs_all(miconic10, Agent, [travelled_distance(Travelled_Distance)]),
+    delete_facts_beliefs_all(miconic10, Agent, 
+                             [travelled_distance(Travelled_Distance)]),
     Travelled_Distance2 is Travelled_Distance + Distance,
     add_facts_beliefs_all(miconic10, Agent, 
                           [travelled_distance(Travelled_Distance2)]),	                   

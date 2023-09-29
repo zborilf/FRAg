@@ -1,17 +1,18 @@
 
-fact(wants(betty, cd9,125)).
-fact(wants(betty, cd2,60)).
-fact(wants(betty, cd4,60)).
-fact(wants(betty, cd1,90)).
-fact(wants(hana, cd1,100)).
-fact(wants(hana, cd8,60)).
-fact(wants(tereza, cd7,160)).
-fact(wants(tereza, cd3,60)).
+fact(wants(betty,cd9,125)).
+fact(wants(betty,cd2,60)).
+fact(wants(betty,cd4,60)).
+fact(wants(betty,cd1,90)).
+fact(wants(hana,cd1,100)).
+fact(wants(hana,cd8,60)).
+fact(wants(tereza,c7,160)).
+fact(wants(tereza,cd3,60)).
+
 
 
 goal(ach,sell,[[]]).
 goal(ach,sell,[[]]).
-% goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
 % goal(ach,sell,[[]]).
 % goal(ach,sell,[[]]).
 
@@ -22,10 +23,11 @@ plan(ach,
 	act(me(ME)),
 	act(format(atom(S),"Zkousi ~w neco prodat",[ME])),
 	act(printfg(S)),
-	test(has(adam, CARD)),
+%	test(has(adam, CARD)),
+	test(sells(Who, CARD, Price)),
 	test(wants(BUYER,CARD,OFFERS)),
-	test(price(CARD,PRICE)),
-	rel(DIF is (PRICE-OFFERS)/PRICE),
+%	test(price(CARD,PRICE)),
+	rel(DIF is (Price-OFFERS)/Price),
 	rel(DIF<0.2),
 	% act in environment 1 by performing act 'sell(betty, CARD)'
 	act(card_shop, sell(adam, BUYER, CARD)),

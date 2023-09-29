@@ -1,0 +1,19 @@
+
+
+include_environment("/environments/shop/shop.pl").
+
+
+set_default(control, terminate(no_job)).
+set_default(control, terminate(timeout, 2000)).
+set_default(bindings, early).
+% set_default(reasoning, random_reasoning).
+% set_default(reasoning_params, mcts_params(20,4,70)).
+set_default(environment, card_shop).		% name of the environment defined in "/environments/env1"
+
+
+% load("lesek","../examples/trader2/trader",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+
+% load("paul","../examples/trader3/trader",1,[(debug, systemdbg)]).
+load("frag","../examples/trader3/trader",1,[(debug, systemdbg), (bindings, late)]).
+% load("petr","../examples/trader3/trader",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
+			  

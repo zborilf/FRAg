@@ -963,7 +963,19 @@ reasoning:-
             event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
                   History),
             Events),
-   reasoning2(Events).
+write(ebef),
+writeln(Events),
+
+
+   reasoning2(Events),
+
+    findall(event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
+                  History),
+            event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
+                  History),
+            Events2),
+write(eaf),
+writeln(Events2).
 
 reasoning.  % no events
 

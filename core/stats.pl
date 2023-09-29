@@ -1,0 +1,11 @@
+stats(fragagent,0.0,1).
+stats(peter,20.375,2000).
+stats_([sold([sold(peter,83)]),buyers(161),sellers(115)]).
+stats(fragagent,0.015625,1).
+stats(paul,2.296875,2000).
+stats_([sold([sold(paul,39),sold(peter,37)]),buyers(145),sellers(131)]).
+stats(peter,2.328125,2000).
+stats_([sold([sold(paul,39),sold(peter,37)]),buyers(145),sellers(131)]).
+stats(fragagent,0.0,1).
+stats(frag,16.578125,2000).
+stats_([sold([sold(frag,96)]),buyers(142),sellers(148)]).

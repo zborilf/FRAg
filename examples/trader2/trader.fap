@@ -1,0 +1,27 @@
+     
+goal(ach,sell,[[]]).
+
+plan(ach,
+     sell,                        
+     [not(closed),buyer(Buyer, CD, Buy_Price)], 
+     [
+    %    act(sleep(0.25)),
+        act(printfg('jedu')),
+	test(seller(Seller, CD, Sel_Price)),
+        act(printfg('cd mame')),
+       	rel(Buy_Price > Sel_Price),
+        iset(prodej(Buyer, Buy_Price, Sel_Price), BB),
+        act(printfg("~w~n",[BB])),
+        act(printfg('cena sedi')),
+        act(card_shop, sell(Seller, Buyer, CD)),
+        act(printfg(
+            '~w prodava ~w CDcko ~w za ~w', 
+            [Seller, Buyer, CD, Price])),
+        ach(sell)
+     ]).
+
+
+plan(ach,
+     sell,                        
+     [closed], [
+       act(printfg('Je zavreno, koncim'))]).

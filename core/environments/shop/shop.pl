@@ -5,40 +5,48 @@
         card_shop / 2,
 	card_shop / 3,			% agentname, addlist, deletelist
 	card_shop / 4			% agentname, act
-    ]
+    ]              
 ).
 
 :- discontiguous card_shop/2.
 :- discontiguous card_shop/3.
 
+:- dynamic episode /1.
+:- dynamic buyers /1.
+:- dynamic sellers /1.
+
+episode(1).
+
 
 
 :-use_module('../FRAgPLEnvironmentUtils').   % interface to environments
+:-use_module('stat_utils').
 
 
-% has -> sells
-has(adam,cd1).
-has(adam,cd3).
-has(adam,cd4).
-has(adam,cd6).
-has(adam,cd7).
-has(adam,cd8).
-has(adam,cd9).
 
-
-price(cd1,100).
-price(cd2,80).
-price(cd3,68).
-price(cd4,110).
-price(cd5,50).
-price(cd6,90).
-price(cd7,110).
-price(cd8,55).
-price(cd9,150).
+price(cd1, 100).
+price(cd2, 80).
+price(cd3, 68).
+price(cd4, 110).
+price(cd5, 50).
+price(cd6, 90).
+% price(cd7, 110).
+% price(cd8, 55).
+% price(cd9, 150).
 
 
 
 % environment(card_shop).
+
+average_buyers(0.08).
+average_sellers(0.08).
+mean_discount_seller(0.75).
+mean_discount_buyer(0.5).
+buyers_stay(80).
+sellers_stay(200).
+closing_time(1800).
+buyers(0).
+sellers(0).
 
 
 %	Init the environment for agent AGENTNAME
@@ -52,13 +60,14 @@ init_beliefs(Agents):-
     %         price(What, Price)
     %     from environment to Agent's add_list
     
- %   findall_environment(card_shop, Agent, has(Who, What), Beliefs1),
- %   findall_environment(card_shop, Agent, price(What, Price), Beliefs2),
     findall_environment(card_shop, Agent, has( _, _), Beliefs1),
     findall_environment(card_shop, Agent, price( _, _), Beliefs2),
-    
+    findall_environment(card_shop, Agent, sells( _, _, _), Beliefs3),
+
     add_beliefs_agents(Agents, Beliefs1),
-    add_beliefs_agents(Agents, Beliefs2).
+    add_beliefs_agents(Agents, Beliefs2),
+    add_beliefs_agents(Agents, Beliefs3),
+    add_beliefs_agents(Agents, [stats_([sold([]), buyers(0), sellers(0)])]).
 
 
 
@@ -105,59 +114,201 @@ card_shop(remove_state, Instance, State):-
 
 %    Agent percieves
 
+%!  add_tick(+Agent)
+% prida jeden token do prostredi 
+
+    
 card_shop(perceive, Agent , Add_List, Delete_List):-
-     retreive_add_delete(Agent, Add_List, Delete_List).
-      
-%    Agent acts
-
-card_shop(act, Seller, sell(Buyer, What), true):- 
-    query_environment(card_shop, Seller, has(Seller, What)),
-    delete_facts_beliefs_all(card_shop, Seller, [has(Seller, What)]),
-    % assert(has(Buyer, What)),
-    add_facts_beliefs_all(card_shop, Seller, [has(Buyer, What)]),
-    format("Prodej ~w komu ~w co ~w~n",[Seller, Buyer, What]).
-
-    card_shop(act, Seller, sell(Buyer , What), false):-
-    format("Prodej ~w komu ~w co ~w selhal~n",[Seller, Buyer, What]).
+    retreive_add_delete(Agent, Add_List, Delete_List),
+    update_environment(Agent),
+    query_environment(card_shop, Agent, stats_([sold(Sold_By), 
+                                                  buyers( _ ), sellers( _ )])),
+    delete_facts_beliefs_all(card_shop, Agent, 
+                             [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
+    sellers(S),
+    buyers(B),                                                      
+    add_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By), 
+                                               buyers(B), sellers(S)])]).
 
 
-card_shop(act, Brooker, sell(Seller, Buyer, What), true):- 
-    query_environment(card_shop, Brooker, has(Seller, What)),
-    delete_facts_beliefs_all(card_shop, Brooker, [has(Seller, What)]),
-    % assert(has(Buyer, What)),
-    add_facts_beliefs_all(card_shop, Brooker, [has(Buyer, What)]).
-%    format("Prodej ~w komu ~w co ~w pres ~w~n",[Seller, Buyer, What, Brooker]).
+update_environment(Agent):-
+    episode(E), 
+    retractall(episode(E)),
+    E2 is E + 1,
+    assert(episode(E2)),
+    patience_out(Agent, E2),
+    if_open_add_customers(E2,Agent).
+
+   
+if_open_add_customers(Episode, Agent):-
+    closing_time(Closing_Time),
+    Episode < Closing_Time,
+    add_sellers(Agent),
+    add_buyers(Agent).
+
+
+if_open_add_customers(Episode, Agent):-
+    closing_time(Episode),
+    add_facts_beliefs_all(card_shop, Agent, [closed]).
+
+
+
+if_open_add_customers( _, _).
+
+
+
+patience_out(Agent, Episode):-
+    findall_environment(card_shop, Agent, deadline(Person, Name, Episode), 
+                        Unpatients),
+    unpatients_left(Agent, Unpatients).
+
+unpatients_left(Agent, []).
+                                          
+unpatients_left(Agent, [Unpatient | Unpatients]):-
+    remove_unpatient(Agent, Unpatient),
+    unpatients_left(Agent, Unpatients).
+
+
+
+remove_unpatient(Agent, deadline(seller, Seller, _)):-
+   delete_facts_beliefs_all(card_shop, Agent, 
+                              [seller(Seller, _, _)]),
+   add_facts_beliefs_all(card_shop, Agent, 
+                             [left(Seller)]).
+
+    
+
+remove_unpatient(Agent, deadline(buyer, Buyer, _)):-
+   delete_facts_beliefs_all(card_shop, Agent, 
+                             [buyer(Buyer, _, _)]),
+   add_facts_beliefs_all(card_shop, Agent, 
+                             [left(Buyer)]).
+
+
+
+
+add_sellers(Agent):-
+    average_sellers(Lambda),
+    mean_discount_seller(Mean_Seller),
+    sellers(Seller_Index),
+    new_events_number(Lambda, New_Sellers),
+    sellers_stay(Stay_Length),
+    add_persons(Agent, Lambda, seller, Seller_Index, New_Sellers, Mean_Seller, 
+                Stay_Length).
+
+add_buyers(Agent):-
+    average_buyers(Lambda),
+    mean_discount_buyer(Mean_Buyer),
+    buyers(Buyer_Index),
+    new_events_number(Lambda, New_Buyers),
+    sellers_stay(Stay_Length),
+    add_persons(Agent, Lambda, buyer, Buyer_Index, New_Buyers, Mean_Buyer, 
+                Stay_Length).
+
+
+
+add_persons(_, _, _, _, 0, _, _).
+
+add_persons(Agent, Lambda, Predicate, Index, N, Mean, Stay_Length):-    
+    generate_cd_price(CD, Price, Mean),
+    Index2 is Index+1,
+    N2 is N-1,
+    format(atom(Person), "~w~w", [Predicate, Index2]),
+    increase_persons(Predicate),
+    Fact =..[Predicate, Person, CD, Price],
+    add_facts_beliefs_all(card_shop, Agent, [Fact]),
+% set deadline ... as a fact only
+    episode(E),
+    E2 is E + Stay_Length,
+    add_facts_agent(card_shop, Agent, [deadline(Predicate, Person, E2)]),
+    add_persons(Agent, Lambda, Predicate, Index2, N2, Mean, Stay_Length).
+
+
+
+          
+increase_persons(buyer):-
+    retract(buyers(B)),
+    B2 is B+1,
+    assert(buyers(B2)).
+
+increase_persons(seller):-
+    retract(sellers(S)),
+    S2 is S+1,
+    assert(sellers(S2)).
+
+generate_cd_price(CD, Price_Out, Mean):-
+    findall(cd(CD, Price), price(CD, Price), CDs),
+    random_member(cd(CD, Price),CDs),
+    get_discount(Mean, Discount),
+    Price_Out is truncate(Price * (1 - Discount)).
+ 
+  
+%    Agent acts   
+
+
+
+
+card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
+    episode(E), 
+    query_environment(card_shop, Brooker, seller(Seller, What, Price)),
+    query_environment(card_shop, Brooker, buyer(Buyer, What, Price2)),
+    add_facts_beliefs_all(card_shop, Brooker, [has(Buyer, What),
+                                               sold(Seller, What)]),
+    query_environment(card_shop, Brooker, stats_([sold(Sold_By), buyers(B), 
+                                                 sellers(S)])),
+    delete_facts_beliefs_all(card_shop, Brooker, 
+                             [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
+    delete_facts_beliefs_all(card_shop, Brooker, 
+                             [buyer(Buyer, What, _)]),
+    delete_facts_beliefs_all(card_shop, Brooker, 
+                             [seller(Seller, What, _)]),
+
+    delete_facts_agent(card_shop, Brooker, [deadline(seller, Seller, _), 
+                                            deadline(buyer, Buyer, _)]),
+
+    add_trade(Sold_By, Brooker, Sold_By2),
+    add_facts_beliefs_all(card_shop, Brooker, [stats_([sold(Sold_By2), buyers(B), 
+                                               sellers(S)])]).
+
+
 
 card_shop(act, _, sell( _, _), false).
 
-%    format("Prodej ~w komu ~w co ~w selhal~n",[Seller, Buyer, What]).
 
-card_shop(act, _, sell( _, _, _), false).
 
-%    format("Prodej ~w komu ~w co ~w pres ~w selhal~n",[Seller, Buyer, What, 
-%                                                       Brooker]).
+card_shop(act, _, sell( Seller, Buyer, What), false):-
+   format("Prodej ~w komu ~w co ~w pres ~w selhal~n",[Seller, Buyer, What, 
+                                                       Brooker]).
+
+add_trade(Sold_By, Seller, Sold_By3):-
+    member(sold(Seller, N), Sold_By),
+    delete(Sold_By, sold(Seller, N), Sold_By2),
+    N2 is N+1,
+    append(Sold_By2, [sold(Seller, N2)], Sold_By3).
+
+add_trade(Sold_By, Seller, Sold_By2):-
+    append(Sold_By, [sold(Seller, 1)], Sold_By2).
+
 
 
 %	Agent AGENTNAME acts silently
 
   % for mcts
 
-card_shop(act, Seller, silently_(sell(Buyer, What)), Result):-
-    card_shop(act, Seller, sell(Buyer, What), Result).
+card_shop(act, Seller, silently_(sell(Seller, What)), Result):-
+    card_shop(act, Seller, sell(Seller, What), Result).
 
 card_shop(act, Brooker, silently_(sell(Seller, Buyer, What)), Result):- 
     card_shop(act, Brooker, sell(Seller, Buyer, What), Result).
 
 card_shop(act, _, _, fail).
 
-
  
 
                            
 :-
     env_utils:register_environment(card_shop),
-    findall(has(Who, What), has(Who, What), Facts1),
-    findall(price(What, Price), price(What, Price), Facts2),
-    env_utils:add_facts(card_shop, Facts1),
-    env_utils:add_facts(card_shop, Facts2).
+    findall(price(What, Price), price(What, Price), Facts),
+    env_utils:add_facts(card_shop, [stats_([sold([]), buyers(0), sellers(0)])]),
+    env_utils:add_facts(card_shop, Facts).
     

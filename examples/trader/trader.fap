@@ -1,0 +1,22 @@
+     
+% goal(ach,sell,[[]]).
+
+plan(ach,
+     buyer(Buyer, CD, Max_Price),                        
+     [], 
+     [
+	test(seller(Seller, CD, Price)),
+        rel(Max_Price > Price),
+	act(card_shop, sell(Seller, Buyer, CD)),
+        act(printfg(
+            "~w prodava ~w CDcko ~w za ~w", 
+            [Seller, Buyer, CD, Price]))
+     ]).
+
+
+plan(add,
+     buyer(Buyer, CD, Max_Price),                        
+     [], 
+     [
+	ach(buyer(Buyer, CD, Max_Price))
+     ]).

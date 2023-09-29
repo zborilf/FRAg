@@ -75,19 +75,19 @@ printfg(String):-
 
 
 foo(A):-
-    format(atom(String),"uff ~w",[A]),
+    format(atom(String),"ugh ~w",[A]),
     printfg(String).
 
 foo(A,B):-
-    format(atom(String),"uff ~w ~w",[A,B]),
+    format(atom(String),"ugh ~w ~w",[A,B]),
     printfg(String).
 
 foo(A,B,C):-
-    format(atom(String),"ufff ~w ~w ~w",[A,B,C]),
+    format(atom(String),"ugh ~w ~w ~w",[A,B,C]),
     printfg(String).
 
 foo(A,B,C,D):-
-    format(atom(String),"ufff ~w ~w ~w ~w",[A,B,C,D]),
+    format(atom(String),"ugh ~w ~w ~w ~w",[A,B,C,D]),
     printfg(String).
 
 
@@ -135,8 +135,8 @@ do(X):-
 
 
     % joint version of printfg
-jprintfg(STRING):-
-    printfg(STRING).	
+jprintfg(String):-
+    printfg(String).	
 
 
 % basic(act, _, Act, true):-

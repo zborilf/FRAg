@@ -9,12 +9,12 @@
 		situate_agent /2,		% + agent, environment
 		situate_agent /3,		% + agent, environment, clone
 		get_agent_environments /2,
-		get_agent_instance /3,	% evn + clone
+		get_agent_instance /3, 	% evn + clone
 		agent_perceives /3,
-		agent_acts /4,
-		virtualize_agent /2,
+		agent_acts /4,                     
+ 		virtualize_agent /2,
 		virtualize_agents /2,
-		reset_clone /2,
+		reset_clone /2,	
 		reset_clones /1,
 		remove_clone /2,
 		remove_clones /1,
@@ -25,34 +25,31 @@
 		remove_instance_state /3,
 		remove_all_instances_state /2,
 		is_exclusive_action /2,
-		is_joint_action /2
+		is_joint_action /2 
 	    ]
 	).
 
 
-/** <module>  FRAg Environment Interface
+/** <module>  FRAg Environment Interface 
 
-FRAgPL environments Interface. Provides clauses for interaction among agents
-and environments
+FRAgPL environments Interface. Provides clauses for interaction among agents 
+and environments  
 
 @author Frantisek Zboril
 @license GPL
 */
 
 
-:-include('environments/basic/basic.pl').	% internal actions library
+:-include('environments/basic/basic.pl').  	% internal actions library
 
 
-
-% loaded environments
-:-dynamic environment / 1.
-
-%!  agent_environment(Agent, Environment, Instance).
+                                   
+:-dynamic environment / 1.	
 :-dynamic agent_environment /3.
 
+                           
 
-
-
+	
 is_exclusive_action(Environment, Action):-
     functor(Action, Term, Arity),
     exclusive_action(Environment, Term, Arity).
@@ -63,7 +60,7 @@ is_joint_action(Environment, Action):-
 
 
 %
-%	system includes environment ENVIRONMENT
+%	system includes environment ENVIRONMENT 
 %
 
 
@@ -73,7 +70,7 @@ is_joint_action(Environment, Action):-
 
 add_environment_library(Module_Name):-
     current_module(fRAg, FRAg_Path),
-    absolute_file_name(Module_Name, Absolute_Module_Name,
+    absolute_file_name(Module_Name, Absolute_Module_Name, 
                        [relative_to(FRAg_Path)]),
     use_module(Absolute_Module_Name),
     current_module(Environment, Absolute_Module_Name),
@@ -93,21 +90,21 @@ environment_loaded(Environment):-
 
 %!  clone_environment(+Environment, +Clone) is det
 %Vytvori kopii prostredi s identifikatorem Environment_Clone
-%Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon
+%Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon 
 %samostatne Agent muze bude situovan (situate_agent) do puvodniho prostredi,
-%nebo do klonu (see situate_agent)
+%nebo do klonu (see situate_agent)  
 %* Envrionment: identifikator prostredi
-%
+%       
 %* Environment_Clone: ground nebo free, klon bude odkazovan timto nazvem
 %  pouziti pro situovani agentu (jinak si prostredi pohlida, kteremu agentu
-%  davat data z originaniho prostredi a kteremu z klonu
+%  davat data z originaniho prostredi a kteremu z klonu 
 
 
 clone_environment(Environment, Clone):-
     Clone_Environment=..[Environment, clone, Clone],
     !,
     Clone_Environment.
-
+            
 
 
 %!  situate_agent(+Agent:atom, +Environment:atom) is det
@@ -116,7 +113,7 @@ clone_environment(Environment, Clone):-
 %* Agent: agent name / identifier
 %* Envrionment: environment identifier
 
-
+		
 situate_agent(Agent, Environment):-
     agent_environment(Agent, Environment, Environment),
     format("[IFC] Agent ~w is already situated in environment ~w~n",
@@ -147,8 +144,8 @@ situate_agent(Agent, Environment, Clone):-
             it is already situated in an instance of the environment~n",
             [Agent, Clone, Environment]),
     !,
-    fail.
-
+    fail.	
+                                
 
 situate_agent(Agent, Environment, Clone):-
     environment(Environment),				% does it exist?
@@ -164,11 +161,11 @@ situate_agent(Agent, Environment, Clone):-
 %* Agent: agent name / identifier
 %* Environments: list of Environments, where agent is situated in
 
-
-get_agent_environments(Agent, Environments):-
-    findall(Environment, agent_environment(Agent, Environment, _),
+              
+get_agent_environments(Agent, Environments):- 
+    findall(Environment, agent_environment(Agent, Environment, _), 
           Environments).
-
+	
 get_agent_environments(_, []).
 
 
@@ -189,7 +186,7 @@ get_agent_instance(Agent, Environment, Instance):-
 
 %!  virtualize_agent(+Agent, ?Virtual_Agent) is det
 % For every environment where Agent is situated it creates clone and situates
-% Virtual_Agent there.
+% Virtual_Agent there. 
 %* Agent: agent name / identifier
 %* Virtual_Agent: virtualized agent
 
@@ -209,16 +206,16 @@ virtualize_agent(Agent, Agent2):-
           Environments),
     virtualize_agent_environments(Agent2, Environments).
 
-virtualize_agent(_, _).
+virtualize_agent(_, _).    
 
 
 %!  virtualize_agents(+Agent, ?Virtual_Agents) is det
 %For every environment where Agent is situated creates clone and situates
-%Virtual_Agent there. Name of the clone is the name of the first agent in
+%Virtual_Agent there. Name of the clone is the name of the first agent in 
 %Virtual_Agents.
 %* Agent: agent name / identifier
 %* Virtual_Agents: list of agents for virtualization
-
+                          
 virtualize_agents(Agent, Virtual_Agents):-
 % vytvori klony pro vsechna prostredi, ve kterem je agent
 % remove already situated, new virtual agents must not be anywhere
@@ -234,10 +231,10 @@ remove_situated([], []).
 
 remove_situated([Agent| Agents], Agents2):-
     agent_environment(Agent, _, _),
-    remove_situated(Agents, Agents2).
+    remove_situated(Agents, Agents2).    
 
 remove_situated([Agent| Agents], [Agent| Agents2]):-
-    remove_situated(Agents, Agents2).
+    remove_situated(Agents, Agents2).    
 
 
 
@@ -245,18 +242,18 @@ accompany_agents(_, [], _).
 
 accompany_agents(Agent, [Agent2| Agents], Environments):-
     accompany_agent(Agent, Agent2, Environments),
-    accompany_agents(Agent, Agents, Environments).
+    accompany_agents(Agent, Agents, Environments).    
 
 
 
 accompany_agent(_, _, []).
-
+    
 accompany_agent(Agent, Agent2, [Environment| Environments]):-
     agent_environment(Agent, Environment, Clone),
     situate_agent(Agent2, Environment, Clone),
     accompany_agent(Agent, Agent2, Environments).
 
-
+               
 
 %
 %	Agent AGENT senses ENVIRONMENT and obtainns ADDLIST and DELETELIST
@@ -270,17 +267,12 @@ accompany_agent(Agent, Agent2, [Environment| Environments]):-
 %* Dlete_List: vanished percepts for the agent since last perieving
 
 
-agent_perceives_environment2(Agent, Environment, Add_List, Delete_List):-
-    Percieve_Environment=..[Environment, perceive, Agent, Add_List,
-                            Delete_List],
-  %  clause(Percieve_Environment, _),			% does it exist?
-    !,
-%    with_mutex(frag_mutex,(Perceive_Environment)). 
-    Percieve_Environment.
-
 agent_perceives_environment(Agent, Environment, Add_List, Delete_List):-
-    with_mutex(frag_mutex,
-       (agent_perceives_environment2(Agent, Environment, Add_List, Delete_List))).
+    Percieve_Environment=..[Environment, perceive, Agent, Add_List, 
+                            Delete_List],
+  %  clause(Percieve_Environment, _),    		% does it exist?
+    !,
+    Percieve_Environment.
 
 
 agent_perceives( _, _, [], []).
@@ -288,48 +280,44 @@ agent_perceives( _, _, [], []).
 
 agent_perceives2(_, [], [], []):- !.
 
-agent_perceives2(Agent, [Environment | Environments], Add_List_Out,
+agent_perceives2(Agent, [Environment | Environments], Add_List_Out, 
                  Delete_List_Out):-
     agent_perceives_environment(Agent, Environment, Add_List, Delete_List),
     agent_perceives2(Agent, Environments, Add_List2, Delete_List2),
     append(Add_List, Add_List2,Add_List_Out),
     append(Delete_List, Delete_List2, Delete_List_Out),
     !.
-
+		
 
 
 agent_perceives(Agent, Add_List, Delete_List):-
-    findall(Environment, agent_environment(Agent, Environment, _),
+    findall(Environment, agent_environment(Agent, Environment, _), 
             Environments),
     !,
     agent_perceives2(Agent, Environments, Add_List, Delete_List).
 
 
-% no environment assigned
-agent_perceives( _, [], []).
+	% no environment assigned
+	agent_perceives( _, [], []).
 
 %!  agent_acts(+Agent, +Environment, +Act, +Result) is det
-%Agent performs Act in Environment and obtain Result.
+%Agent performs Act in Environment and obtain Result. 
 %* Agent: agent name / identifier
 %* Environment: environment name, where the Act should be performed
 %* Act: atom describing the act
-%* Result: Reult is either 'true' in case of successfull exclusive action,
+%* Result: Reult is either 'true' in case of successfull exclusive action, 
 %an instance of Act in case of joint action, or 'fail', when act fails
 
 
-agent_acts2(Agent, Environment, Act, Result):-
-    Act_In_Environment =.. [Environment, act, Agent, Act, Result],
+agent_acts(Agent, Environment, Act, Result):-
+    Act_In_Environment =.. [Environment, act, Agent, Act, Result], 
 
     clause(Act_In_Environment, _),			% does it exist?
     Act_In_Environment.
 
-agent_acts(Agent, Environment, Act, Result):-
-    with_mutex(frag_mutex, 
-       (agent_acts2(Agent, Environment, Act, Result))).
-
 % act was not performed in the specified environment
 
-agent_acts( _, _, _, false).
+agent_acts( _, _, _, false).       
 
 
 
@@ -340,17 +328,17 @@ agent_acts( _, _, _, false).
 %!  reset_clone(+Environments, +Clone)
 %Reset Clone of an Environments. Reset means that the clones
 %are removed and then are created new of the same name
-%* Environment: Environment name
+%* Environment: Environment name 
 %* Clone: A Clone of the Environment
-
-reset_clone(Environment, Clone):-
+ 
+reset_clone(Environment, Clone):-   
     Reset_clone=..[Environment, reset_clone, Clone],
     !,
     Reset_clone.
 
 %!  reset_clones(+Agent)
 %Reset Clones where Agent is situated
-%* Agent: agent name
+%* Agent: agent name 
 
 
 reset_clones2( _, []).
@@ -382,11 +370,11 @@ remove_clone(Environment, Clone):-
     Remove_Clone=..[Environment, remove_clone, Clone],
     !,
     Remove_Clone.
-
+    
 
 %!  remove_clones(+Agent) is det
 %Remove all Clones where Agent is situated
-%* Agent: agent name
+%* Agent: agent name 
 
 remove_clones2( _, []).
 
@@ -408,10 +396,10 @@ remove_clones(Agent):-
 
 
 %! save_instance_state(+Environment, +Instance, +State) is det
-%Saves actual state Environment Insance under name State/
+%Saves actual state Environment Insance under name State/ 
 %* Environment
 %* Instance
-%* State
+%* State		
 
 save_instance_state(Environment, Instance, State):-
     Save_State=..[Environment, save_state, Instance, State],
@@ -438,10 +426,10 @@ save_all_instances_state(Agent, State):-
 
 
 %! load_instance_state(+Environment, +Instance, +State) is semdiet
-%Loads saved State of Environment Insance
+%Loads saved State of Environment Insance 
 %* Environment
 %* Instance
-%* State
+%* State		
 
 load_instance_state(Environment, Instance, State):-
     Load_State=..[Environment, load_state, Instance, State],
@@ -478,10 +466,10 @@ remove_instance_state(Environment, Instance, State):-
     Remove_State=..[Environment, remove_state, Instance, State],
     !,
     Remove_State.
-
+		
 
 %! remove_all_instance_states(+Agent, +State)
-%Removes every environment instance, where Agent is situated
+%Removes every environment instance, where Agent is situated 
 %* Agent: Agent name
 %* State: Name of the states
 
@@ -497,7 +485,7 @@ remove_all_instances_state(Agent, State):-
     remove_all_instances_state2(Agent, Environments, State).
 
 
-:-  initialization(mutex_create(frag_mutex)).
+
 
 md:-
     use_module(library(pldoc/doc_library)),

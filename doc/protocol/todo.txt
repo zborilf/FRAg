@@ -50,6 +50,10 @@ pokud v metafile chci nahrat agenta toho sameho jmena, hlasi to chybu (spravne),
 kdyz v mas2fp v load klauzuli v atributech je spatne (atom misto dvvojice) frag vytuhne, mel by ale zartav
 
 
+Kdyz nekdo udela blbe prostredi, tak pada. Asi modul na testovani prostredi
+
+
+Omezit velikost kontextu
 
 
 

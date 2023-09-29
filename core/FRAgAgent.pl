@@ -24,6 +24,7 @@ This module contains code for threads of individual agents
 	go_sync / 2,
 	include_reasoning_method /1,
 	load_environment /1,
+        set_control /1,
 	set_default_reasoning /1,
 	get_default_reasoning /3,
 	set_plan_selection /1,
@@ -72,20 +73,28 @@ This module contains code for threads of individual agents
 % FRAg operations for relations and assignments
 :-include('FRAgPLRelations.pl').
 
+:- use_module(library(thread)).
 % shared data among threads (agents etc.)
 :-use_module('FRAgBlackboard').
 % interface to environments
 :-use_module('FRAgAgentInterface').
 
 
-max_agent_iterations(200).
+timeout(200).
+
+% no_job, because the 'init' agent should finish ASAP
+terminate(no_job).
 
 %
 %	dynamic atoms
 %
 :-dynamic default_late_bindings / 1.
 :-dynamic default_environment /1.
-
+:-dynamic terminate /1.
+:-dynamic timeout /1.
+:-dynamic start_time /1.
+:-dynamic finish_time /1.
+                   
 %
 % thread_local predicates ... plans, facts (beliefs), intentions, events
 % (desires, goal), fresh intention index, simulation loop number
@@ -260,15 +269,23 @@ print_state(Message):-
 print_state(_).
 
 
-write_stats([Steps_Left]):-
-    open('stats2', append, Stats_File),
+write_stats(String):-
+    open('stats.pl', append, Stats_File),
     thread_self(Agent),
-    max_agent_iterations(Max_Iterations),
-    Steps_Total is Max_Iterations - Steps_Left,
-    write(Stats_File, Agent), write(Stats_File,','),
-    writeln(Stats_File, Steps_Total),
+    write(Stats_File, String),
+    writeln(Stats_File,'.'),
+    agents_stats(Stats_File),
     close(Stats_File).
 
+
+% takes _stats /1 from BB and writes it out
+
+agents_stats(Stats_File):-
+    fact(stats_(Stats)),
+    write(Stats_File, stats_(Stats)),
+    writeln(Stats_File,'.').
+
+agents_stats( _ ).
 
 
 
@@ -442,7 +459,7 @@ execute(_ ,
                                                             Acts]),
         plan(Goal_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
-	alop(Term1 is Term2, Context_In, Context_Out, Result).
+    alop(Term1 is Term2, Context_In, Context_Out, Result).
 
 execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context,
                 [rel(Relation)| Acts]),
@@ -606,21 +623,20 @@ select_intention(intention(Intention_ID_Out, Plan_Stack_Out, Status_Out)):-
 %  UPDATE EVENT
 %
 
-
+% No applicable means for any achieve goal, put the goal back
 update_event(-1, event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
                        active, History),
              _, _):-
-    % No applicable means for any achieve goal, put the goal back
     assert(event(Event_ID, ach, Event_Atom, Parent_Intention, Context, active,
                  History)).
 
+% Means for the top level ach goal found, active -> intention =blocked
 update_event(Intention_ID_New, event(Event_ID, ach, Event_Atom, Intention_ID,
-                                     Context, active, History),
+                                     Event_Context, active, History),
              true,
              [plan(Plan_ID, _, Goal_Atom, Conditions, _), Context])
     :-
-% Means for the top level ach goal found, active -> intention =blocked
-    assert(event(Event_ID, ach, Event_Atom, Intention_ID, Context,
+    assert(event(Event_ID, ach, Event_Atom, Intention_ID, Event_Context,
                  Intention_ID_New,
 		 [used_plan(Plan_ID, Goal_Atom, Conditions, Context)| History]
                 )
@@ -671,7 +687,7 @@ update_intention(intention(Intention_ID, _, _), true):-
 % prazdny toplevel plan, resp. telo tohoto planu znamena, ze je hotovo, tedy
 % smazeme intensnu a cil, ktery ji byl dosazen
 
-update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), _):-
+update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), true):-
     println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED", 
                   reasoningdbg),
     retract(intention(Intention_ID, _, _)),
@@ -713,24 +729,42 @@ update_intention(intention(Intention_ID, [ _ ], Status), false):-
     println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED", 
                   reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
+
 % event(EVENTINDEX, EVENTYPE, EVENTTERM, null, CONTEXT, INTENTION2, HISTORY),
 % zapoznamkoval jsem, zdalo se mi to zbytecne
-% bagof(event(A,B,C,D,E,F,G), event(A,B,C,D,E,F,G), ES),
+% findall(event(A,B,C,D,E,F,G), event(A,B,C,D,E,F,G), ES),
+% writeln(ES),
 % cil, pro ktery byl zamer udelan, ma predposledni term INTENTION
+    !,
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID, 
                   History)),
     assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
+
+
+% toplevel plan failed and event is not present (add/del event), do not 
+% reincertante them
+
+update_intention(intention(_, [ _ ], _), false).
+
 
 
 % neuspela akce v podplanu, plan vyhodime z intensny a plan vyssi urovne bude
 % aktivni, znovu vytvori event pro cil dosazeni atd...
 % TODO, jako v predchozim, cil by mel byt zadan a nastaven na aktivni
 
-update_intention(intention(Intention_ID, [Plan| Plans], Status), false):-
+update_intention(intention(Intention_ID, 
+                           [plan(_, Event_Type, Event_Atom, _, _, _)| Plans], 
+                           Status), false):-
     println_debug("[RSNDBG] Update intention: SUBPLAN FAILED", reasoningdbg),
-    retract(intention(Intention_ID, [Plan| Plans], Status)),
-    assertz(intention(Intention_ID, Plans, active)).
+% writeln(retract(intention(Intention_ID, [Plan| Plans], Status))),
+% retract(intention(Intention_ID, [Plan| Plans], Status)),
+     retract(intention(Intention_ID, _, Status)),
+% writeln(retract(intention(Intention_ID, _, Status))),
 
+% !!!!!!!! todo, takhle ne, to smaze hitorii, intensna blokovat, jen update eventu
+
+    retract(event( _, Event_Type, Event_Atom, _, _, Indention_ID, _)),
+    assertz(intention(Intention_ID, Plans, active)).
 
 % zmenil se plan / zasobnik vykonanim predchozi akce, ale neni na jeho vrcholu
 % prazdny plan, tedy na zaklade identifikatoru INT si vytahneme starou
@@ -945,10 +979,13 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                                     History),
                        Intended_Means),
     extend_intention(Parent_Intention, Intended_Means, Intention_ID),
+
     update_event(Intention_ID,
 	         event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, active, History),
                  true, Intended_Means).
+
+ 
 
     
 
@@ -979,11 +1016,11 @@ reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 %
 % reasoning -> no means
 
-%reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
-%                 active, History)):-
-%    update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
-%                           Context, active, History),
-%                 false, _).
+reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
+                 active, History)):-
+    update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+                           Context, active, History),
+                 false, _).
 
 
 
@@ -1003,6 +1040,7 @@ reasoning:-
             event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
                   History),
             Events),
+
    reasoning2(Events).
 
 reasoning.  % no events
@@ -1036,7 +1074,8 @@ next_loop(-1,-1):-
     loop(-1,-1).
 
 next_loop(0,0):-
-    print_state('Finished'),
+    terminate(timeout),
+    print_state('Finished - timeout'),
     finished.
 
 next_loop(Steps, Steps_Left):-
@@ -1050,8 +1089,13 @@ next_loop(Steps, Steps_Left):-
     loop(Steps, Steps_Left).         % should be gosync
 
 next_loop(Steps, Steps):-
-    print_state('Finished'),
+    terminate(no_job),
+    print_state('Finished - no job'),
     finished.
+
+next_loop(Steps, Steps_Left):-
+% no job but does not care -> cycle = 1 (or something greater than 0)
+    loop(Steps, Steps_Left).
 
 
 % main aget control loop
@@ -1075,7 +1119,7 @@ loop(-1, -1).			% born dead
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-    format(atom(String1), 
+	    format(atom(String1), 
 "~n
 [RSNDBG] =====================================================================
 [RSNDBG] ========================== Loop ~w started ==========================
@@ -1083,13 +1127,14 @@ loop(Steps, Steps_Left):-
 ~n",
           [Loop_Number]),
     println_debug(String1, reasoningdbg),
+   
     format(atom(String2), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
     print_state(String2),
 
     late_bindings(Bindings),    % ???
     format(atom(String3), "[INTER] Bindings ~w~n", [Bindings]),
     println_debug(String3, interdbg),
-
+% writeln(sen),
     sensing,
     !,
 
@@ -1098,16 +1143,17 @@ loop(Steps, Steps_Left):-
 
     format(atom(String4), "+|+ RE ~w", [Loop_Number]),
     println_debug(String4, interdbg),
-
+% writeln(reas),
     reasoning,
     !,
 
     format(atom(String5), "+|+ EX ~w", [Loop_Number]),
     println_debug(String5, interdbg),
-
+% writeln(exe),
     execution,
     !,
 
+% writeln(fin),
     format(atom(String6), "+|+ FIN ~w", [Loop_Number]),
     println_debug(String6, interdbg),
     println_debug("loop_finished", interdbg),
@@ -1322,8 +1368,12 @@ go_sync(Steps, I):-
     thread_self(Agent),
     assert(ready(Agent)),
     wait_go(I),
-    loop(Steps, Steps_Left),
-    write_stats([Steps_Left]),
+    call_time(loop(Steps, Steps_Left),Time),
+    get_dict(cpu, Time, Cpu_Time),
+    thread_self(Agent),
+    timeout(Max_Iterations),
+    Steps_Total is Max_Iterations - Steps_Left,
+    write_stats(stats(Agent, Cpu_Time, Steps_Total)),
     assert(ready(Agent)).
 
 
@@ -1334,9 +1384,25 @@ fa_init_com(Filename):-
     assert(agent_debug(1)),
     !.
 
-  fa_finalize_com:-
-	told.
+fa_finalize_com:-
+    told.
 
+
+%!
+%*
+%* Terminating: timeout/ no_job / never ... others = never
+
+set_control(terminate(timeout, Steps)):-
+    retract(terminate( _ )),
+    assert(terminate(timeout)),
+    retract(timeout( _ )),
+    assert(timeout(Steps)).
+    
+
+set_control(terminate(Terminating)):-
+    retract(terminate( _ )),
+    assert(terminate(Terminating)).
+    
 
 get_default_environments(Environments):-
     bagof(Environment, default_environment(Environment), Environments).
@@ -1538,7 +1604,7 @@ fa_init_process_attrs([(Key, Value)| Attributes]):-
 
 
 fa_init_agent(Filename, Attributes):-
-    max_agent_iterations(Iterations),
+    timeout(Iterations),
     string(Filename),
     format(atom(Filename2), "~w.fap", [Filename]),
     load_program(Filename2, Clauses),

@@ -170,8 +170,10 @@ get_frag_attributes(bindings, late):-
 
 get_frag_attributes(bindings, early).
 
-get_frag_attributes(reasonings, [INTENTIONSELECTION, PLANSELECTION, SUBSTITUTIONSELECTION]):-
-    get_default_reasoning(INTENTIONSELECTION, PLANSELECTION, SUBSTITUTIONSELECTION).
+get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection, 
+                                 Substitution_Selection]):-
+    get_default_reasoning(Intention_Selection, Plan_Selection, 
+                          Substitution_Selection).
 
 
 get_frag_attributes(debugs, Debugs):-
@@ -184,11 +186,11 @@ get_frag_attributes(environments, Environments):-
     get_default_environments(Environments).
 
 
-%!  set_default_reasoning(+REASONING_TYPE:string, +REASONING_METHOD:string) is det
+%!  set_default_reasoning(+reasoning, +reasoning_method) is det
 %   Nastavi zpusob vyberu zameru, planu, substituci
-%   * REASONING_TYPE: intention_selection, plan_selection, substitution_selection, all
-%
-%   * REASONING_METHOD: simple_reasoning, random_reasoning, biggest_joint_reasoning, snakes_reasoning, mcts_reasoning
+%* Reasoning: intention_selection, plan_selection, substitution_selection, all
+%* Reasoning_method: simple_reasoning, random_reasoning, 
+% biggest_joint_reasoning, snakes_reasoning, mcts_reasoning
 %       jeden z nich, pokud neni all, pak seznam tri
 
 
@@ -213,8 +215,11 @@ set_default_reasoning(all, Reasoning):-
 
 
 fa_init_set_attrs(debug, DBG):-
-    assert(agent_debug(DBG)).		% jak je to na urovni agenta a vlaken agenta?
+    assert(agent_debug(DBG)).	 % jak je to na urovni agenta a vlaken agenta?
 
+
+set_default_attribute(control, Control):-
+    set_control(Control).
 
 set_default_attribute(reasoning, Reasoning):-
     set_default_reasoning(Reasoning).
@@ -303,7 +308,8 @@ frag_process_clause(Stream, include_environment(Filename), Clauses):-
 % loads a new agent in some number and attributes
 
 frag_process_clause(Stream, load(Filename, Agent, Number, Attributes),
-		    [load(Filename, Agent, Number, Attributes)| Clauses]):-
+		    [load(Filename, Agent, Number, Attributes)| Clauses])
+    :-
     !,
     load_multiagent(Stream, Clauses).
 
@@ -331,7 +337,7 @@ load_multiagent(_, []).
 %  __frag_master code
 %
 
-wait_agents([]).					% no agents loaded
+wait_agents([]).		% no agents loaded
 
 wait_agents(Threads):-
     bagof(Agent, ready(Agent), Agents_Ready),
@@ -390,7 +396,8 @@ frag:-
 mainfp:-
     nl,
     version(Version),
-    format("FRAg version ~w, 2021 - 2023, by Frantisek Zboril & Frantisek Vidensky,
+    format(
+"FRAg version ~w, 2021 - 2023, by Frantisek Zboril & Frantisek Vidensky,
 Brno University of Technology~n~n",
 	   [Version]),
     frag('fraginit'),
