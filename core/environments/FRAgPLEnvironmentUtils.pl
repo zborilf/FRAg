@@ -25,6 +25,7 @@
         situate_agents_clone /3,
 	agent_situated_environment /3,
         get_all_situated /3,
+        situated_number /3,
 	reset_environment_clone /2,
 	remove_environment_clone /2,
         query_environment /3,
@@ -44,6 +45,7 @@
         delete_facts_beliefs /3,
         delete_facts_beliefs_all /3,
         retreive_add_delete /3,  
+	new_episode /1,
 	save_environment_instance_state /3,
         load_environment_instance_state /3,
 	remove_environment_instance_state /3
@@ -64,12 +66,15 @@ This module
 
 :-dynamic fact/3.
 :-dynamic fact/4.
+:-dynamic episode_list /1.
 
 :-dynamic add/2.
 :-dynamic delete/2.
 :-dynamic environment /2.    % Registered environment / clone
 :-dynamic situated_agent /3.  % Agents in this environment or clone
 
+
+episode_list([]).
 
 %!  register_environment(Environment) is det
 %Registers Environment or Clone of the Environment. System can tnen use 
@@ -162,14 +167,25 @@ agent_situated_environment(Agent, Environment, Clone):-
 get_clone_query(Environment, Agent, Query, fact(Environment, Clone, Query)):-
     situated_agent(Agent, Environment, Clone).     
 
-%!  get_all_situated(+Environment, +Clone, -Agents) is det
-%Finds all Agents situated in Clone of Environment
+%!  get_all_situated(+Environment, +Instance, -Agents) is det
+%Finds all Agents situated in Instance of Environment
 %* Environment: name of environment
-%* Clone: some clone of Environment
+%* Instance: instance of Environment
 %* Agents: lost of agents
 
-get_all_situated(Environment, Clone, Agents):-
-    findall(Agent, situated_agent(Agent, Environment, Clone), Agents).
+get_all_situated(Environment, Instance, Agents):-
+    findall(Agent, situated_agent(Agent, Environment, Instance), Agents).
+
+
+%!  situated_number(+Environment, +Instance, - Number) is det
+%Provides number of Agents situated in Instance of Environment
+%* Environment: name of environment
+%* Instance: instance of Environment
+%* Number: number of agents situated in instance of name of environment
+
+situated_number(Environment, Instance, Number):-
+    get_all_situated(Environment, Instance, Agents),
+    length(Agents, Number).
 
 
 %! reset_environment_clone(+Environment, +Clone) is det
@@ -501,6 +517,23 @@ retreive_add_delete(Agent, Add_List, Delete_List):-
     get_add(Agent, Add_List),
     get_delete(Agent, Delete_List).
 
+%!  new_episode(+Agent) is det
+%Passes when Agent is twice in the episode. It adds Agent to a list of agents
+%that wisited an environment and when is some to be added already in that list
+%new episode begins and the new list contains only the actual agent
+
+new_episode(Agent):-
+    episode_list(Agents),
+    member(Agent, Agents),
+    retract(episode_list( _ )),
+    assert(episode_list([Agent])).
+
+new_episode(Agent):-
+    episode_list(Agents),
+    retract(episode_list( _ )),
+    assert(episode_list([Agent | Agents])),
+    !,
+    fail.
 
 
 %!  save_environment_instance_state(+Environment, +Instance, +State) is det

@@ -117,12 +117,12 @@ clone_environment(Environment, Clone):-
 %* Envrionment: environment identifier
 
 
-situate_agent(Agent, Environment):-
+situate_agent2(Agent, Environment):-
     agent_environment(Agent, Environment, Environment),
     format("[IFC] Agent ~w is already situated in environment ~w~n",
             [Agent, Environment]).
 
-situate_agent(Agent, Environment):-
+situate_agent2(Agent, Environment):-
     environment(Environment),				% does it exist?
     assert(agent_environment(Agent, Environment, Environment)),
     Situate_Agent=..[Environment, add_agent, Agent],
@@ -130,7 +130,7 @@ situate_agent(Agent, Environment):-
     Situate_Agent.
 
 % fail???
-situate_agent(Agent, Environment):-
+situate_agent2(Agent, Environment):-
     format("[IFC] Agent ~w cannot be situated in environment ~w~n",
             [Agent, Environment]).
 
@@ -141,13 +141,19 @@ situate_agent(Agent, Environment):-
 %* Envrionment: environment identifier
 %* Clone: environment Environment clone
 
-situate_agent(Agent, Environment, Clone):-
+situate_agent2(Agent, Environment, Clone):-
     agent_environment(Agent, Environment, _),
     format("[IFC] Agent ~w cannot be situated in clone ~w of environment ~w,
             it is already situated in an instance of the environment~n",
             [Agent, Clone, Environment]),
     !,
     fail.
+
+
+situate_agent(Agent, Environment):-
+    with_mutex(frag_mutex,
+       (situate_agent2(Agent, Environment))).
+
 
 
 situate_agent(Agent, Environment, Clone):-

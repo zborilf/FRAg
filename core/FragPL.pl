@@ -421,3 +421,11 @@ md:-
  %   doc_load_library,
     doc_save('FragPL.pl',[format(html), recursive(true), doc_root(doc)]).
 
+
+
+rep(_, 0).
+
+rep(P, N):- 
+    P,
+    N2 is N-1,
+    rep(P, N2).
