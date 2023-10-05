@@ -42,12 +42,12 @@ price(cd9, 150).
 
 % environment(card_shop).
 
-average_buyers(0.08).
-average_sellers(0.16).
-mean_discount_seller(0.4).
-dispersion_discount_seller(0.2).
+average_buyers(0.02).
+average_sellers(0.02).
 mean_discount_buyer(0.6).
 dispersion_discount_buyer(0.2).
+mean_discount_seller(0.4).
+dispersion_discount_seller(0.2).
 buyers_stay(100).
 sellers_stay(100).
 closing_time(750).

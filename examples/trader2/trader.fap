@@ -21,9 +21,9 @@ plan(ach,
     %    act(printfg("~w~n",[BB])),
     %    act(printfg('cena sedi')),
         act(card_shop, sell(Seller, Buyer, CD)),
-    $    act(printfg(
+        act(printfg(
             '~w prodava ~w CDcko ~w za ~w', 
-            [Seller, Buyer, CD, Price])),
+            [Seller, Buyer, CD, Sel_Price])),
         ach(sell)
      ]).
 
