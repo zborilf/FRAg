@@ -42,8 +42,8 @@ price(cd9, 150).
 
 % environment(card_shop).
 
-average_buyers(0.02).
-average_sellers(0.02).
+average_buyers(0.2).
+average_sellers(0.2).
 mean_discount_buyer(0.6).
 dispersion_discount_buyer(0.2).
 mean_discount_seller(0.4).
@@ -53,8 +53,9 @@ sellers_stay(100).
 closing_time(750).
 buyers(0).
 sellers(0).
+episode_length(0.0005). % in secs
 
-previous_time(-1).
+previous_time(-1).       
 
 %	Init the environment for agent AGENTNAME
 
@@ -144,38 +145,59 @@ card_shop(perceive, Agent , Add_List, Delete_List):-
 
 
 
-check_episode(Agent):-
-    new_episode(Agent),
-    episode(Episode), 
-    retractall(episode(Episode)),
-    Episode2 is Episode + 1,
-    assert(episode(Episode2)),
-    delete_facts_beliefs_all(card_shop, Agent, 
-                             [episode( Episode )]),
-    add_facts_beliefs_all(card_shop, Agent, [episode(Episode2)]),
-
-    update_environment(Agent).
-
-
-check_episode( _ ).
-
-update_environment( _ ):-
+check_episode( _ ):-
     previous_time(-1),
     get_time(Time),
     retract(previous_time( _ )),
     assert(previous_time(Time)).
 
 
-update_environment(Agent):-
+check_episode(Agent):-
+    new_episode_time(Agent, N),
+%    writeln(new_episode_time(N)),
+    delete_facts_beliefs_all(card_shop, Agent, 
+                             [episode( Episode )]),
+    add_facts_beliefs_all(card_shop, Agent, [episode(Episode2)]),
+
+    update_environment(Agent, N).
+    
+check_episode( _ ).
+
+
+new_episode_time( _ , N):-
+    previous_time(Previous_Time),
+    get_time(Time),
+    episode_length(Episode_Length),
+
+    !,
+    Delta is (Time - Previous_Time),
+    Episode_Length < Delta,
+    N is truncate(Delta / Episode_Length),
+    retract(previous_time( _ )),
+    assert(previous_time(Time)).
+
+
+
+update_environment(Agent, 0).
+
+update_environment(Agent, N):-
+    /*
     previous_time(Time),
     get_time(Time2),
     time_adjust_multiply(Multiplier),
     Time3 is (Time2 - Time) * Multiplier,
     retract(previous_time(Time)),
     assert(previous_time(Time2)),
-    episode(Episode),
-    patience_out(Agent, Episode),
-    if_open_add_customers(Episode, Time3, Agent).
+    */
+    episode(Episode), 
+    retractall(episode(Episode)),
+    Episode2 is Episode + 1,
+    assert(episode(Episode2)),
+%    format("Updating envir ~w~n",[N]),
+    patience_out(Agent, Episode2),
+    if_open_add_customers(Episode2, Time3, Agent),
+    N2 is N-1,
+    update_environment(Agent, N2).
 
 
 
@@ -218,17 +240,17 @@ unpatients_left(Agent, [Unpatient | Unpatients]):-
 
 remove_unpatient(Agent, deadline(seller, Seller, _)):-
    delete_facts_beliefs_all(card_shop, Agent, 
-                              [seller(Seller, _, _)]),
-   add_facts_beliefs_all(card_shop, Agent, 
-                             [left(Seller)]).
+                              [seller(Seller, _, _)]).
+%   add_facts_beliefs_all(card_shop, Agent, 
+%                             [left(Seller)]).
 
     
 
 remove_unpatient(Agent, deadline(buyer, Buyer, _)):-
    delete_facts_beliefs_all(card_shop, Agent, 
-                             [buyer(Buyer, _, _)]),
-   add_facts_beliefs_all(card_shop, Agent, 
-                             [left(Buyer)]).
+                             [buyer(Buyer, _, _)]).
+%   add_facts_beliefs_all(card_shop, Agent, 
+%                             [left(Buyer)]).
 
 
 

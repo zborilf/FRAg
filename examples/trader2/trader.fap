@@ -6,7 +6,7 @@ plan(ach,
      sell,
      [episode(Episode), Episode > 1000],
      [
-       act(printfg('Konec zvonec'))]).
+       act(printfg('Finished'))]).
 
 plan(ach,
      sell,                        
@@ -31,4 +31,4 @@ plan(ach,
 plan(ach,
      sell,                        
      [closed], [
-       act(printfg('Je zavreno, koncim'))]).
+       act(printfg('It is closed, finish'))]).
