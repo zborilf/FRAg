@@ -5,7 +5,15 @@
 %	Frantisek Zboril
 %
 
+/**
+This file is part of the FRAg program. It is insluded into agent's file 
+FRAgAgent.pl. This separate file is created for clauses that are specific 
+to the late variable binding system when interpreting agent code.
 
+@author Frantisek Zboril
+@license GPL
+
+*/
 
 
 

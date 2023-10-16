@@ -21,16 +21,16 @@ This module contains code for threads of individual agents
 :-module(fRAgAgent,
     [
 	fa_init_agent / 2,
-	go_sync / 2,
+%	go_sync / 2,
 	include_reasoning_method /1,
 	load_environment /1,
         set_control /1,
 	set_default_reasoning /1,
 	get_default_reasoning /3,
+        get_default_environments/1,
 	set_plan_selection /1,
 	set_default_plan_selection /1,
 	set_intention_selection /1,
-             % je toto opravdu nutne z venku?
 	set_default_intention_selection /1,
 	set_substitution_selection /1,
 	set_default_substitution_selection /1,
@@ -94,7 +94,7 @@ terminate(no_job).
 :-dynamic timeout /1.
 :-dynamic start_time /1.
 :-dynamic finish_time /1.
-                   
+
 %
 % thread_local predicates ... plans, facts (beliefs), intentions, events
 % (desires, goal), fresh intention index, simulation loop number
@@ -132,6 +132,9 @@ set_reasoning_params(Parameters):-
   % just load it
 load_environment(Filename):-
     add_environment_library(Filename).
+
+get_default_environments(Environments):-
+    get_all_environments(Environments).
 
 
 %===============================================================================
@@ -263,15 +266,14 @@ print_state( _ ):-
 print_state(Message):-
     println_debug('', reasoningdbg),
     println_debug(Message, reasoningdbg),
-    print_agent_state(reasoningdbg),
-    !.
+    print_agent_state(reasoningdbg).
 
 print_state(_).
 
 
 write_stats(String):-
     open('stats.pl', append, Stats_File),
-    thread_self(Agent),
+%    thread_self(Agent),
     write(Stats_File, String),
     writeln(Stats_File,'.'),
     agents_stats(Stats_File),
@@ -295,6 +297,10 @@ agents_stats( _ ).
 %                                                                              |
 %===============================================================================
 
+%!  process_add_list(+Beliefs)
+% Incorporates Beliefs to agent's BB
+%@arg Beliefs: List of beliefs (atoms)
+
 
 process_add_list([]).
 
@@ -306,6 +312,10 @@ process_add_list([Belief| Beliefs]):-
     assert(fact(Belief)),
     create_event(add, Belief),
     process_add_list(Beliefs).
+
+%!  process_delete_list(+Beliefs)
+% Removes Beliefs to agent's BB
+%@arg Beliefs: List of beliefs (atoms)
 
 process_delete_list([]).
 
@@ -326,6 +336,10 @@ process_delete_list([_ |Beliefs]):-
 %                                                                              |
 %===============================================================================
 
+%!  process_messages
+% Receives messages (through thread) and creates corresponding add
+% events
+
 process_messages:-
     % expected form message(sender,perfomatie,pld(payload))
     thread_peek_message(Message),
@@ -344,19 +358,19 @@ process_messages.
 %                                                                              |
 %===============================================================================
 
-create_event(Event_Type, Belief):-
+%!  create_event(+Event_Type, +Atom) is det
+% Creates top-level event of corresponding type and atom + empty context
+
+create_event(Event_Type, Atom):-
     get_fresh_event_number(Event_Index),
-% generates 'add' event
-    assert(event(Event_Index, Event_Type, Belief, null, [[]], active, [])).
+    assert(event(Event_Index, Event_Type, Atom, null, [[]], active, [])).
 
 
 
-% execute(+Intention, +PlanBefore, - PlanAfter)
-% execute(zamer, plan(trigevent, context condition, plan context, plan body),
-%                plan(trigevent, context condition, new plan context, new plan
-%                     body)).
-%
-
+%! execute(+Intention, +Plan_Before, - Plan_After) is det
+% @arg Plan_Before, plan plan(trigevent, context condition, plan
+% context, plan body)
+% @arg Plan_After
 
 % add belief execution add(pred(t1,t2...))
 
@@ -366,7 +380,6 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
 		 plan(Event_Type, Event_Atom, Conditions, Context2, Acts),
         true)
     :-
-% term_variables(Belief, BELIEFVARIABLES),
     decisioning(Belief, Context, Context2),
     assert(fact(Belief)),
     create_event(add, Belief).
@@ -423,7 +436,7 @@ execute( _, plan(Goal_Type, Goal_Term, Conditions, Context, [test(Goal)| Acts]),
     nonempty(Context_New, Result).             % true / fail as the act result
 
 
-% vykona cil dosazeni, asi nejnarocnejsi
+% perform the goal of reaching, probably the most difficult
 
 execute(Intention_ID,
         plan(Goal_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
@@ -435,7 +448,7 @@ execute(Intention_ID,
     assertz(intention(Intention_ID, Plan_Stack, blocked)),
 % variables of the goal declared
     term_variables(Goal, Goal_Variables),
-% nashortujeme kontext puvodni urovne podle promennych v dekl. cili
+% short context of the original level by variables in the goal declared
     shorting(Goal, Goal2, Context, Goal_Variables, Context_New,_),
     get_fresh_event_number(Event_ID),
 % zadame pod-cil i s odkazem na tuto intensnu INT, nashortovanym kontextem
@@ -649,20 +662,20 @@ update_event( _, event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
     assert(event(Event_Index, ach, Event_Atom, Parent_Intention, Context,
                  active, History)).
 
-% Other types of events (add/del) are kept deleted in both cases (means found 
+% Other types of events (add/del) are kept deleted in both cases (means found
 % // not found)
 update_event( _, event( _, _, _, _, _, active, _), _, _).
 
 
 
 %
-%  UPDATE INTENTION (cisteni zameru po vykonani akctu, pokud v intention 0, je 
-% blokovana, neresime; 1, skoncil toplevel plan, 2; podplan 3; nic z toho, ale 
+%  UPDATE INTENTION (cisteni zameru po vykonani akctu, pokud v intention 0, je
+% blokovana, neresime; 1, skoncil toplevel plan, 2; podplan 3; nic z toho, ale
 % akt byl vykonan a zasobnik zmenen
 %    TODO ... ktera pravidla z clanku k submitnuti toto vlastne realizuje???
 %
 
-% smaze event zpracovavany INTENTIONINDEX s nejvetsim vlastnim indexem 
+% smaze event zpracovavany INTENTIONINDEX s nejvetsim vlastnim indexem
 % (aktualni pro tento zamer)
 
 try_retract_event(Intention_ID):-
@@ -675,20 +688,20 @@ try_retract_event( _).
 
 
 % BLOKOVANA
-% pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl 
+% pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl
 % provedeno vyvolani podcile. Nemeni se, dokud se podcil nepovede
 
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
 % no update for blocked intention / waiting for subgoal
-    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED", 
+    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED",
                   reasoningdbg).
 % USPEL TOPLEVEL
 % prazdny toplevel plan, resp. telo tohoto planu znamena, ze je hotovo, tedy
 % smazeme intensnu a cil, ktery ji byl dosazen
 
 update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), true):-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED", 
+    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",
                   reasoningdbg),
     retract(intention(Intention_ID, _, _)),
 %  try_retract_event(EVENTATOM, ORIGIN, EVENCONTEXT, INTENTIONINDEX)
@@ -697,7 +710,7 @@ update_intention(intention(Intention_ID, [plan(_,_,_,_,_,[])], _), true):-
 
 % USPEL PODPLAN
 % skoncil podplan, musime udelat prenos kontextu na vyssi uroven!!! Dale vyhodi
-% akci vyvolani podcile znovu zavolame update intention, muze dojit k tomu, ze 
+% akci vyvolani podcile znovu zavolame update intention, muze dojit k tomu, ze
 % splnenim podcile byl splnen i nadplan (6.2.2023)
 
 update_intention(intention(Indention_ID,
@@ -708,7 +721,7 @@ update_intention(intention(Indention_ID,
                            Status),
                  _ )
     :-
-    println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED", 
+    println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED",
                   reasoningdbg),
     intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
@@ -726,7 +739,7 @@ update_intention(intention(Indention_ID,
 % neuspela akce v toplevel planu zameru, zrusi zamer a obnovi cil
 
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED", 
+    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED",
                   reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
 
@@ -736,12 +749,12 @@ update_intention(intention(Intention_ID, [ _ ], Status), false):-
 % writeln(ES),
 % cil, pro ktery byl zamer udelan, ma predposledni term INTENTION
     !,
-    retract(event(Event_Index, Type, Atom, null, Context, Intention_ID, 
+    retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
                   History)),
     assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
 
 
-% toplevel plan failed and event is not present (add/del event), do not 
+% toplevel plan failed and event is not present (add/del event), do not
 % reincertante them
 
 update_intention(intention(_, [ _ ], _), false).
@@ -752,18 +765,12 @@ update_intention(intention(_, [ _ ], _), false).
 % aktivni, znovu vytvori event pro cil dosazeni atd...
 % TODO, jako v predchozim, cil by mel byt zadan a nastaven na aktivni
 
-update_intention(intention(Intention_ID, 
-                           [plan(_, Event_Type, Event_Atom, _, _, _)| Plans], 
+update_intention(intention(Intention_ID,
+                           [plan(_, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
     println_debug("[RSNDBG] Update intention: SUBPLAN FAILED", reasoningdbg),
-% writeln(retract(intention(Intention_ID, [Plan| Plans], Status))),
-% retract(intention(Intention_ID, [Plan| Plans], Status)),
-     retract(intention(Intention_ID, _, Status)),
-% writeln(retract(intention(Intention_ID, _, Status))),
-
-% !!!!!!!! todo, takhle ne, to smaze hitorii, intensna blokovat, jen update eventu
-
-    retract(event( _, Event_Type, Event_Atom, _, _, Indention_ID, _)),
+    retract(intention(Intention_ID, _, Status)),
+    retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
     assertz(intention(Intention_ID, Plans, active)).
 
 % zmenil se plan / zasobnik vykonanim predchozi akce, ale neni na jeho vrcholu
@@ -809,7 +816,7 @@ simulate_early_reasoning([[plan(Plan_ID, Goal_Type, Goal_Atom,
 %!  expand_plans(Plans1, Plans2)
 
 % no more substitutions in context
-expand_plans([plan( _, _, _, _, _), []]  , []).   
+expand_plans([plan( _, _, _, _, _), []]  , []).
 
 expand_plans([plan(Plan_ID, Type, Atom, Conditions, Body),
               [Substitution| Contexts]],
@@ -985,9 +992,9 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, active, History),
                  true, Intended_Means).
 
- 
 
-    
+
+
 
 % is means
 reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
@@ -1119,7 +1126,7 @@ loop(-1, -1).			% born dead
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-	    format(atom(String1), 
+	    format(atom(String1),
 "~n
 [RSNDBG] =====================================================================
 [RSNDBG] ========================== Loop ~w started ==========================
@@ -1127,7 +1134,7 @@ loop(Steps, Steps_Left):-
 ~n",
           [Loop_Number]),
     println_debug(String1, reasoningdbg),
-   
+
     format(atom(String2), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
     print_state(String2),
 
@@ -1298,40 +1305,11 @@ load_program(Agent_File, []):-
 
 
 
-%
-%  Taking agent state snapshot
-%
-
-take_snapshot_beliefs(SnapshotB):-
-    bagof(fact(X),fact(X),SnapshotB).
-
-take_snapshot_beliefs([]).
 
 
-take_snapshot_goals(Event_Snapshot):-
-    bagof(event(Event_Index, Type, Predicate, Intention, Context, Status,
-                History),
-	  event(Event_Index, Type, Predicate, Intention, Context, Status,
-                History),
-	  Event_Snapshot).
-
-take_snapshot_goals([]).
-
-
-take_snapshot_plans(Plan_Snapshot):-
-    bagof(plan(Number, Type, Predicate, Context, Body),
-          plan(Number, Type, Predicate, Context, Body), Plan_Snapshot).
-
-take_snapshot_plans([]).
-
-
-take_snapshot_intentions(Intention_Snapshot):-
-    bagof(intention(Number, PlanStack, Status),
-          intention(Number, PlanStack, Status), Intention_Snapshot).
-
-take_snapshot_intentions([]).
 %!  take_snapshot(+Snapshot)
 %Wraps agent's state to one list
+%* Snapshot: snapshot of agent state
 
 take_snapshot(Snapshot):-
     take_snapshot_beliefs(Belief_Snapshot),
@@ -1341,6 +1319,39 @@ take_snapshot(Snapshot):-
     append([Belief_Snapshot, Event_Snapshot, Plan_Snapshot,
             Intention_Snapshot], Snapshot).
 
+
+
+take_snapshot_intentions(Intention_Snapshot):-
+    findall(intention(Number, PlanStack, Status),
+          intention(Number, PlanStack, Status), Intention_Snapshot).
+
+take_snapshot_intentions([]).
+
+
+
+take_snapshot_plans(Plan_Snapshot):-
+    findall(plan(Number, Type, Predicate, Context, Body),
+          plan(Number, Type, Predicate, Context, Body), Plan_Snapshot).
+
+take_snapshot_plans([]).
+
+
+
+take_snapshot_beliefs(SnapshotB):-
+    bagof(fact(X),fact(X),SnapshotB).
+
+take_snapshot_beliefs([]).
+
+
+
+take_snapshot_goals(Event_Snapshot):-
+    findall(event(Event_Index, Type, Predicate, Intention, Context, Status,
+                History),
+	  event(Event_Index, Type, Predicate, Intention, Context, Status,
+                History),
+	  Event_Snapshot).
+
+take_snapshot_goals([]).
 
 
 %
@@ -1388,7 +1399,7 @@ fa_finalize_com:-
     told.
 
 
-%!
+%! set_control(+Terminating) is det
 %*
 %* Terminating: timeout/ no_job / never ... others = never
 
@@ -1397,17 +1408,21 @@ set_control(terminate(timeout, Steps)):-
     assert(terminate(timeout)),
     retract(timeout( _ )),
     assert(timeout(Steps)).
-    
 
 set_control(terminate(Terminating)):-
     retract(terminate( _ )),
     assert(terminate(Terminating)).
-    
 
-get_default_environments(Environments):-
-    bagof(Environment, default_environment(Environment), Environments).
 
-get_default_environments([]).
+% get_default_environments(Environments):-
+%    bagof(Environment, default_environment(Environment), Environments).
+%
+% get_default_environments([]).
+
+
+%! set_default_environment(+Environment) is det
+%*
+%* Environment: environment to be added to the multiagent system
 
 
 set_default_environment(Environment):-
@@ -1422,10 +1437,14 @@ set_default_environment(Environment):-
     println_debug(String, error).
 
 
+
+%!  set_late_bindings
+
 set_late_bindings:-
     retractall(late_bindings( _ )),
     assert(late_bindings(true)).
 
+%!  set_early_bindings
 
 set_early_bindings:-
     retractall(late_bindings( _ )),
@@ -1562,6 +1581,7 @@ fa_init_run:-
     fail.
 
 
+
 fa_init_set_attrs(environment, Environment):-
     thread_self(Agent),
     situate_agent(Agent, Environment).
@@ -1573,14 +1593,11 @@ fa_init_set_attrs(environment, Environment):-
            [Environment, Agent]),
     println_debug(String, error).
 
-
 fa_init_set_attrs(reasoning, Reasoning):-
     set_reasoning(Reasoning).
 
-
 fa_init_set_attrs(debug, Debug):-
-	assert(agent_debug(Debug)).
-
+    assert(agent_debug(Debug)).
 
 fa_init_set_attrs(bindings, late):-
     set_late_bindings(true).

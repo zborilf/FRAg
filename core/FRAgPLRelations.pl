@@ -51,7 +51,6 @@ get_term(Var, [_ | Bindings], Term):-
 % relation > , the output context will contain only those substitutions
 % that match it, e.g. A>B, [ [[A=3],[B=5]], [[A=5],[B=3]] ,
 % [[A=2],[B=0]] ] -> [ [[A=5],[B=3]] , [[A=2],[B=0]] ]
-%
 
 non_empty_context([], false).
 

@@ -13,7 +13,7 @@ plan(ach,
      [not(closed),buyer(Buyer, CD, Buy_Price)], 
      [
     %    act(sleep(0.25)),
-    %    act(printfg('jedu')),
+    %    act(printfg('lets go')),
 	test(seller(Seller, CD, Sel_Price)),
     %    act(printfg('cd mame')),
        	rel(Buy_Price > Sel_Price),
@@ -22,7 +22,7 @@ plan(ach,
     %    act(printfg('cena sedi')),
         act(card_shop, sell(Seller, Buyer, CD)),
         act(printfg(
-            '~w prodava ~w CDcko ~w za ~w', 
+            '~w selling ~w CD ~w for ~w', 
             [Seller, Buyer, CD, Sel_Price])),
         ach(sell)
      ]).

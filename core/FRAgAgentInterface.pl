@@ -4,12 +4,14 @@
 :-module(fRAgAgentInterface,
 	    [
 		add_environment_library /1,             % + init ihned
+                set_environment_attributes /2,
 	        environment_loaded /1,
 		clone_environment /2,
 		situate_agent /2,		% + agent, environment
 		situate_agent /3,		% + agent, environment, clone
 		get_agent_environments /2,
-		get_agent_instance /3,	% evn + clone
+		get_all_environments /1,
+                get_agent_instance /3,	% evn + clone
 		agent_perceives /3,
 		agent_acts /4,
 		virtualize_agent /2,
@@ -62,10 +64,6 @@ is_joint_action(Environment, Action):-
     joint_action(Environment, Term, Arity).
 
 
-%
-%	system includes environment ENVIRONMENT
-%
-
 
 %!  add_environment_library(Module_Name) is det
 %Uses environment specified in Module_Name
@@ -83,6 +81,24 @@ add_environment_library(Module_Name):-
     format("[IFC] Error, environment ~w not loaded~n",[Module_Name]).
 
 
+%!  set_environment_attributes(+Environment, +Attributes)
+% Set Attributes for Environment. Particular possible attributes are described
+% in Environment doncumentation
+%@arg Environment: Environment identifier
+%@arg Attributes: Environment's environemnt
+
+set_environment_attributes(Environment, Attributes):-
+    Environment_Attrs=..[Environment, set_attributes, Attributes],
+    !,
+    Environment_Attrs.
+
+
+%! get_all_environments(-Environments) is det
+
+get_all_environments(Environments):-
+    findall(Environment, environment(Environment), Environments).
+
+
 %!  environment_loaded(+Environment) is semidet
 %Succeed, if Environment has been added to the system
 %*Environment: Name of environment
@@ -92,8 +108,8 @@ environment_loaded(Environment):-
 
 
 %!  clone_environment(+Environment, +Clone) is det
-%Vytvori kopii prostredi s identifikatorem Environment_Clone
-%Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon
+% Creates a copy of the environment with the identifier Environment_Clone
+% Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon
 %samostatne Agent muze bude situovan (situate_agent) do puvodniho prostredi,
 %nebo do klonu (see situate_agent)
 %* Envrionment: identifikator prostredi

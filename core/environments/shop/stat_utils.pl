@@ -1,6 +1,7 @@
 
 :-module(stat_utils, 
     [
+        normal_dist_sample /3,
         get_discount / 3,
         new_events_number / 3
      ]
@@ -64,6 +65,7 @@ normal_dist_sample(Mean, Dispersion, X_Out):-
 
 get_discount(Mean, Dispersion, Discount):-
     normal_dist_sample(Mean, Dispersion, Discount).
+
 
 
 g(0).

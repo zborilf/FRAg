@@ -46,18 +46,19 @@ joint_action(basic, jprintfg, 1).
 
 
 
-population(P):-
-    bagof(A,agent(A),P).
+population(Population):-
+    bagof(Agent, agent(Agent), Population).
 
 
-concatTerm(S1,S2,S):-
-    string(S2),
-    concat(S1,S2,S).
+concatTerm(String1, String2, String):-
+    string(String2),
+    concat(String1, String2, String).
+
 
 % S2 is not a String
-concatTerm(S1,S2,S):-
-    term_string(S2,S2S),
-    concat(S1,S2S,S).
+concatTerm(String1, String2,String):-
+    term_string(String2, String2_S),
+    concat(String1, String2_S , String).
 
 
 printfg(String):-    

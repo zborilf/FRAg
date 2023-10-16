@@ -1,4 +1,5 @@
 
+
 Metasoubor
 
 set_default((ATTR, VAL)*)
@@ -11,21 +12,68 @@ set_default((ATTR, VAL)*)
 load
 
 
-Klauzule
 
-set_default(+Atribute, +Value)
 
-*Attribute:
-    bindings
-    	early
-    	late
-    reasoning
 
-    reasoning_params
+MULTIAGENT
+==========
+
+
+%!  include_reasoning(+Filename).
+% Consults reasoning method from file Filename
+%* Filename name of the reasoning file
+* Reasoning files in distribution
+        "/reasoning_methods/Basic/FRAgPLReasoningSimple.pl"
+        "/reasoning_methods/Basic/FRAgPLReasoningRandom.pl"
+        "/reasoning_methods/Basic/FRAgPLReasoningCAN.pl"
+        "/reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl".
+        "/reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl"
+
+%!  load(+Filename).
+% Consults arbitrary file +File_Name
+%* Filename name of the file
+
+%! load(+Agent_Name, +Agent_File, +Number_Of_Instances, 
+%        +List_Od_Attributes) is det
+
+
+include_environment(+Environment).
+%
+% environment available with this distribution is mentioned *here*
+
+%!  set_environment(+Environment, +Parameters).
+%Set environment parameters. Parameter is a tuple specific to environment
+%Environment. Could be found in Environment documentation
+%*Environment:
+%*Parameters: List of environment paramteters 
+
+%!  set_default(+Atribute, +Value) is det
+* Attribute - atribute of the multiagent system which default value is set
+*
+        control
+        % sets the agent loop control / termination
+
+
+        bindings
+            * Value
+    	        early   % 'classic' early bindings
+    	        late	% late bindings
+        reasoning
+            * Value
+
+        reasoning_params
+            * Value
     
-    debug
-
-    environment
+        debug
+            * Value
+                no_debug
+	        systemdbg 
+                reasoningdbg
+                mctsdbg
+	        mctsdbg_path
+  
+        environment
+            * Value
      
 
 load(Filename, Agent, Number, Attributes)
@@ -34,28 +82,20 @@ load(Filename, Agent, Number, Attributes)
 
 
 debug
-	no_debug, suppress all debugs
-	mctsdbg
-	mctsdbg_path
+	
 
 
 
 
 Agent
 
-Facts:
 ------
-
-
-
+Facts:
 
 Goals:
-------
 
 Plans:
-------
-
-plan(+Event_Type, +Event_Term, +Conditions, +Context, +Body)
+    plan(+Event_Type, +Event_Term, +Conditions, +Context, +Body)
 
 
 

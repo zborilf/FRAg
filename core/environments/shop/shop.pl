@@ -1,11 +1,11 @@
-                                
+
 
 :-module(card_shop,
     [
         card_shop / 2,
-	card_shop / 3,			% agentname, addlist, deletelist
-	card_shop / 4			% agentname, act
-    ]              
+	card_shop / 3,
+	card_shop / 4
+    ]
 ).
 
 :- discontiguous card_shop/2.
@@ -14,10 +14,28 @@
 
 time_adjust_multiply(30).
 
+% :- dynamic number_of_products /1.
+% :- dynamic mean_product_price /1.
+% :- dynamic dispersion_product_price /1.
+:- dynamic product /2.
 :- dynamic episode /1.
+:- dynamic average_sellers /1.
+:- dynamic average_buyers /1.
+:- dynamic mean_discount_buyer /1.
+:- dynamic mean_discount_seller /1.
+:- dynamic dispersion_discount_buyer /1.
+:- dynamic dispersion_discount_seller /1.
+:- dynamic buyer_stay /1.
+:- dynamic seller_stay /1.
+:- dynamic closing_time /1.
+:- dynamic mean_discount_seller /1.
+:- dynamic episode_length /1.
 :- dynamic buyers /1.
 :- dynamic sellers /1.
 :- dynamic previous_time /1.
+:- dynamic episode_mode /1.
+:- dynamic episode_length /1.
+
 
 episode(1).
 
@@ -27,23 +45,27 @@ episode(1).
 :-use_module('stat_utils').
 
 
+max_price(200).
 
-price(cd1, 100).
-price(cd2, 80).
-price(cd3, 68).
-price(cd4, 110).
-price(cd5, 50).
-price(cd6, 90).
-price(cd7, 110).
-price(cd8, 55).
-price(cd9, 150).
+product(cd1, 100).
+product(cd2, 80).
+product(cd3, 68).
+product(cd4, 110).
+product(cd5, 50).
+product(cd6, 90).
+product(cd7, 110).
+product(cd8, 55).
+product(cd9, 150).
 
 
 
 % environment(card_shop).
 
-average_buyers(0.2).
-average_sellers(0.2).
+% number_of_products(4).
+% mean_product_price(100).
+% dispersion_product_price(20).
+average_buyers(0.22).
+average_sellers(0.22).
 mean_discount_buyer(0.6).
 dispersion_discount_buyer(0.2).
 mean_discount_seller(0.4).
@@ -53,59 +75,172 @@ sellers_stay(100).
 closing_time(750).
 buyers(0).
 sellers(0).
-episode_length(0.0005). % in secs
+episode_mode(real_time).  % Mode is either sim_time or real_time
+episode_length(0.01). % in secs
 
-previous_time(-1).       
+previous_time(-1).
 
-%	Init the environment for agent AGENTNAME
+%!  init_beliefs(+Agents)
+% Inserts beliefs has / price / sells to Agents
 
-% Fill add list of Agents with actual environment state
-
-                   
 init_beliefs(Agents):-
-    % inserts all the
-    %         has(Who, What)
-    %         price(What, Price)
-    %     from environment to Agent's add_list
-    
-    findall_environment(card_shop, Agent, has( _, _), Beliefs1),
-    findall_environment(card_shop, Agent, price( _, _), Beliefs2),
+      findall_environment(card_shop, Agent, has( _, _), Beliefs1),
+    findall_environment(card_shop, Agent, product( _, _), Beliefs2),
     findall_environment(card_shop, Agent, sells( _, _, _), Beliefs3),
 
     add_beliefs_agents(Agents, Beliefs1),
     add_beliefs_agents(Agents, Beliefs2),
     add_beliefs_agents(Agents, Beliefs3).
 
+                  
 
-%    Situate agent in environment or its clone
+%!  card_shop(++Functionality, +Attributes) is det 
+%@arg Functionality is one of 
+%* set_parameters 
+%* add_agent
+%* clone
+%* reset_clone
+%* remove_clone
+%@arg Attributes: List of parameters in the form of tuples
+%1. For functionality 'set_attributes' the attributes can be
+%* (products, [Number, Mean_Price, Dispersion])
+%* (b_lambda, Mean) 
+%* (s_lambda, Mean)
+%* (b_price, [Mean, Dispersion])
+%* (s_price, [Mean, Dispersion]) 	
+%* (closing, Episode)
+%* (b_stay, Episodes)
+%* (c_stay, Episodes)
+%* (episoding, sim_time)
+%* (episoding, (real_time, Time)) 
+%2. For functionality 'add_agant' the parameter is agent's name
 
+
+card_shop(set_attributes, []).
+
+card_shop(set_attributes, [(Key, Value)| Attributes]):-
+    set_parameter(Key, Value),
+    card_shop(set_attributes, Attributes).
+
+
+
+set_parameter(products, [Number, Mean, Dispersion]):-
+%    change_params(number_of_products(Number)),
+%    change_params(mean_product_price(Mean_Price)),
+%    change_params(dispersion_product_price(Dispersion)),
+    retractall(product( _, _)),
+    generate_products(Number, Mean, Dispersion).
+
+set_parameter(b_lambda, Mean):-
+     change_params(average_buyers(Mean)).
+
+set_parameter(s_lambda, Mean):-
+    change_params(average_sellers(Mean)).
+
+set_parameter(b_price, [Mean, Dispersion]):-
+    change_params(mean_discount_buyer(Mean)),
+    change_params(dispersion_discount_buyer(Dispersion)).
+
+set_parameter(s_price, [Mean, Dispersion]):- 	
+    change_params(mean_discount_seller(Mean)),
+    change_params(dispersion_discount_seller(Dispersion)).
+
+set_parameter(closing, Episode):-
+    change_params(closing_time(Episode)).
+
+set_parameter(b_stay, Episodes):-
+    change_params(buyers_stay(Episodes)).
+
+set_parameter(c_stay, Episodes):-
+    change_params(sellers_stay(Episodes)).
+
+set_parameter(episoding, sim_time):-
+    change_params(episode_mode(sim_time)).  
+
+set_parameter(episoding, (real_time, Time)):-
+    change_params(episode_mode(real_time)),
+    change_params(episode_mode(Time)).
+
+
+change_params(Atom):-
+   Atom=..[Predicate, Value],
+   Retract=..[Predicate, _],
+   retract(Retract),
+   assert(Atom).
+
+change_params(Atom):-
+    assert(Atom).
+
+%! generate_products(+Number, +Mean_Price, +Dispersion) is det
+% Generates Number of CDs with prices ~N(Mean_Prixe, Dispersion) truncates
+% to tens
+%@arg Number
+%@arg Mean_Price
+%@arg Dispersion
+
+generate_products(0, _, _).
+
+generate_products(Number, Mean, Dispersion):-
+    format(atom(CD_Name), "cd~w", [Number]),
+    term_string(CD, CD_Name),
+    max_price(Max_Price),
+    get_discount(Mean, Dispersion, Discount),
+    CD_Price is truncate(Max_Price * (1 - Discount)),
+    assert(product(CD, CD_Price)),
+    Number2 is Number -1,
+    generate_products(Number2, Mean, Dispersion).
+
+   
+ 
+
+set_parameter( _, _):-
+    format("[ERROR] card shop, wrong parameters").   
+
+%!  card_shop(add_agent, +Agent) is det
+% adds agent Agent to the main instance of card_shop environment
+%* Agent: Name of the agent
 
 card_shop(add_agent, Agent):-
     situate_agent_environment(Agent, card_shop),
     init_beliefs([Agent]),
-    delete_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By), buyers(B), 
-                                               sellers(S)])]),
+    delete_facts_beliefs_all(card_shop, Agent,
+                             [stats_([sold(Sold_By), buyers(Buyers),
+                                      sellers(Sellers)])]),
 
     append(Sold_By, [sold(Agent, 0)], Sold_By2),
-    add_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By2), buyers(B), 
-                                               sellers(S)])]).
-  
+    add_facts_beliefs_all(card_shop, Agent,
+                          [stats_([sold(Sold_By2), buyers(Buyers),
+                                   sellers(Sellers)])]).
 
-card_shop(add_agent, Agent, Clone):-
-    situate_agents_clone([Agent], card_shop, Clone),
-    init_beliefs([Agent]).         
+%!  card_shop(add_agent, +Instance +Agent) is det
+% adds agent Agent to the +Instance of card_shop environment
+%* Agent: Name of the agent
+%* Instance: Insatnce of the card_shop environment
+
+card_shop(add_agent, Agent, Instance):-
+    situate_agents_clone([Agent], card_shop, Instance),
+    init_beliefs([Agent]).
 
 
+%!  card_shop(clone, +Instance) is det
+% creates a clone 
+%* Instance: Insatnce of the card_shop environment
 
-card_shop(clone, Clone):-
-    clone_environment(card_shop, Clone).
-    
+card_shop(clone, Instance):-
+    clone_environment(card_shop, Instance).
+
+%!  card_shop(reset_clone, +Clone) is det
+%Resets clone to its initial state
+%*Clone:
 
 card_shop(reset_clone, Clone):-
     reset_environment_clone(card_shop, Clone),
-    get_all_situated(card_shop, Clone, Agents),   
+    get_all_situated(card_shop, Clone, Agents),
     init_beliefs(Agents).
 
+%!  card_shop(remove_clone, +Clone) is det
+%Removes clone instance
+%*Clone:
 
 card_shop(remove_clone, Clone):-
     remove_environment_clone(card_shop, Clone).
@@ -125,25 +260,30 @@ card_shop(remove_state, Instance, State):-
 
 
 
-%    Agent percieves
 
-%!  add_tick(+Agent)
-% prida jeden token do prostredi 
+%!  card_shop(perceive, +Agent, -Add_List, - Delete_List) is det
+% Passes changes to the Agent in the form od Add_List and Delete_List
+%*Agent: Agent that perceives some instance of card_shop environment
+%*Add_List: New percept since last perceiving
+%*Delete_List: Disapeared peceps since last perceiving
 
-    
 card_shop(perceive, Agent , Add_List, Delete_List):-
     check_episode(Agent),
     retreive_add_delete(Agent, Add_List, Delete_List),
-    query_environment(card_shop, Agent, stats_([sold(Sold_By), 
+    query_environment(card_shop, Agent, stats_([sold(Sold_By),
                                                   buyers( _ ), sellers( _ )])),
-    delete_facts_beliefs_all(card_shop, Agent, 
+    delete_facts_beliefs_all(card_shop, Agent,
                              [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
     sellers(S),
-    buyers(B),                                                      
-    add_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By), 
+    buyers(B),
+    add_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By),
                                                buyers(B), sellers(S)])]).
 
 
+%!  check_episode(+Agent) is det
+% Checks if the episode is over and if so, updates environment.
+%TODO should respect particular instances (does not now, for all instances together)
+%*Agent: agent perceiving environment, could be used for episode checking
 
 check_episode( _ ):-
     previous_time(-1),
@@ -154,21 +294,20 @@ check_episode( _ ):-
 
 check_episode(Agent):-
     new_episode_time(Agent, N),
-%    writeln(new_episode_time(N)),
-    delete_facts_beliefs_all(card_shop, Agent, 
+    delete_facts_beliefs_all(card_shop, Agent,
                              [episode( Episode )]),
     add_facts_beliefs_all(card_shop, Agent, [episode(Episode2)]),
 
     update_environment(Agent, N).
-    
+
 check_episode( _ ).
+
 
 
 new_episode_time( _ , N):-
     previous_time(Previous_Time),
     get_time(Time),
     episode_length(Episode_Length),
-
     !,
     Delta is (Time - Previous_Time),
     Episode_Length < Delta,
@@ -177,19 +316,16 @@ new_episode_time( _ , N):-
     assert(previous_time(Time)).
 
 
+%!  update_environment(+Agent, +Number) is det
+%Updates environment Number-times.
+%*Agent:
+%*Number: Number of updatings
+
 
 update_environment(Agent, 0).
 
 update_environment(Agent, N):-
-    /*
-    previous_time(Time),
-    get_time(Time2),
-    time_adjust_multiply(Multiplier),
-    Time3 is (Time2 - Time) * Multiplier,
-    retract(previous_time(Time)),
-    assert(previous_time(Time2)),
-    */
-    episode(Episode), 
+    episode(Episode),
     retractall(episode(Episode)),
     Episode2 is Episode + 1,
     assert(episode(Episode2)),
@@ -203,7 +339,7 @@ update_environment(Agent, N):-
 
 
 
-   
+
 if_open_add_customers(Episode, Time_Difference, Agent):-
     closing_time(Closing_Time),
     Episode < Closing_Time,
@@ -226,12 +362,12 @@ if_open_add_customers( _, _, _).
 
 
 patience_out(Agent, Episode):-
-    findall_environment(card_shop, Agent, deadline(Person, Name, Episode), 
+    findall_environment(card_shop, Agent, deadline(Person, Name, Episode),
                         Unpatients),
     unpatients_left(Agent, Unpatients).
 
 unpatients_left(Agent, []).
-                                          
+
 unpatients_left(Agent, [Unpatient | Unpatients]):-
     remove_unpatient(Agent, Unpatient),
     unpatients_left(Agent, Unpatients).
@@ -239,17 +375,17 @@ unpatients_left(Agent, [Unpatient | Unpatients]):-
 
 
 remove_unpatient(Agent, deadline(seller, Seller, _)):-
-   delete_facts_beliefs_all(card_shop, Agent, 
+   delete_facts_beliefs_all(card_shop, Agent,
                               [seller(Seller, _, _)]).
-%   add_facts_beliefs_all(card_shop, Agent, 
+%   add_facts_beliefs_all(card_shop, Agent,
 %                             [left(Seller)]).
 
-    
+
 
 remove_unpatient(Agent, deadline(buyer, Buyer, _)):-
-   delete_facts_beliefs_all(card_shop, Agent, 
+   delete_facts_beliefs_all(card_shop, Agent,
                              [buyer(Buyer, _, _)]).
-%   add_facts_beliefs_all(card_shop, Agent, 
+%   add_facts_beliefs_all(card_shop, Agent,
 %                             [left(Buyer)]).
 
 
@@ -262,7 +398,7 @@ add_sellers(Agent, Time_Difference):-
     sellers(Seller_Index),
     new_events_number(Lambda, Time_Difference, New_Sellers),
     sellers_stay(Stay_Length),
-    add_persons(Agent, Lambda, seller, Seller_Index, New_Sellers, Mean_Seller, 
+    add_persons(Agent, Lambda, seller, Seller_Index, New_Sellers, Mean_Seller,
                 Dispersion_Seller, Stay_Length).
 
 add_buyers(Agent, Time_Difference):-
@@ -272,14 +408,14 @@ add_buyers(Agent, Time_Difference):-
     buyers(Buyer_Index),
     new_events_number(Lambda, Time_Difference, New_Buyers),
     sellers_stay(Stay_Length),
-    add_persons(Agent, Lambda, buyer, Buyer_Index, New_Buyers, Mean_Buyer, 
+    add_persons(Agent, Lambda, buyer, Buyer_Index, New_Buyers, Mean_Buyer,
                 Dispersion_Buyer, Stay_Length).
 
 
 
 add_persons(_, _, _, _, 0, _, _, _).
 
-add_persons(Agent, Lambda, Predicate, Index, N, Mean, Dispersion, Stay_Length):-    
+add_persons(Agent, Lambda, Predicate, Index, N, Mean, Dispersion, Stay_Length):-
     generate_cd_price(CD, Price, Mean, Dispersion),
     Index2 is Index+1,
     N2 is N-1,
@@ -291,12 +427,12 @@ add_persons(Agent, Lambda, Predicate, Index, N, Mean, Dispersion, Stay_Length):-
     episode(E),
     E2 is E + Stay_Length,
     add_facts_agent(card_shop, Agent, [deadline(Predicate, Person, E2)]),
-    add_persons(Agent, Lambda, Predicate, Index2, N2, Mean, Dispersion, 
+    add_persons(Agent, Lambda, Predicate, Index2, N2, Mean, Dispersion,
                 Stay_Length).
 
 
 
-          
+
 increase_persons(buyer):-
     retract(buyers(B)),
     B2 is B+1,
@@ -308,39 +444,39 @@ increase_persons(seller):-
     assert(sellers(S2)).
 
 generate_cd_price(CD, Price_Out, Mean, Dispersion):-
-    findall(cd(CD, Price), price(CD, Price), CDs),
+    findall(cd(CD, Price), product(CD, Price), CDs),
     random_member(cd(CD, Price),CDs),
     get_discount(Mean, Dispersion, Discount),
     Price_Out is truncate(Price * (1 - Discount)).
- 
-  
-                 
 
-%    Agent acts   
+
+
+
+%    Agent acts
 
 
 
 
 card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
-    episode(E), 
+    episode(E),
     query_environment(card_shop, Brooker, seller(Seller, What, Price)),
     query_environment(card_shop, Brooker, buyer(Buyer, What, Price2)),
     add_facts_beliefs_all(card_shop, Brooker, [has(Buyer, What),
                                                sold(Seller, What)]),
-    query_environment(card_shop, Brooker, stats_([sold(Sold_By), buyers(B), 
+    query_environment(card_shop, Brooker, stats_([sold(Sold_By), buyers(B),
                                                  sellers(S)])),
-    delete_facts_beliefs_all(card_shop, Brooker, 
+    delete_facts_beliefs_all(card_shop, Brooker,
                              [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
-    delete_facts_beliefs_all(card_shop, Brooker, 
+    delete_facts_beliefs_all(card_shop, Brooker,
                              [buyer(Buyer, What, _)]),
-    delete_facts_beliefs_all(card_shop, Brooker, 
+    delete_facts_beliefs_all(card_shop, Brooker,
                              [seller(Seller, What, _)]),
 
-    delete_facts_agent(card_shop, Brooker, [deadline(seller, Seller, _), 
+    delete_facts_agent(card_shop, Brooker, [deadline(seller, Seller, _),
                                             deadline(buyer, Buyer, _)]),
 
     add_trade(Sold_By, Brooker, Sold_By2),
-    add_facts_beliefs_all(card_shop, Brooker, [stats_([sold(Sold_By2), buyers(B), 
+    add_facts_beliefs_all(card_shop, Brooker, [stats_([sold(Sold_By2), buyers(B),
                                                sellers(S)])]).
 
 
@@ -350,7 +486,7 @@ card_shop(act, _, sell( _, _), false).
 
 
 card_shop(act, _, sell( Seller, Buyer, What), false):-
-   format("Prodej ~w komu ~w co ~w pres ~w selhal~n",[Seller, Buyer, What, 
+   format("Prodej ~w komu ~w co ~w pres ~w selhal~n",[Seller, Buyer, What,
                                                        Brooker]).
 
 add_trade(Sold_By, Seller, Sold_By3):-
@@ -371,19 +507,25 @@ add_trade(Sold_By, Seller, Sold_By2):-
 card_shop(act, Seller, silently_(sell(Seller, What)), Result):-
     card_shop(act, Seller, sell(Seller, What), Result).
 
-card_shop(act, Brooker, silently_(sell(Seller, Buyer, What)), Result):- 
+card_shop(act, Brooker, silently_(sell(Seller, Buyer, What)), Result):-
     card_shop(act, Brooker, sell(Seller, Buyer, What), Result).
 
 card_shop(act, _, _, fail).
 
- 
 
-                           
+
+
 :-
     env_utils:register_environment(card_shop),
-    findall(price(What, Price), price(What, Price), Facts),
+    findall(product(What, Price), product(What, Price), Facts),
     env_utils:add_facts(card_shop, [stats_([sold([]), buyers(0), sellers(0)])]),
     env_utils:add_facts(card_shop, Facts).
+
+md:-
+    use_module(library(pldoc/doc_library)),
+    doc_save('shop.pl',[format(html), recursive(true), 
+                                          doc_root('../../doc')]).
+
 
 
 

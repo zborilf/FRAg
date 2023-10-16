@@ -47,14 +47,14 @@
 %	check_used(TUSEDMEANS, INTENDEDMEANS).
 
 
-  get_plan(can_reasoning, event( _ , _ , _ , _ , _ , _ , USEDMEANS),
-	   [ _ | TINTENDEDMEANS], Intended_Means):-
-	format(atom(STRING), "[CANDBG] ~w", [USEDMEANS]),
+  get_plan(can_reasoning, event( _ , _ , _ , _ , _ , _ , Used_Means),
+	   [ _ | Means], Intended_Means):-
+	format(atom(STRING), "[CANDBG] ~w", [Used_Means]),
 	println_debug(STRING, candbg),
-	check_used(USEDMEANS, Intended_Means),
-	get_plan(can_reasoning, _ , TINTENDEDMEANS, Intended_Means).
+	check_used(Used_Means, INTENDEDMEANS),
+	get_plan(can_reasoning, _ , Means, INTENDEDMEANS).
 
-  get_plan(can_reasoning, _, [Intended_Means| _ ], Intended_Means).
+  get_plan(can_reasoning, _, [INTENDEDMEANS| _ ], INTENDEDMEANS).
 
   update_model(can_reasoning).
 

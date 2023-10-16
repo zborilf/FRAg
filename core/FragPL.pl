@@ -170,9 +170,9 @@ get_frag_attributes(bindings, late):-
 
 get_frag_attributes(bindings, early).
 
-get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection, 
+get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
                                  Substitution_Selection]):-
-    get_default_reasoning(Intention_Selection, Plan_Selection, 
+    get_default_reasoning(Intention_Selection, Plan_Selection,
                           Substitution_Selection).
 
 
@@ -189,7 +189,7 @@ get_frag_attributes(environments, Environments):-
 %!  set_default_reasoning(+reasoning, +reasoning_method) is det
 %   Nastavi zpusob vyberu zameru, planu, substituci
 %* Reasoning: intention_selection, plan_selection, substitution_selection, all
-%* Reasoning_method: simple_reasoning, random_reasoning, 
+%* Reasoning_method: simple_reasoning, random_reasoning,
 % biggest_joint_reasoning, snakes_reasoning, mcts_reasoning
 %       jeden z nich, pokud neni all, pak seznam tri
 
@@ -218,28 +218,6 @@ fa_init_set_attrs(debug, DBG):-
     assert(agent_debug(DBG)).	 % jak je to na urovni agenta a vlaken agenta?
 
 
-set_default_attribute(control, Control):-
-    set_control(Control).
-
-set_default_attribute(reasoning, Reasoning):-
-    set_default_reasoning(Reasoning).
-
-set_default_attribute(bindings ,late):-
-    set_default_late_bindings(true).
-
-set_default_attribute(bindings ,early):-
-    set_default_late_bindings(false).
-
-set_default_attribute(reasoning_params , Parameters):-
-    fRAgAgent:set_reasoning_params(Parameters).
-
-set_default_attribute(environment, Environment):-
-    fRAgAgent:set_default_environment(Environment).
-
-
-
-%  set_default_attribute(reasoning , REASONING):-
-%	...
 
 
 
@@ -277,20 +255,29 @@ load_agents([load(Agent, Program, Number, Attributes)| Agents],
 
 
 
-%
+
 %  frag2(Stream,LoadClausesList)
 %  reads clauses 'load(Filename, Name, Count, Attrs)'
 %  from Stream (a *.mas2fp file) to LoadClausesList
 %  Attrs: (bindings, [early|late])
 %
 
+
+
+
 frag_process_clause(_ , end_of_file, []):-
     !.
 
 %  sets default attributes
 
-frag_process_clause(Stream, set_default(Attribute, Value), Clauses):-
-    set_default_attribute(Attribute, Value),
+frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
+    fRAgAgent:set_environment_attributes(Environment, Attributes),
+    !,
+    load_multiagent(Stream, Clauses).
+
+
+frag_process_clause(Stream, set_default(Attributes), Clauses):-
+    frag_process_attributes(Attributes),
     !,
     load_multiagent(Stream, Clauses).
 
@@ -322,6 +309,48 @@ frag_process_clause(Stream, Clause, Clauses):-
     format("[MAS2FP] Error processing clause ~w~n", [Clause]),
     !,
     load_multiagent(Stream, Clauses).
+
+
+
+
+%! . frag_process_attributes(+List_Of_Attributes)
+% Process default attributes of the system
+%* List_Of_Attributes
+
+frag_process_attributes([]).
+
+frag_process_attributes([(Key, Value)| Attributes]):-
+    set_default_attribute(Key, Value),
+    frag_process_attributes(Attributes).
+
+
+%!  set_default_attribute(+Key, +Value) is det
+%*Key:
+%*Value:
+
+set_default_attribute(control, Control):-
+    set_control(Control).
+
+set_default_attribute(reasoning, Reasoning):-
+    set_default_reasoning(Reasoning).
+
+set_default_attribute(bindings ,late):-
+    set_default_late_bindings(true).
+
+set_default_attribute(bindings ,early):-
+    set_default_late_bindings(false).
+
+set_default_attribute(reasoning_params , Parameters):-
+    fRAgAgent:set_reasoning_params(Parameters).
+
+set_default_attribute(environment, Environment):-
+    fRAgAgent:set_default_environment(Environment).
+
+
+
+
+
+
 
 
 
@@ -369,7 +398,17 @@ frag(Filename):-
     wait_agents(Threads),
     % run (unblock) agents
     assert(go(1)),
-    wait_agents(Threads).
+    wait_agents(Threads),
+    writeln(Threads),
+    join_threads(Threads).
+
+
+
+join_threads([]).
+
+join_threads([Thread| Threads]):-
+    thread_join(Thread, _),    % Prolog native
+    join_threads(Threads).
 
 
 frag(Filename):-
@@ -405,7 +444,7 @@ Brno University of Technology~n~n",
     get_frag_attributes(default_bindings, Bindings),
     get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
 	                Substitution_selection]),
-    get_frag_attributes(environments,  Environments),
+    get_default_environments(Environments),
     format("-> Bindings: ~w~n-> Intention selection: ~w ~n-> Plan selection: ~w
 -> Substitution selection: ~w ~n-> Environments: ~w ~n~n",
 	   [Bindings, Intention_Selection, Plan_Selection,
@@ -425,7 +464,7 @@ md:-
 
 rep(_, 0).
 
-rep(P, N):- 
+rep(P, N):-
     P,
     N2 is N-1,
     rep(P, N2).

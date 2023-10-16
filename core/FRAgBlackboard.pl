@@ -14,9 +14,9 @@
 	).
 
 
+% agent(Name), agent Name is a part of the mutliagent system
 
 :-dynamic frag_debug / 1.
-% agent(Name), agent Name is a part of the mutliagent system
 :-dynamic agent /1.				
 :-dynamic ready /1.
 :-dynamic go / 1.

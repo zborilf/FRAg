@@ -3,17 +3,6 @@
 %       Frantisek Zboril jr. 2023
 %	
 
-%
-%	Environment models are in the form of a set of facts 
-%	fact(Environment, Clone, Fact)
-%	Every environment may be cloned, then 
-%		the original environment (f.e. merch_shop) may be cloned to 
-%		adam_merchs and betty_merchs, then the original model is in
-%		fact(merch_shop, merch_shop, Fact), and the clones in
-%		fact(merch_shop, adam_shop, Fact)
-%		fact(merch_shop, betty_shop, Fact).
-%
-
 
 :-module(env_utils,
     [
@@ -52,9 +41,10 @@
     ]
 ).
 
-/** <module>  Utilities Support for Making FRAg Environments 
+/** <module>  Environments Supporting Clauses 
 
-This module 
+Work with instances, facts, beliefs, agents
+ 
 
 @author Frantisek Zboril
 @license GPL

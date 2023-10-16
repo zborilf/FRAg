@@ -1,7 +1,7 @@
 
 %
-%  	Reasoning methods - MCTS supported reasoning
-%  	Frantisek Zboril jr. 2022 - 2023
+%	Reasoning methods - MCTS supported reasoning
+%	Frantisek Zboril jr. 2022 - 2023
 %
 
 %
@@ -13,17 +13,17 @@
 
 % This module is loaded / included in the FRAgAgent file
 
-% :-thread_local tree_node/5.                  		% id node, action, children, visited, points
+% :-thread_local tree_node/5.				% id node, action, children, visited, points
 
 %  :- use_module('FRAgMCTSModel').
 
 
-:-dynamic simulate_late_bindings/1.    		% should do the tree for early bindings (expand individual reasonings and tests?)
+:-dynamic simulate_late_bindings/1.		% should do the tree for early bindings (expand individual reasonings and tests?)
 :-dynamic mcts_default_expansions/1.
 :-dynamic mcts_default_number_of_simulations/1.
 :-dynamic mcts_simulation_steps/1.
 
-:-thread_local recomended_path/2.    			% based on model, either greedy, or ucb
+:-thread_local recomended_path/2.			% based on model, either greedy, or ucb
 :-thread_local mcts_expansions/1.
 :-thread_local mcts_number_of_simulations/1.
 
@@ -33,7 +33,7 @@
 
 
 %
-% 	Static atoms
+%	Static atoms
 %
 
 mcts_default_expansions(10).
@@ -56,13 +56,13 @@ recomended_path([],[]).
 %	Zpracovani atributu v metasouboru, specialne pro tento modul
 %
 
-set_reasoning_method_params(mcts_params(Expansions, SIMULATIONS, STEPS)):-
+set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
     retractall(mcts_default_expansions( _ )),
     retractall(mcts_default_number_of_simulations( _ )),
     retractall(mcts_simulation_steps( _ )),
     assert(mcts_default_expansions(Expansions)),
-    assert(mcts_default_number_of_simulations(SIMULATIONS)),
-    assert(mcts_simulation_steps(STEPS)).
+    assert(mcts_default_number_of_simulations(Simulations)),
+    assert(mcts_simulation_steps(Steps)).
 
 
 %
@@ -78,8 +78,8 @@ set_reasoning_method_params(mcts_params(Expansions, SIMULATIONS, STEPS)):-
 %
 %
 
-get_decisions(PUS, VARS, DECISIONS):-
-    shorting_pus(PUS, VARS, DECISIONS).
+get_decisions(PUS, Variables, Decisions):-
+    shorting_pus(PUS, Variables, Decisions).
 
 
 perform_reasoning( _, _):-
@@ -97,41 +97,41 @@ perform_reasoning( _, _):-
 
 get_all_action_decisions2(_, _, [], []).
 
-get_all_action_decisions2(INTENTIONINDEX, ACTION, [DECISION| TDECISIONS],
-                          [model_act_node(INTENTIONINDEX, ACTION, [DECISION])|
+get_all_action_decisions2(Intention_Index, Action, [Decision| Decisions],
+                          [model_act_node(Intention_Index, Action, [Decision])|
                               Acts]):-
-    get_all_action_decisions2(INTENTIONINDEX, ACTION, TDECISIONS, Acts).
+    get_all_action_decisions2(Intention_Index, Action, Decisions, Acts).
 
 
 % Action is ground
-get_all_action_decisions(INTENTIONINDEX, ACTION, _,
-                         [model_act_node(INTENTIONINDEX, ACTION,[[]])])
+get_all_action_decisions(Intention_Index, Action, _,
+                         [model_act_node(Intention_Index, Action,[[]])])
     :-
-    term_variables(ACTION, []).
+    term_variables(Action, []).
 
 
-get_all_action_decisions(INTN, ACTION, CONTEXT, ACTIONS):-
-    term_variables(ACTION, VARS),
-    get_decisions(CONTEXT, VARS, DECISIONS),
+get_all_action_decisions(Intention_ID, Action, Context, Actions):-
+    term_variables(Action, Variables),
+    get_decisions(Context, Variables, Decisions),
 %	write("decisions: "), write(get_decisions(CONTEXT, VARS, DECISIONS)),
-    get_all_action_decisions2(INTN, ACTION, DECISIONS, ACTIONS).
+    get_all_action_decisions2(Intention_ID, Action, Decisions, Actions).
 
 
 % For late bindings goals actions (test, ach) are abstracted without decisions
 %  in the case of early bindings, must be also expanded for individual decisions
 
-get_actions(INTENTIONINDEX, test(GOAL), _,
-            [model_act_node(INTENTIONINDEX, test(GOAL),[[]])])
+get_actions(Intention_Index, test(Goal), _,
+            [model_act_node(Intention_Index, test(Goal),[[]])])
     :-
     simulate_late_bindings(true).
 
 
-get_actions(INTENTIONINDEX, test(GOAL), CONTEXT, ACTIONS):-
+get_actions(Intention_Index, test(Goal), Context, Actions):-
 % test goal is set with its results, should be simulated
-    bagof(fact(GOAL), fact(GOAL), TESTGOALS),
-    broadUnification(fact(GOAL), TESTGOALS, CONTEXT2),
-    restrict(CONTEXT, CONTEXT2, CONTEXT3),
-    get_all_action_decisions(INTENTIONINDEX, test(GOAL), CONTEXT3, ACTIONS).
+    bagof(fact(Goal), fact(Goal), Test_Goals),
+    broad_unification(fact(Goal), Test_Goals, Context2),
+    restriction(Context, Context2, Context3),
+    get_all_action_decisions(Intention_Index, test(Goal), Context3, Actions).
 
 
 % tato akce ma spadnout, takze nechame test goal jak byl (i kdyby nahodou ve
@@ -163,8 +163,8 @@ get_actions(Intention_Index, del(Goal), Context, Actions):-
 get_actions(Intention_Index, act(Goal), Context, Actions):-
     get_all_action_decisions(Intention_Index, act(Goal), Context, Actions).
 
-get_actions(INTENTIONINDEX, act(Environment, Goal), Context, Actions):-
-    get_all_action_decisions(INTENTIONINDEX, act(Environment, Goal), Context,
+get_actions(Intention_Index, act(Environment, Goal), Context, Actions):-
+    get_all_action_decisions(Intention_Index, act(Environment, Goal), Context,
                              Actions).
 
 
@@ -180,22 +180,23 @@ model_expand_actions2([intention(Intention_Index ,
                      ):-
     model_expand_actions2(Intentions, Acts).
 
-model_expand_actions2([intention(INTN ,
+model_expand_actions2([intention(Intention_ID ,
                                  [plan( _, _, _, _, Context, [Act | _])| _],
-                                       active) | IT], ACTIONS2):-
-    get_actions(INTN, Act, Context, Acts),
-    format(atom(STRING),"[MCTS] +++ Actions to expand: ~w", [Acts]),
-    println_debug(STRING, mctsdbg),
-    sort(Acts, ACTIONSS),    % remove duplicates
-    model_expand_actions2(IT, AT),
-    append(ACTIONSS, AT, ACTIONS2).
+                                       active) | Intentions], Acts3):-
+    get_actions(Intention_ID, Act, Context, Acts),
+    format(atom(String),"[MCTS] +++ Actions to expand: ~w", [Acts]),
+    println_debug(String, mctsdbg),
+    sort(Acts, Acts_Sorted),    % remove duplicates
+    model_expand_actions2(Intentions, Acts2),
+    append(Acts_Sorted, Acts2, Acts3).
 
 
 model_expand_actions(Actions):-
-    bagof(intention(N,P,S), intention(N,P,S), INTENTIONS),
-    model_expand_actions2(INTENTIONS, Actions),
-    format(atom(STRING),"[MCTS] Expanded actions: ~w",[Actions]),
-    println_debug(STRING, mctsdbg).
+    bagof(intention(Intention_ID,Plan_Stack, Status),
+          intention(Intention_ID, Plan_Stack, Status), Intentions),
+    model_expand_actions2(Intentions, Actions),
+    format(atom(String),"[MCTS] Expanded actions: ~w",[Actions]),
+    println_debug(String, mctsdbg).
 
 model_expand_actions([]).   % in the case there is no intention
 
@@ -207,23 +208,31 @@ model_expand_actions([]).   % in the case there is no intention
 
 
 model_expand_deliberations4(Goal,
-                           [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), CONTEXT],
-              [model_reasoning_node(Goal, plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), CONTEXT)]):-
+                           [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions ,
+                                 Plan_Body), Context],
+                           [model_reasoning_node(Goal,
+                                                 plan(Plan_ID,Goal_Type,
+                                                      Goal_Atom, Conditions,
+                                                      Plan_Body),
+                                                 Context)]):-
     simulate_late_bindings(true).
 
   model_expand_deliberations4(_,[_,[]], []).
 
   model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),[Unif| T]],
-      	[model_reasoning_node(Goal, plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), [Unif])| MDNT]):-
-      	model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),T], MDNT).
+	[model_reasoning_node(Goal, plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), [Unif])| MDNT]):-
+	model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),T], MDNT).
 
 
 model_expand_deliberations3(_,[],[]).
 
-model_expand_deliberations3(Goal,[[plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), Unifs]|PT], MDNTS):-
-    model_expand_deliberations4(Goal,[plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), Unifs], MDNT1),
-    model_expand_deliberations3(Goal, PT, MDNT2),
-    append(MDNT1,MDNT2,MDNTS).
+model_expand_deliberations3(Goal,[[plan(Plan_ID, Event_Type, Event_Atom, 
+                                        Conditions, Body), Context]| Plans], 
+                            Deliberation_Nodes):-
+    model_expand_deliberations4(Goal,[plan(Plan_ID, Event_Type, Event_Atom, 
+                                           Conditions, Body), Context], MDNT1),
+    model_expand_deliberations3(Goal, Plans, MDNT2),
+    append(MDNT1,MDNT2,Deliberation_Nodes).
 
 model_expand_deliberations2([], []).
 
@@ -256,38 +265,20 @@ model_expand_deliberations([]).   % in the case there is no goal
 %  such act is not executed, but the decision on the variables in ACT is kept
 %
 
-silence_plan([],[]).
-
-silence_plan([act(A is B)| T], [act(A is B)| T2]):-
-    silence_plan(T,T2).
-
-silence_plan([act(ACT)| T], [act(ACT)| T2]):-
-    ACT=..[OPERATION, _, _],
-    relational_operator(OPERATION),        % in the FragPLActions.pl file
-    silence_plan(T,T2).
-
-silence_plan([act(ACT)| T], [(act(silently_(ACT)))| T2]):-
-%  the only modification is here (act that is not 'is' or relops)
-    silence_plan(T,T2).
-
-silence_plan([act(ENVIRONMENT, ACT)| T], [(act(ENVIRONMENT, silently_(ACT)))| T2]):-
-%  the only modification is here (act that is not 'is' or relops)
-    silence_plan(T,T2).
-
-
-
-silence_plan([H|T],[H|T2]):-
-    silence_plan(T,T2).
 
 silence_program([],[]).
 
-silence_program([plan(A,B,C,D,E,F)|T], [plan(A,B,C,D,E,F2)|T2]):-
-    silence_plan(F,F2),
-    silence_program(T,T2).
+silence_program(
+    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts)| Plans],
+    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts2)| Plans2]):-
+    silence_plan(Acts,Acts2),
+    silence_program(Plans,Plans2).
 
-silence_program([plan(A,B,C,D,E)|T], [plan(A,B,C,D,E2)|T2]):-
-    silence_plan(E,E2),
-    silence_program(T,T2).
+silence_program(
+    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts)| Plans],
+    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts2)| Plans2]):-
+    silence_plan(Acts,Acts2),
+    silence_program(Plans,Plans2).
 
 
 silence_program([intention(A,Plans,C)|T], [intention(A,Plans2,C)|T2]):-
@@ -296,6 +287,31 @@ silence_program([intention(A,Plans,C)|T], [intention(A,Plans2,C)|T2]):-
 
 silence_program([H|T], [H|T2]):-
     silence_program(T,T2).
+
+
+
+silence_plan([],[]).
+
+silence_plan([act(A is B)| Acts1], [act(A is B)| Acts2]):-
+    silence_plan(Acts1, Acts2).
+
+silence_plan([act(Act)| Acts1], [act(Act)| Acts2]):-
+    Act=..[Operation, _, _],
+    relational_operator(Operation),        % in the FragPLActions.pl file
+    silence_plan(Acts1, Acts2).
+
+silence_plan([act(Act)| Acts1], [(act(silently_(Act)))| Acts2]):-
+%  the only modification is here (act that is not 'is' or relops)
+    silence_plan(Acts1, Acts2).
+
+silence_plan([act(Environment, Act)| Acts1],
+             [(act(Environment, silently_(Act)))| Acts2]):-
+%  the only modification is here (act that is not 'is' or relops)
+    silence_plan(Acts1, Acts2).
+
+silence_plan([H|T],[H|T2]):-
+    silence_plan(T,T2).
+
 
 
 %
@@ -313,7 +329,7 @@ garbage_all:-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%
 %
-% 	Start of engine code
+%	Start of engine code
 %
 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -331,7 +347,7 @@ frag_simulate_program2(Program, STEPS, 0, RESULTS, EXPANDED):-
     engine_yield(runResult(RESULTS,0, EXPANDED, GOALSREMAIN)),
     !,
 
-    	% ENGINE RESTARTS HERE!
+	% ENGINE RESTARTS HERE!
 
     garbage_collect_atoms,
     mcts_number_of_simulations(Simulations),
@@ -430,7 +446,7 @@ set_debugs(false).
 
 
 mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
-	  	 RUNS, STEPS, SIMULATIONS, AGENTLOOP, Agent, BINDINGS, DEBUG):-
+		 RUNS, STEPS, SIMULATIONS, AGENTLOOP, Agent, BINDINGS, DEBUG):-
 
     %
     %  simulation engine ...
@@ -449,7 +465,7 @@ mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
     set_clauses(Program, 1),
     thread_self(Virtual_Agent),
     virtualize_agent(Agent, Virtual_Agent),
-    assert(intention_fresh(INTENTIONFRESH)), 		% ponecham jako v originalnim vlakne
+    assert(intention_fresh(INTENTIONFRESH)),		% ponecham jako v originalnim vlakne
     assert(event_fresh(EVENTFRESH)),
 
     println_debug('+++++ PATH +++++', mctsdbg),
@@ -457,7 +473,7 @@ mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
     mcts_print_path(Path, mctsdbg),
 
     print_state('MCTS BEFORE FORCE PATH'),
-    force_execute_model_path(Path),   			% executes program in Path
+    force_execute_model_path(Path),			% executes program in Path
     print_state('MCTS AFTER FORCE'),
 
     model_expand_actions(Expanded_Acts),
@@ -475,7 +491,7 @@ mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%
 %
-% 	End of engine code
+%	End of engine code
 %
 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -539,7 +555,7 @@ mcts_expansion_loop(Program, EXPANSIONS, GOALSTOTAL, SIMULATIONS):-
     is_debug(mctsdbg, DEBUG),
 
     engine_create(run_result(_ ,_),
-    		  mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path,
+		  mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path,
                                    EXPANDED, EXPANSIONS, SIMULATIONSTEPS,
                                    SIMULATIONS, AGENTLOOP, Agent, BINDINGS,
                                    DEBUG),
@@ -621,25 +637,25 @@ update_model(mcts_reasoning):-
     retractall(simulate_late_bindings( _ )),
     assert(simulate_late_bindings(BINDINGS)),
     println_debug('[MCTS] Updating model',mctsdbg),
-    % here allways late bindings (for mcts simulation)
-    % set_late_bindings(true),
-    % in Program is now a snapshot of actual agent state
+% here allways late bindings (for mcts simulation)
+% set_late_bindings(true),
+% in Program is now a snapshot of actual agent state
     take_snapshot(Program),
-    % ProgramS does not produce outputs now
+% ProgramS does not produce outputs now
     silence_program(Program, Silent_Program),
 
     println_debug('',mctsdbg),
     println_debug(Silent_Program, mctsdbg),
     println_debug('simstr',mctsdbg),
-    % Expansions <- number of expansions per (the next) simulation
+% Expansions <- number of expansions per (the next) simulation
     mcts_expansions(Expansions),
-    % Number of simulations per expansion
+% Number of simulations per expansion
     mcts_number_of_simulations(SIMULATIONS),
 
     mcts_simulation(Silent_Program, Expansions, SIMULATIONS),
     print_mcts_model(mctsdbg_path),
     mcts_get_best_ucb_path(PATH, false),
-    % REASONING: 'reasoning node' prefix of PATH, ACT is the first ACT in PATH
+% REASONING: 'reasoning node' prefix of PATH, ACT is the first ACT in PATH
     mcts_divide_path(PATH, REASONING, ACT),
     print_debug('[MCTS] Path:', mctsdbg),
     println_debug(PATH, mctsdbg),
@@ -647,11 +663,6 @@ update_model(mcts_reasoning):-
     print_debug('[MCTS] First action:', mctsdbg),println_debug(ACT, mctsdbg),
     retractall(recomended_path( _, _)),
     assert(recomended_path(REASONING, ACT)).
-    % simulate_late_bindings(BINDINGS),
-    % println_debug(set_late_bindings(BINDINGS), interdbg),
-    % restore bindings policy, tohle asi neni nutne, je to lokalni pro vlakna
-    % (v agentnim se nezmeni) // ZASTARELE
-    % set_late_bindings(BINDINGS).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -741,7 +752,7 @@ get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
     apply_substitutions(Model_Substitution),
     print_debug('MODELACTSUB:', interdbg),
     println_debug(Model_Act, interdbg),
-    %  	rename_substitution_vars(MODELCTX,VARS,NCTX),
+    %	rename_substitution_vars(MODELCTX,VARS,NCTX),
     unifiable(Action, Model_Act, Context_Out),
     println_debug('DONE', interdbg),
     println_debug(Context_Out, interdbg).
