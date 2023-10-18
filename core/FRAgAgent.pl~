@@ -297,6 +297,10 @@ agents_stats( _ ).
 %                                                                              |
 %===============================================================================
 
+%!  process_add_list(+Beliefs)
+% Incorporates Beliefs to agent's BB
+%@arg Beliefs: List of beliefs (atoms)
+
 
 process_add_list([]).
 
@@ -308,6 +312,10 @@ process_add_list([Belief| Beliefs]):-
     assert(fact(Belief)),
     create_event(add, Belief),
     process_add_list(Beliefs).
+
+%!  process_delete_list(+Beliefs)
+% Removes Beliefs to agent's BB
+%@arg Beliefs: List of beliefs (atoms)
 
 process_delete_list([]).
 
@@ -328,6 +336,10 @@ process_delete_list([_ |Beliefs]):-
 %                                                                              |
 %===============================================================================
 
+%!  process_messages
+% Receives messages (through thread) and creates corresponding add
+% events
+
 process_messages:-
     % expected form message(sender,perfomatie,pld(payload))
     thread_peek_message(Message),
@@ -346,16 +358,19 @@ process_messages.
 %                                                                              |
 %===============================================================================
 
-create_event(Event_Type, Belief):-
+%!  create_event(+Event_Type, +Atom) is det
+% Creates top-level event of corresponding type and atom + empty context
+
+create_event(Event_Type, Atom):-
     get_fresh_event_number(Event_Index),
-% genera.tes 'add' event
-    assert(event(Event_Index, Event_Type, Belief, null, [[]], active, [])).
+    assert(event(Event_Index, Event_Type, Atom, null, [[]], active, [])).
 
 
 
 %! execute(+Intention, +Plan_Before, - Plan_After) is det
-%* Plan_Before, plan plan(trigevent, context condition, plan context, plan body),
-%* Plan_After
+% @arg Plan_Before, plan plan(trigevent, context condition, plan
+% context, plan body)
+% @arg Plan_After
 
 % add belief execution add(pred(t1,t2...))
 
@@ -1333,7 +1348,7 @@ take_snapshot_goals(Event_Snapshot):-
     findall(event(Event_Index, Type, Predicate, Intention, Context, Status,
                 History),
 	  event(Event_Index, Type, Predicate, Intention, Context, Status,
-                History),                                       
+                History),
 	  Event_Snapshot).
 
 take_snapshot_goals([]).

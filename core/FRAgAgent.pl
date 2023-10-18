@@ -399,8 +399,8 @@ try_retract(_).
 
 
 execute(_ ,
-        plan(Goal_Type, Goal_Term, Conditions, Context, [del(Belief)| Acts]),
-	plan(Goal_Type, Goal_Term, Conditions, New_Context, Acts),
+        plan(Event_Type, Event_Atom, Conditions, Context, [del(Belief)| Acts]),
+	plan(Event_Type, Event_Atom, Conditions, New_Context, Acts),
         true):-
 % term_variables(Belief, Action_Vars),
     decisioning(Belief, Context, New_Context),
@@ -410,9 +410,9 @@ execute(_ ,
 
 % instance set, makes instance set of PRED using CTX, only in FRAg
 
-execute(_ ,plan(Goal_Type, Goal_Term, Conditions, Context,
+execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
                 [iset(Predicate, Instance_Set)| Acts]),
-	   plan(Goal_Type, Goal_Term, Conditions, Context, Acts), true):-
+	   plan(Event_Type, Event_Atom, Conditions, Context, Acts), true):-
     instance_set(Predicate, Context, Instance_Set).
 
 
@@ -428,8 +428,8 @@ nonempty([], false).
 nonempty( _, true).
 
 
-execute( _, plan(Goal_Type, Goal_Term, Conditions, Context, [test(Goal)| Acts]),
-	    plan(Goal_Type, Goal_Term, Conditions, Context_New, Acts),
+execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]),
+	    plan(Event_Type, Event_Atom, Conditions, Context_New, Acts),
             Result):-
     query(Goal, Context, Context2),
     simulate_early_bindings(Goal, Context2, Context_New),
@@ -439,8 +439,8 @@ execute( _, plan(Goal_Type, Goal_Term, Conditions, Context, [test(Goal)| Acts]),
 % perform the goal of reaching, probably the most difficult
 
 execute(Intention_ID,
-        plan(Goal_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
-        plan(Goal_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
+        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
+        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
         true)
     :-
     retract(intention(Intention_ID, Plan_Stack, active)),
@@ -458,8 +458,8 @@ execute(Intention_ID,
 
 % v planu nic neni, nedelame nic a ani jej nemenime, on bude odstranen z
 % intensny na vyssi urovni
-execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context, []),
-        plan(Goal_Type, Goal_Atom, Conditions, Context, []), true).
+execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context, []),
+        plan(Event_Type, Goal_Atom, Conditions, Context, []), true).
 
 
 % vykona aritmeticko-logickou operaci alop(operace)
@@ -468,15 +468,15 @@ execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context, []),
 % pro vsechny a redukuje kontext)
 
 execute(_ ,
-        plan(Goal_Type, Goal_Atom, Conditions, Context_In, [rel(Term1 is Term2)|
+        plan(Event_Type, Goal_Atom, Conditions, Context_In, [rel(Term1 is Term2)|
                                                             Acts]),
-        plan(Goal_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
+        plan(Event_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
     alop(Term1 is Term2, Context_In, Context_Out, Result).
 
-execute(_ ,plan(Goal_Type, Goal_Atom, Conditions, Context,
+execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context,
                 [rel(Relation)| Acts]),
-	plan(Goal_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
+	plan(Event_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
     functor(Relation, Operator, _),
     is_relational_operator(Operator),
@@ -493,17 +493,17 @@ execute_environment( _, _, false).
 
 
 % agent acts in specified environment
-execute(_ ,plan(Event_Type, Event_Term, Conditions, Context,
+execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
                 [act(Environment, Action)| Acts]),
-	plan(Event_Type, Event_Term, Conditions, Context_Out, Acts), Restult)
+	plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Restult)
     :-
     decisioning(Action, Context, Context_Out),
     !,
     execute_environment(Environment, Action, Restult).
 
-execute(_ , plan(Event_Type, Event_Term, Conditions, Context, [act(Action)|
+execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
                                                              Acts]),
-            plan(Event_Type, Event_Term, Conditions, Context_Out, Acts), Result)
+            plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Result)
     :-
 % rozhodnem o vybrane akci, zmeni to kontext (udelame rozhodnuti na CTX
 % pro promenne v ACTION)
@@ -526,23 +526,23 @@ execute(_ , plan(Event_Type, Event_Term, Conditions, Context, [act(Action)|
 %    TLP, tak zrusit zamer a vratit goal
 
 execute(_ ,
-        plan(Goal_Type ,Goal_Atom, Conditions, Context, Acts),
-        plan(Goal_Type ,Goal_Atom, Conditions, Context, Acts),
+        plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
+        plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
         false).
 
 
 % Plan is linear and only one act is executed per cycle
 
 execute_plan(Intention_Index,
-             [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context,
+             [plan(Plan_Index, Event_Type, Event_Atom, Conditions, Context,
                    Body)| Plans],
-	     [plan(Plan_Index, Event_Type, Event_Term, Conditions, Context2,
+	     [plan(Plan_Index, Event_Type, Event_Atom, Conditions, Context2,
                    Body2)| Plans],
              Result)
     :-
     execute(Intention_Index,
-            plan(Event_Type, Event_Term, Conditions, Context, Body),
-	    plan(Event_Type, Event_Term, Conditions, Context2, Body2),
+            plan(Event_Type, Event_Atom, Conditions, Context, Body),
+	    plan(Event_Type, Event_Atom, Conditions, Context2, Body2),
             Result),
     !.
 
@@ -589,26 +589,26 @@ get_fresh_event_number(Event_Index):-
 
 % means found for top level goal
 
-extend_intention(null, [plan(Plan_ID, Goal_Type, Goal_Term, Conditions, Body),
+extend_intention(null, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body),
                         Context], Intention_ID)
     :-
 	%   put_back_plan(IDX),
 	get_fresh_intention_number(Intention_ID),
 	assertz(
-	   intention(Intention_ID, [plan(Plan_ID, Goal_Type, Goal_Term,
+	   intention(Intention_ID, [plan(Plan_ID, Event_Type, Event_Atom,
                                          Conditions, Context, Body)], active)
 	   ).
 
 % means found for a subgoal
 
-extend_intention(Intention_ID, [plan(Plan_ID, Goal_Type, Goal_Term, Conditions,
+extend_intention(Intention_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions,
                                      Body), Context], Intention_ID)
     :-
 	%   put_back_plan(PGT,PG),
 	retract(intention(Intention_ID, Plan_Stack, blocked)),
 	assertz(
 	   intention(Intention_ID,
-		[plan(Plan_ID, Goal_Type, Goal_Term, Conditions, Context, Body)
+		[plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)
                 | Plan_Stack],active
 	            )
 		).
@@ -687,7 +687,7 @@ try_retract_event(Intention_ID):-
 try_retract_event( _).
 
 
-% BLOKOVANA
+% Blocked intention
 % pokud je intensna zablokovana, znamena to, ze jako posledni v ni byl
 % provedeno vyvolani podcile. Nemeni se, dokud se podcil nepovede
 
@@ -803,11 +803,11 @@ check_early_reasoning(Plans, Means):-
 
 simulate_early_reasoning([], []).
 
-simulate_early_reasoning([[plan(Plan_ID, Goal_Type, Goal_Atom,
+simulate_early_reasoning([[plan(Plan_ID, Event_Type, Goal_Atom,
                                 Conditions, Body), Context]| Plans],
                            Means)
     :-
-    expand_plans([plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Body),
+    expand_plans([plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Body),
                   Context], Means1),
     simulate_early_reasoning(Plans, Means2),
     append(Means1, Means2, Means).
@@ -836,11 +836,11 @@ update_intentions(Result):-
     % it leads to reduction of the plan context
     % takes 'another' intention with act(Result) on its top
     intention(Intention_ID,
-              [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
+              [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context,
                     [act(Result)| Acts])| Plans], active),
     short_variables_binds(Context, Context_New),
     update_intention(intention(Intention_ID,
-                               [plan(Plan_ID, Goal_Type, Goal_Atom,
+                               [plan(Plan_ID, Event_Type, Goal_Atom,
                                      Conditions, Context_New, Acts)
                                | Plans],
                                active),
@@ -893,7 +893,7 @@ check_applicable(Context, [Context_Condition| Context_Conditions],
 
 
 check_relevant_applicable_plan(Event_Atom, Context,
-				plan(Plan_Index, Goal_Type, Goal_Atom,
+				plan(Plan_Index, Event_Type, Goal_Atom,
 				     Conditions, Body),
 				Means):-
     intersection(Event_Atom, Context, Goal_Atom, Context2),
@@ -901,7 +901,7 @@ check_relevant_applicable_plan(Event_Atom, Context,
 	!,
     check_applicable(Context2, Conditions, Context3),
 %   Means is either the second term, if Context is not [], or [] if it is
-    is_means(Context3, [[plan(Plan_Index, Goal_Type, Goal_Atom,
+    is_means(Context3, [[plan(Plan_Index, Event_Type, Goal_Atom,
 			 Conditions, Body), Context3]],
 	     Means).
 
@@ -956,12 +956,12 @@ get_relevant_applicable_plans(_,_,[],[]).
 
 execution:-
     select_intention(intention(Intention_ID,
-                               [plan(Plan_ID, Goal_Type, Goal_Term, Conditions,
+                               [plan(Plan_ID, Event_Type, Event_Atom, Conditions,
                                      Context, Body)| Plans],
                                Status)),
     !,
     execute_plan(Intention_ID,
-                 [plan(Plan_ID,Goal_Type, Goal_Term, Conditions, Context, Body)
+                 [plan(Plan_ID,Event_Type, Event_Atom, Conditions, Context, Body)
                    | Plans],
                  Plan2, Result),
     % if RES is false, the plan failed, it is good to put it to the end of PB
@@ -1219,7 +1219,7 @@ force_execution(model_act_node(Intention_Index, true, _)):-
 
 force_execution(model_act_node(Intention_Index, Act, Decision)):-
     retract(intention(Intention_Index,
-                      [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context,
+                      [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context,
                             [Plan_Act| Plan_Acts])| Plans],
                       Status)),
     % action in node and in the plan could have renamed vars, unify them
@@ -1228,11 +1228,11 @@ force_execution(model_act_node(Intention_Index, Act, Decision)):-
     restriction(Context, Decision, Context2),
     % update intention ... plan has now a new context restricted by decision
     assert(intention(Intention_Index,
-                     [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
+                     [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context2,
                            [Plan_Act| Plan_Acts])| Plans],
                      Status)),
     execute_plan(Intention_Index,
-                 [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context2,
+                 [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context2,
                        [Plan_Act| Plan_Acts])| Plans], P2,
                  Result),
     update_intention(intention(Intention_Index, P2, Status), Result),
@@ -1250,23 +1250,23 @@ force_execution(model_act_node(Intention_Index, Act, Decision)):-
 %===============================================================================
 
 %!  set_clauses(+Clauses, +Plan_Index)
-%* Clauses:
-%* Plan_Index: actual index for a plan, if it is added to agent's plan
+%@arg Clauses:
+%@arg Plan_Index: actual index for a plan, if it is added to agent's plan
 % base
 
 set_clauses([],_).
 
-set_clauses([plan(Goal_Type, Goal_Atom, Conditions, Body)|Clauses], Plan_Index)
+set_clauses([plan(Event_Type, Goal_Atom, Conditions, Body)|Clauses], Plan_Index)
     :-
-    assert(plan(Plan_Index ,Goal_Type, Goal_Atom, Conditions, Body)),
+    assert(plan(Plan_Index ,Event_Type, Goal_Atom, Conditions, Body)),
     Plan_Index2 is Plan_Index+1,
     set_clauses(Clauses, Plan_Index2),
     !.
 
 % process declared top-level goal -> creates events for them
-set_clauses([goal(Goal_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
+set_clauses([goal(Event_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
     get_fresh_event_number(Event_Index),
-    assert(event(Event_Index, Goal_Type, Goal_Atom, null, Context, active,
+    assert(event(Event_Index, Event_Type, Goal_Atom, null, Context, active,
                  [])),
     set_clauses(Clauses, Plan_Index),
     !.

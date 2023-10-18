@@ -126,12 +126,12 @@ get_actions(Intention_Index, test(Goal), _,
     simulate_late_bindings(true).
 
 
-get_actions(Intention_Index, test(Goal), CONTEXT, ACTIONS):-
+get_actions(Intention_Index, test(Goal), Context, Actions):-
 % test goal is set with its results, should be simulated
-    bagof(fact(Goal), fact(Goal), TESTGOALS),
-    broad_unification(fact(Goal), TESTGOALS, CONTEXT2),
-    restriction(CONTEXT, CONTEXT2, CONTEXT3),
-    get_all_action_decisions(Intention_Index, test(Goal), CONTEXT3, ACTIONS).
+    bagof(fact(Goal), fact(Goal), Test_Goals),
+    broad_unification(fact(Goal), Test_Goals, Context2),
+    restriction(Context, Context2, Context3),
+    get_all_action_decisions(Intention_Index, test(Goal), Context3, Actions).
 
 
 % tato akce ma spadnout, takze nechame test goal jak byl (i kdyby nahodou ve
@@ -180,15 +180,15 @@ model_expand_actions2([intention(Intention_Index ,
                      ):-
     model_expand_actions2(Intentions, Acts).
 
-model_expand_actions2([intention(INTN ,
+model_expand_actions2([intention(Intention_ID ,
                                  [plan( _, _, _, _, Context, [Act | _])| _],
-                                       active) | IT], ACTIONS2):-
-    get_actions(INTN, Act, Context, Acts),
-    format(atom(STRING),"[MCTS] +++ Actions to expand: ~w", [Acts]),
-    println_debug(STRING, mctsdbg),
-    sort(Acts, ACTIONSS),    % remove duplicates
-    model_expand_actions2(IT, AT),
-    append(ACTIONSS, AT, ACTIONS2).
+                                       active) | Intentions], Acts3):-
+    get_actions(Intention_ID, Act, Context, Acts),
+    format(atom(String),"[MCTS] +++ Actions to expand: ~w", [Acts]),
+    println_debug(String, mctsdbg),
+    sort(Acts, Acts_Sorted),    % remove duplicates
+    model_expand_actions2(Intentions, Acts2),
+    append(Acts_Sorted, Acts2, Acts3).
 
 
 model_expand_actions(Actions):-
@@ -226,10 +226,13 @@ model_expand_deliberations4(Goal,
 
 model_expand_deliberations3(_,[],[]).
 
-model_expand_deliberations3(Goal,[[plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), Unifs]|PT], MDNTS):-
-    model_expand_deliberations4(Goal,[plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), Unifs], MDNT1),
-    model_expand_deliberations3(Goal, PT, MDNT2),
-    append(MDNT1,MDNT2,MDNTS).
+model_expand_deliberations3(Goal,[[plan(Plan_ID, Event_Type, Event_Atom, 
+                                        Conditions, Body), Context]| Plans], 
+                            Deliberation_Nodes):-
+    model_expand_deliberations4(Goal,[plan(Plan_ID, Event_Type, Event_Atom, 
+                                           Conditions, Body), Context], MDNT1),
+    model_expand_deliberations3(Goal, Plans, MDNT2),
+    append(MDNT1,MDNT2,Deliberation_Nodes).
 
 model_expand_deliberations2([], []).
 
@@ -266,14 +269,14 @@ model_expand_deliberations([]).   % in the case there is no goal
 silence_program([],[]).
 
 silence_program(
-    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts)|Plans],
-    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts2)|Plans2]):-
+    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts)| Plans],
+    [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions, Context, Acts2)| Plans2]):-
     silence_plan(Acts,Acts2),
     silence_program(Plans,Plans2).
 
 silence_program(
-    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts)|Plans],
-    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts2)|Plans2]):-
+    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts)| Plans],
+    [plan(Goal_Type, Goal_Atom, Conditions, Context, Acts2)| Plans2]):-
     silence_plan(Acts,Acts2),
     silence_program(Plans,Plans2).
 

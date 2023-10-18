@@ -22,8 +22,8 @@
 :-dynamic mcts_default_expansions/1.
 :-dynamic mcts_default_number_of_simulations/1.
 :-dynamic mcts_simulation_steps/1.
-
-:-thread_local recomended_path/2.			% based on model, either greedy, or ucb
+% based on model, either greedy, or ucb
+:-thread_local recomended_path/2.			
 :-thread_local mcts_expansions/1.
 :-thread_local mcts_number_of_simulations/1.
 
@@ -67,7 +67,8 @@ set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
 
 %
 %  strom -> akce, potomkovske akce
-%           akce -> vyber planu pro zamer, nebo akce planu (ale bude to mit desne vetveni)
+%  akce -> vyber planu pro zamer, nebo akce planu 
+%                     (ale bude to mit desne vetveni)
 %
 
 
@@ -118,7 +119,7 @@ get_all_action_decisions(Intention_ID, Action, Context, Actions):-
 
 
 % For late bindings goals actions (test, ach) are abstracted without decisions
-%  in the case of early bindings, must be also expanded for individual decisions
+% in the case of early bindings, must be also expanded for individual decisions
 
 get_actions(Intention_Index, test(Goal), _,
             [model_act_node(Intention_Index, test(Goal),[[]])])
@@ -151,20 +152,20 @@ get_actions(Intention_Index, ach(Goal),_ ,
             [model_act_node(Intention_Index, ach(Goal),[[]])]):-
     simulate_late_bindings(true).
 
-get_actions(Intention_Index, ach(Goal), Context, Actions):-
-    get_all_action_decisions(Intention_Index, ach(Goal), Context, Actions).
+get_actions(Intention_ID, ach(Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, ach(Goal), Context, Actions).
 
-get_actions(Intention_Index, add(Goal), Context, Actions):-
-    get_all_action_decisions(Intention_Index, add(Goal), Context, Actions).
+get_actions(Intention_ID, add(Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, add(Goal), Context, Actions).
 
-get_actions(Intention_Index, del(Goal), Context, Actions):-
-    get_all_action_decisions(Intention_Index, del(Goal), Context, Actions).
+get_actions(Intention_ID, del(Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, del(Goal), Context, Actions).
 
-get_actions(Intention_Index, act(Goal), Context, Actions):-
-    get_all_action_decisions(Intention_Index, act(Goal), Context, Actions).
+get_actions(Intention_ID, act(Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, act(Goal), Context, Actions).
 
-get_actions(Intention_Index, act(Environment, Goal), Context, Actions):-
-    get_all_action_decisions(Intention_Index, act(Environment, Goal), Context,
+get_actions(Intention_ID, act(Environment, Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, act(Environment, Goal), Context,
                              Actions).
 
 
@@ -172,11 +173,11 @@ get_actions(Intention_Index, act(Environment, Goal), Context, Actions):-
 
 model_expand_actions2([],[]).   % no intention left, no actions
 
-model_expand_actions2([intention(Intention_Index ,
+model_expand_actions2([intention(Intention_ID ,
                                 [plan( _, _, _, _, _, [])| _],
                                 active) |
                           Intentions],
-                      [model_act_node(Intention_Index, true, [])| Acts]
+                      [model_act_node(Intention_ID, true, [])| Acts]
                      ):-
     model_expand_actions2(Intentions, Acts).
 
@@ -204,35 +205,20 @@ model_expand_actions([]).   % in the case there is no intention
 %
 % expand state -> all possible deliberations
 %
+%!  model_expand_deliberations(
+%TODO
 
 
+model_expand_deliberations(Deliberations):-
+    bagof(event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
+	  event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
+	  Events),
+    !,
+    model_expand_deliberations2(Events, Deliberations).
 
-model_expand_deliberations4(Goal,
-                           [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions ,
-                                 Plan_Body), Context],
-                           [model_reasoning_node(Goal,
-                                                 plan(Plan_ID,Goal_Type,
-                                                      Goal_Atom, Conditions,
-                                                      Plan_Body),
-                                                 Context)]):-
-    simulate_late_bindings(true).
-
-  model_expand_deliberations4(_,[_,[]], []).
-
-  model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),[Unif| T]],
-	[model_reasoning_node(Goal, plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), [Unif])| MDNT]):-
-	model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),T], MDNT).
+model_expand_deliberations([]).   % in the case there is no goal
 
 
-model_expand_deliberations3(_,[],[]).
-
-model_expand_deliberations3(Goal,[[plan(Plan_ID, Event_Type, Event_Atom, 
-                                        Conditions, Body), Context]| Plans], 
-                            Deliberation_Nodes):-
-    model_expand_deliberations4(Goal,[plan(Plan_ID, Event_Type, Event_Atom, 
-                                           Conditions, Body), Context], MDNT1),
-    model_expand_deliberations3(Goal, Plans, MDNT2),
-    append(MDNT1,MDNT2,Deliberation_Nodes).
 
 model_expand_deliberations2([], []).
 
@@ -249,20 +235,40 @@ model_expand_deliberations2([event( _, _, _, _, _, _, _)| Events], MEANS):-
         model_expand_deliberations2(Events, MEANS).
 
 
-model_expand_deliberations(Deliberations):-
-    bagof(event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
-	    event(EVENTINDEX, Type,Predicate,Intention, Context,active, History),
-	    Events),
-    !,
-    model_expand_deliberations2(Events, Deliberations).
 
-model_expand_deliberations([]).   % in the case there is no goal
+model_expand_deliberations3(_,[],[]).
+
+model_expand_deliberations3(Goal,[[plan(Plan_ID, Event_Type, Event_Atom,
+                                        Conditions, Body), Context]| Plans],
+                            Deliberation_Nodes):-
+    model_expand_deliberations4(Goal,[plan(Plan_ID, Event_Type, Event_Atom,
+                                           Conditions, Body), Context], MDNT1),
+    model_expand_deliberations3(Goal, Plans, MDNT2),
+    append(MDNT1,MDNT2,Deliberation_Nodes).
 
 
 
-%
-%  Silence program / plan ... translates plan such that all act(ACT) in the program plans which are not relations or 'is' are translated to act(__foo(ACT))
-%  such act is not executed, but the decision on the variables in ACT is kept
+model_expand_deliberations4(Goal,
+                           [plan(Plan_ID, Goal_Type, Goal_Atom, Conditions ,
+                                 Plan_Body), Context],
+                           [model_reasoning_node(Goal,
+                                                 plan(Plan_ID,Goal_Type,
+                                                      Goal_Atom, Conditions,
+                                                      Plan_Body),
+                                                 Context)]):-
+    simulate_late_bindings(true).
+
+model_expand_deliberations4(_,[_,[]], []).
+
+model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),[Unif| T]],
+    [model_reasoning_node(Goal, plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody), [Unif])| MDNT]):-
+    model_expand_deliberations4(Goal, [plan(PlanNumber,PlanType,PlanGoal,PlanGuards,PlanBody),T], MDNT).
+
+
+
+% Silence program / plan ... translates plan such that all act(ACT) in the 
+% program plans which are not relations or 'is' are translated to act(__foo(ACT))
+% such act is not executed, but the decision on the variables in ACT is kept
 %
 
 
@@ -676,16 +682,16 @@ get_first_act([_, _, ID, Act|_], ID, Act).
 get_first_act(_, null, no_action).   % root only, finished
 
 
-get_plan_for_goal(event(EVENTINDEX, GOALTYPE, GOALPREDICATE, INTENTION,
+get_plan_for_goal(event(Event_ID, Event_Type, Event_Atom, INTENTION,
                         GOALCTX, STATE, HISTORY),
                   REASONINGNODES, Plan_ID):-
 
 % plan(Plan_ID,PLANTYPE,PLANPREDICATE,CTXCONDITIONS,BODY,PLANCTX)):-
 
-    member(model_reasoning_node(event(EVENTINDEX, GOALTYPE, GOALPREDICATE, INTENTION, GOALCTX, STATE, HISTORY),
+    member(model_reasoning_node(event(Event_ID, Event_Type, Event_Atom, INTENTION, GOALCTX, STATE, HISTORY),
     plan(Plan_ID, PLANTYPE,PLANPREDICATE,CTXCONDITIONS,BODY),PLANCTX),REASONINGNODES),
     delete(REASONINGNODES,
-           model_reasoning_node(event(EVENTINDEX, GOALTYPE, GOALPREDICATE,
+           model_reasoning_node(event(Event_ID, Event_Type, Event_Atom,
                                       INTENTION, GOALCTX, STATE, HISTORY),
     plan(Plan_ID,PLANTYPE,PLANPREDICATE,CTXCONDITIONS,BODY),PLANCTX), REASONINGNODES2),
     recomended_path( _, ACT),
@@ -712,21 +718,21 @@ rename_substitution_vars([ _=C | T1], [B | T2], [B=C | T3]):-
 
 
 
-get_model_act(Modal_Act, Substitution):-
+get_model_act(Model_Act, Substitution):-
 %	recomended_path( _, [model_act_node( _, act(ENVIRONMENT, silently_(MODELACT)), [MODELSUBSTITUTION])]).
-    recomended_path( _, [model_act_node( _, act(_ , silently_(Modal_Act)), [Substitution])]).
+    recomended_path( _, [model_act_node( _, act(_ , silently_(Model_Act)), [Substitution])]).
 
-get_model_act(Modal_Act, Substitution):-
-    recomended_path( _, [model_act_node( _, act(silently_(Modal_Act)), [Substitution])]).
+get_model_act(Model_Act, Substitution):-
+    recomended_path( _, [model_act_node( _, act(silently_(Model_Act)), [Substitution])]).
 
-get_model_act(Modal_Act, Substitution):-
-    recomended_path( _, [model_act_node( _, test(Modal_Act), [Substitution])]).
+get_model_act(Model_Act, Substitution):-
+    recomended_path( _, [model_act_node( _, test(Model_Act), [Substitution])]).
 
-get_model_act(Modal_Act, Substitution):-
-    recomended_path( _, [model_act_node( _, add(Modal_Act), [Substitution])]).
+get_model_act(Model_Act, Substitution):-
+    recomended_path( _, [model_act_node( _, add(Model_Act), [Substitution])]).
 
-get_model_act(Modal_Act, Substitution):-
-    recomended_path( _, [model_act_node( _, del(Modal_Act), [Substitution])]).
+get_model_act(Model_Act, Substitution):-
+    recomended_path( _, [model_act_node( _, del(Model_Act), [Substitution])]).
 
 
 get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-

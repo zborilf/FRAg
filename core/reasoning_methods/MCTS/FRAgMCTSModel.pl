@@ -33,9 +33,9 @@ fresh_node_index(1).
 
 
 
-set_root_node(ROOT):-
+set_root_node(Root):-
     retractall(root_node(_)),
-    assert(root_node(ROOT)).
+    assert(root_node(Root)).
 
 
 
@@ -48,13 +48,13 @@ model_print_node_children([NodeChild|T], SfxStr, Debug):-
     model_print_node_children(T,SfxStr, Debug).
 
 
-model_print_node(NODEINDEX, Sufix_String, Debug):-
-    tree_node(NODEINDEX, Node_Content, Node_Children, Node_Visits, Node_Score),
+model_print_node(Node_ID, Sufix_String, Debug):-
+    tree_node(Node_ID, Act, Children, Visits, Score),
     print_debug(Sufix_String, Debug),
-    println_debug(tree_node(NODEINDEX, Node_Content, Node_Children,
-                            Node_Visits, Node_Score), Debug),
+    println_debug(tree_node(Node_ID, Act, Children,
+                            Visits, Score), Debug),
     format(atom(Sufix_String2),"~w - ",[Sufix_String]),
-    model_print_node_children(Node_Children,Sufix_String2, Debug).
+    model_print_node_children(Children,Sufix_String2, Debug).
 
 
 mcts_print_model(Debug):-
@@ -73,9 +73,6 @@ get_fresh_node_id(Index):-
     assert(fresh_node_index(Index2)).
 
 
-
-
-
 %!  generate_children(+Index_starts, +Index_ends, -Children) is det
 %   vytvori seznam indexu od Index_starts do Index_ends,
 %* Index_starts: integer
@@ -83,29 +80,30 @@ get_fresh_node_id(Index):-
 
 generate_children(Index, Index, []).
 
-generate_children(INDEXSTART, INDEXEND, [INDEXSTART| TINDEXES]):-
-    INDEXSTART2 is INDEXSTART +1,
-    generate_children(INDEXSTART2, INDEXEND, TINDEXES).
+generate_children(Start_ID, End_ID, [Start_ID| Indexes]):-
+    Start_ID2 is Start_ID +1,
+    generate_children(Start_ID2, End_ID, Indexes).
 
 %!  set_children(+Node_index: ke kteremu uzlu se pripojuji decka, +Index_starts, Index_Ends) is det
 %   TODO
 %   * Index_starts: integer
 
 
-set_children(NODEINDEX, INDEXSTART, INDEXEND):-
+set_children(Node_ID, Start_ID, End_ID):-
     print_debug('generate children ', mctsdbg),
-    print_debug(INDEXSTART, mctsdbg),
-    print_debug(',', mctsdbg),println_debug(INDEXEND, mctsdbg),
-    generate_children(INDEXSTART, INDEXEND, Ch),
-    retract(tree_node(NODEINDEX, E, _, V, S)),
-    assert(tree_node(NODEINDEX, E, Ch, V, S)).
+    print_debug(Start_ID, mctsdbg),
+    print_debug(',', mctsdbg),
+    println_debug(End_ID, mctsdbg),
+    generate_children(Start_ID, End_ID, Children_IDs),
+    retract(tree_node(Node_ID, Act, _, Visits, Score)),
+    assert(tree_node(Node_ID, Act, Children_IDs, Visits, Score)).
 
 expand_node2([]).
 
-expand_node2([ELEMENT| TELEMENTS]):-
-    get_fresh_node_id(INDEX),
-    assert(tree_node(INDEX, ELEMENT, not_expanded, 0, 0)),
-    expand_node2(TELEMENTS).
+expand_node2([Element| Elements]):-
+    get_fresh_node_id(ID),
+    assert(tree_node(ID, Element, not_expanded, 0, 0)),
+    expand_node2(Elements).
 
 %!  expand_node(+Node_index: integer, Elements: list of nodes) is det
 %   creates nodes for elements and assign them to a parent node
@@ -114,31 +112,30 @@ expand_node2([ELEMENT| TELEMENTS]):-
 %   * Elements
 %	elements to be assigned to the parent node
 
-mcts_expand_node(NODE, ELEMENTS):-
-    fresh_node_index(INDEXSTART),
-    expand_node2(ELEMENTS),
-    fresh_node_index(INDEXEND),
-    set_children(NODE, INDEXSTART, INDEXEND).
+mcts_expand_node(Node_ID, Elements):-
+    fresh_node_index(Start_ID),
+    expand_node2(Elements),
+    fresh_node_index(End_ID),
+    set_children(Node_ID, Start_ID, End_ID).
 
 
 % true, pokud je  not_expanded
 
-expand_candidate(ParentID, ParentID):-
-    tree_node(ParentID, _, not_expanded, _, _).
+expand_candidate(Parent_ID, Parent_ID):-
+    tree_node(Parent_ID, _, not_expanded, _, _).
 
 
 
-
-
-ucb(ParentID, ChildID, UCB):-
 % for list of children (4th term in tree_node) finds out their ucb's -> binded
 % to UctList
 % wi/ni + sqrt(2)*sqrt((ln Ni) / ni)
 % wi - wins of the node, ni - runs over the node, Ni runs over parent's node
 % (after ith step)
-    tree_node(ParentID,_,_,VP,_),
-    tree_node(ChildID,_,_,VCH,SCH),
-    UCB is (SCH/VCH)+sqrt(2*(log(VP)/VCH)).
+
+ucb(Parent_ID, Child_ID, UCB):-
+    tree_node(Parent_ID, _, _, Parent_Visits, _),
+    tree_node(Child_ID, _, _, Child_Visits, Child_Score),
+    UCB is (Child_Score/Child_Visits)+sqrt(2*(log(Parent_Visits)/Child_Visits)).
 
 
 %
@@ -147,80 +144,80 @@ ucb(ParentID, ChildID, UCB):-
 % TODO asi by stacil na vstupu jen INDEX, zbytek se vytahne v retractu
 
 
-increment_node(tree_node(Index, Action, Children, Visited, Score), Reward):-
-    retract(tree_node(Index, Action, Children, Visited, Score)),
-    Visited2 is Visited + 1,
+increment_node(tree_node(Index, Act, Children, Visits, Score), Reward):-
+    retract(tree_node(Index, Act, Children, Visits, Score)),
+    Visits2 is Visits + 1,
     Score2 is Score + Reward,
-    assert(tree_node(Index, Action, Children, Visited2, Score2)).
+    assert(tree_node(Index, Act, Children, Visits2, Score2)).
 
 
 
 mcts_increment_path([leaf_node(ID),_], Reward):-
-    tree_node(ID, Action, Children, Visited, Score),
-    increment_node(tree_node(ID, Action, Children, Visited,  Score), Reward).
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits,  Score), Reward).
 
 mcts_increment_path([node(ID),_], Reward):-      % Success????, dostane se to sem vubec?
-    tree_node(ID, Action, Children, Visited, Score),
-    increment_node(tree_node(ID, Action, Children, Visited, Score), Reward).
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits, Score), Reward).
 
 mcts_increment_path([node(ID),_|T], Reward):-
-    tree_node(ID, Action, Children, Visited, Score),
-    increment_node(tree_node(ID, Action, Children, Visited, Score), Reward),
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits, Score), Reward),
     mcts_increment_path(T, Reward).
 
 
 
 mcts_print_path([], _).
 
-mcts_print_path([NODEINDEX, NODE| TPATH], DEBUG):-
+mcts_print_path([Node_ID, Node| Path], Debug):-
     print_debug(' - ', mctsdbg_path),
-    print_debug(NODEINDEX, DEBUG),
+    print_debug(Node_ID, Debug),
     print_debug(':', mctsdbg_path),
-    println_debug(NODE, DEBUG),
-    mcts_print_path(TPATH, DEBUG).
+    println_debug(Node, Debug),
+    mcts_print_path(Path, Debug).
 
 
 
 
-select_best_child3(Value1,Child1,Value2,_,Child1):-
+select_best_child3(Value1, Child1, Value2, _, Child1):-
     Value1 > Value2.
 
-select_best_child3(_ ,_ ,_ ,Child2,Child2).
+select_best_child3( _, _, _, Child2, Child2).
 
 
 %  select_best_child2(Parent, Child1, Child2, Child, false) ?? TODO
 
-select_best_child2(_ , _, CHILD, CHILD, _):-
-    tree_node(CHILD, _, not_expanded, _, _).
+select_best_child2(_ , _, Child, Child, _):-
+    tree_node(Child, _, not_expanded, _, _).
 
 select_best_child2( _, Child1, Child2, Child, false):-
-    tree_node(Child1, _, _, Visited1, SCORE1),
-    tree_node(Child2, _, _, Visited2, SCORE2),
-    SUCCESS1 is SCORE1 / Visited1,
-    SUCCESS2 is SCORE2 / Visited2,
-    select_best_child3(SUCCESS1, Child1, SUCCESS2, Child2, Child).
+    tree_node(Child1, _, _, Visits1, Score1),
+    tree_node(Child2, _, _, Visits2, Score2),
+    Success1 is Score1 / Visits1,
+    Success2 is Score2 / Visits2,
+    select_best_child3(Success1, Child1, Success2, Child2, Child).
 
-select_best_child2(PARENT, CHILD1, CHILD2, CHILD, true):-
-    ucb(PARENT, CHILD1, UCB1),
-    ucb(PARENT, CHILD2, UCB2),!,
-    select_best_child3(UCB1, CHILD1, UCB2, CHILD2, CHILD).
+select_best_child2(Parent, Child1, Child2, Child, true):-
+    ucb(Parent, Child1, UCB1),
+    ucb(Parent, Child2, UCB2),!,
+    select_best_child3(UCB1, Child1, UCB2, Child2, Child).
 
 
   % select_best_child(Parent, List of children, Child, UCB)
 
-select_best_child(_, [CHILD], CHILD, _).
+select_best_child(_, [Child], Child, _).
 
-select_best_child( _, [CHILD| _], CHILD, _):-
-    tree_node(CHILD, _, not_expanded, _, _).
+select_best_child( _, [Child| _], Child, _):-
+    tree_node(Child, _, not_expanded, _, _).
 
 
 % best child of the node
 %     UCB = true  ... depends on UCB   (for making MCTS model)
 %     UCB = false ... depends on score (for extraction of the best path of the model)
 
-select_best_child(Parent, [CHILD|CHILDREN] , BestChild, UCB):-
-    select_best_child(Parent, CHILDREN, BestChild2, UCB),
-    select_best_child2(Parent, CHILD, BestChild2, BestChild, UCB).
+select_best_child(Parent, [Child| Children] , Best_Child, UCB):-
+    select_best_child(Parent, Children, Best_Child2, UCB),
+    select_best_child2(Parent, Child, Best_Child2, Best_Child, UCB).
 
 
 
@@ -228,20 +225,20 @@ select_best_child(Parent, [CHILD|CHILDREN] , BestChild, UCB):-
 % model_get_best_ucb_path(Path, UCB) ... UCB true -> ucb, false -> best score
 %
 
-mcts_get_best_ucb_path(PATH, UCB):-    % only one term -> implicit rood node
-   root_node(ROOT),
-   mcts_get_best_ucb_path(ROOT, PATH, UCB).
+mcts_get_best_ucb_path(Path, UCB):-    % only one term -> implicit rood node
+   root_node(Root),
+   mcts_get_best_ucb_path(Root, Path, UCB).
 
-mcts_get_best_ucb_path(ID, [leaf_node(ID), ACTION], _):-
-    tree_node(ID, ACTION, [], _, _).
+mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
+    tree_node(ID, Action, [], _, _).
 
-mcts_get_best_ucb_path(ID, [leaf_node(ID), ACTION], _):-
-    tree_node(ID, ACTION, not_expanded, _, _).
+mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
+    tree_node(ID, Action, not_expanded, _, _).
 
-mcts_get_best_ucb_path(ID, [node(ID), ACTION| PATH], UCB):-
-    tree_node(ID, ACTION, CHILDREN, _, _),
-    select_best_child(ID, CHILDREN, BESTCHILD, UCB),
-    mcts_get_best_ucb_path(BESTCHILD, PATH, UCB).
+mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
+    tree_node(ID, Action, Children, _, _),
+    select_best_child(ID, Children, Best_Child, UCB),
+    mcts_get_best_ucb_path(Best_Child, Path, UCB).
 
 
 %
@@ -259,21 +256,22 @@ mcts_get_best_ucb_path(ID, [node(ID), ACTION| PATH], UCB):-
 
 
 
-divide_path2([_,model_reasoning_node(GOAL,PLAN,CTX)| Path],
-             [model_reasoning_node(GOAL,PLAN,CTX)|RT],ACT):-
-	divide_path2(Path,RT,ACT).
+divide_path2([_,model_reasoning_node(Event, Plan, Context)| Path],
+             [model_reasoning_node(Event, Plan, Context)| Reasoning_Nodes], 
+             Act):-
+    divide_path2(Path, Reasoning_Nodes, Act).
 
 divide_path2([ _, model_act_node(Intention, Action, Context)| _], [],
              [model_act_node(Intention, Action, Context)]).
 
 divide_path2(_,[],[]).
 
-
-mcts_divide_path([_,_|PATH], REASONING, ACT):-
-	% PATH - optimal path by MCTS
+% PATH - optimal path by MCTS
 	% REASONING - path prefix (without the Root node) of reasoning nodes before the first act
 	% ACT - list with the first act in PATH
-	divide_path2(PATH, REASONING, ACT).
+
+mcts_divide_path([_,_| Path], Reasoning_Nodes, Act_Node):-
+    divide_path2(Path, Reasoning_Nodes, Act_Node).
 
 
 % model_init:-
@@ -287,6 +285,7 @@ mcts_model_init:-
     retractall(tree_node(_,_,_,_,_)),
     assert(root_node(root)),
     assert(fresh_node_index(1)),
-    assert(tree_node(root, model_act_node(no_intention, no_action, [[]]), not_expanded, 0, 0)).
+    assert(tree_node(root, model_act_node(no_intention, no_action, [[]]), 
+                     not_expanded, 0, 0)).
 
 

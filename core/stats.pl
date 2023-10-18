@@ -25,3 +25,6 @@ stats(fragagent,0.015625,1).
 stats(alois,0.8906250000000001,8000).
 stats_([sold([sold(paul,13),sold(alois,0)]),buyers(17),sellers(18)]).
 stats(fragagent,0.0,1).
+stats(fragagent,0.015625,1).
+stats(alois,2.375,8000).
+stats_([sold([sold(alois,17)]),buyers(19),sellers(24)]).
