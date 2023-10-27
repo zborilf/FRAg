@@ -61,90 +61,6 @@ version("0.99").
 
 
 
-frag_choice(48).
-
-frag_choice(49):-
-    writeln("program name:"),
-    read(File),
-    frag(File).
-
-frag_choice(50,49):-
-    set_default_reasoning(all, mcts_reasoning),
-    frag.
-
-frag_choice(50,50):-
-    set_default_reasoning(all, simple_reasoning),
-    frag.
-
-frag_choice(50,51):-
-    set_default_reasoning(all, random_reasoning),
-    frag.
-
-
-frag_choice(50,52):-
-    set_default_reasoning(intention_selection, biggest_joint_reasoning),
-    frag.
-
-frag_choice(50,53):-
-    set_default_reasoning(plan_selection, can_reasoning),
-    frag.
-
-
-frag_choice(50):-
-    get_default_reasoning(Intention_Reasoning, Plan_Reasoning,
-                          Substitution_Reasoning),
-    writeln([Intention_Reasoning, Plan_Reasoning, Substitution_Reasoning]),
-    writeln("1, mcts reasoning"),
-    writeln("2, simple reasoning"),
-    writeln("3, random reasoning"),
-    writeln("4, biggest joint (for intention selection only)"),
-    writeln("5, can reasoning (for plan selection only)"),
-    get_single_char(Choince),
-    frag_choice(50, Choince).
-
-frag_choice(51,49):-
-    set_bindings(late),
-    frag.
-
-frag_choice(51,50):-
-    set_bindings(early),
-    frag.
-
-frag_choice(51):-
-    writeln("1, late bindings"),
-    writeln("2, early bindings"),
-    get_single_char(Choice),
-    frag_choice(51, Choice).
-
-frag_choice(52):-
-    writeln("todo"),
-    frag.
-
-frag_choice(53):-
-    gspy(loop),
-    frag.
-
-frag_choice(54):-
-    get_frag_attributes(default_bindings, Bindings),
-    get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
-                                     Substitution_Selection]),
-    get_frag_attributes(debugs, Debugs),
-    nl,
-    writeln("Settings"),
-    writeln("--------"),
-    writeln("Default bindings:"),
-    write(".. "),write(Bindings),nl,
-    writeln("Reasonings:"),
-    write("-> Intention selection: "),write(Intention_Selection),nl,
-    write("-> Plan selection: "),write(Plan_Selection),nl,
-    write("-> Substitution selection: "),write(Substitution_Selection),nl,
-    write("-> Debugs:"), write(Debugs), nl,
-    nl,
-    frag.
-
-
-frag_choice( _ ):-
-    frag('worker').
 
 
 %!  set_bindings(+BINDINGS_METHOD: atom) is det
@@ -270,9 +186,15 @@ frag_process_clause(_ , end_of_file, []):-
 
 %  sets default attributes
 
-frag_process_clause(Stream, set_default(Attribute, Value), Clauses):-
-    set_default_attribute(Attribute, Value),
-8    !,
+frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
+    fRAgAgent:set_environment_attributes(Environment, Attributes),
+    !,
+    load_multiagent(Stream, Clauses).
+
+
+frag_process_clause(Stream, set_default(Attributes), Clauses):-
+    frag_process_attributes(Attributes),
+    !,
     load_multiagent(Stream, Clauses).
 
 frag_process_clause(Stream, include_reasoning(Filename), Clauses):-
@@ -319,32 +241,30 @@ frag_process_attributes([(Key, Value)| Attributes]):-
 
 
 %!  set_default_attribute(+Key, +Value) is det
-%*Key:
-%*Value:
+%   Sets attributes of the multiagent system. These settings are default
+%   to agents and can be changed for individual agents in the agent
+%   introducting clauses @see multiagent frag file
+%@arg Key: attribute name
+%@arg Value: attribute value
+
 
 set_default_attribute(control, Control):-
-    set_control(Control).
+    fRAgAgent:set_control(Control).
 
 set_default_attribute(reasoning, Reasoning):-
-    set_default_reasoning(Reasoning).
+    fRAgAgent:set_default_reasoning(Reasoning).
 
 set_default_attribute(bindings ,late):-
-    set_default_late_bindings(true).
+    fRAgAgent:set_default_late_bindings(true).
 
 set_default_attribute(bindings ,early):-
-    set_default_late_bindings(false).
+    fRAgAgent:set_default_late_bindings(false).
 
 set_default_attribute(reasoning_params , Parameters):-
     fRAgAgent:set_reasoning_params(Parameters).
 
 set_default_attribute(environment, Environment):-
     fRAgAgent:set_default_environment(Environment).
-
-
-
-
-
-
 
 
 
@@ -372,9 +292,10 @@ wait_agents(Threads):-
     wait_agents(Threads).
 
 
-%
-%	MAIN
-%
+%!  frag(+Filename) is det
+%   Loads and performs multiagent system declared in file Filename.
+%@arg Filename: multiagent file for the FRAg system
+%@see documentation for the mas2fp file format
 
 frag(Filename):-
     format(atom(Mas2FP),"~w.mas2fp",[Filename]),
@@ -384,6 +305,7 @@ frag(Filename):-
     !,
     open(Absolute_Mas2FP, read, Stream, [close_on_abort(true)]),
     thread_setconcurrency(_ , 1000),
+% loads initial multiagent system.
     load_multiagent(Stream, Agents),
     !,
     close(Stream),
@@ -392,14 +314,14 @@ frag(Filename):-
     wait_agents(Threads),
     % run (unblock) agents
     assert(go(1)),
-    wait_agents(Threads).
-
+    wait_agents(Threads),
+    join_threads(Threads).
 
 frag(Filename):-
     format("[MAS2FP] Metafile ~w.mas2fp does not exists.~n", [Filename]).
 
-
-
+%!  frag is det
+%   Starts the system as console with menu
 
 frag:-
     writeln("Select your choice"),
@@ -415,8 +337,111 @@ frag:-
     frag_choice(Choice),
     writeln(bye).
 
+frag_choice(48).
 
-mainfp:-
+frag_choice(49):-
+    writeln("program name:"),
+    read(File),
+    frag(File).
+
+frag_choice(50,49):-
+    set_default_reasoning(all, mcts_reasoning),
+    frag.
+
+frag_choice(50,50):-
+    set_default_reasoning(all, simple_reasoning),
+    frag.
+
+frag_choice(50,51):-
+    set_default_reasoning(all, random_reasoning),
+    frag.
+
+
+frag_choice(50,52):-
+    set_default_reasoning(intention_selection, biggest_joint_reasoning),
+    frag.
+
+frag_choice(50,53):-
+    set_default_reasoning(plan_selection, can_reasoning),
+    frag.
+
+
+frag_choice(50):-
+    get_default_reasoning(Intention_Reasoning, Plan_Reasoning,
+                          Substitution_Reasoning),
+    writeln([Intention_Reasoning, Plan_Reasoning, Substitution_Reasoning]),
+    writeln("1, mcts reasoning"),
+    writeln("2, simple reasoning"),
+    writeln("3, random reasoning"),
+    writeln("4, biggest joint (for intention selection only)"),
+    writeln("5, can reasoning (for plan selection only)"),
+    get_single_char(Choince),
+    frag_choice(50, Choince).
+
+frag_choice(51,49):-
+    set_bindings(late),
+    frag.
+
+frag_choice(51,50):-
+    set_bindings(early),
+    frag.
+
+frag_choice(51):-
+    writeln("1, late bindings"),
+    writeln("2, early bindings"),
+    get_single_char(Choice),
+    frag_choice(51, Choice).
+
+frag_choice(52):-
+    writeln("todo"),
+    frag.
+
+frag_choice(53):-
+    gspy(loop),
+    frag.
+
+frag_choice(54):-
+    get_frag_attributes(default_bindings, Bindings),
+    get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
+                                     Substitution_Selection]),
+    get_frag_attributes(debugs, Debugs),
+    nl,
+    writeln("Settings"),
+    writeln("--------"),
+    writeln("Default bindings:"),
+    write(".. "),write(Bindings),nl,
+    writeln("Reasonings:"),
+    write("-> Intention selection: "),write(Intention_Selection),nl,
+    write("-> Plan selection: "),write(Plan_Selection),nl,
+    write("-> Substitution selection: "),write(Substitution_Selection),nl,
+    write("-> Debugs:"), write(Debugs), nl,
+    nl,
+    frag.
+
+
+frag_choice( _ ):-
+    frag.
+
+
+
+%!  join_threads(+Threads) is det
+%   Joins Threads to the main thread before finish the 'frag' clause
+%@arg Threads: list of threads to join the main thread
+
+join_threads([]).
+
+join_threads([Thread| Threads]):-
+    thread_join(Thread, _),    % Prolog native
+    join_threads(Threads).
+
+
+%!  mainf_frag is det
+%   Initializes the FRAg system. Initialization parameters is in
+%   multiagent file @see fraginit.mas2fp. Then prints initial
+%   information about the system, including settings of essential
+%   parameters
+
+main_frag:-
     nl,
     version(Version),
     format(
@@ -428,27 +453,33 @@ Brno University of Technology~n~n",
     get_frag_attributes(default_bindings, Bindings),
     get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
 	                Substitution_selection]),
-    get_frag_attributes(environments,  Environments),
+    get_default_environments(Environments),
     format("-> Bindings: ~w~n-> Intention selection: ~w ~n-> Plan selection: ~w
 -> Substitution selection: ~w ~n-> Environments: ~w ~n~n",
 	   [Bindings, Intention_Selection, Plan_Selection,
             Substitution_selection, Environments]).
 
 
-:-initialization(mainfp, after_load).
+
+:-initialization(main_frag, after_load).
 
 
 
-md:-
+make_documentation:-
     use_module(library(pldoc/doc_library)),
- %   doc_load_library,
     doc_save('FragPL.pl',[format(html), recursive(true), doc_root(doc)]).
 
 
 
-rep(_, 0).
 
-rep(P, N):-
-    P,
-    N2 is N-1,
-    rep(P, N2).
+
+
+
+
+
+
+
+
+
+
+

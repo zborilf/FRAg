@@ -1,22 +1,34 @@
      
-% goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
+
 
 plan(ach,
-     buyer(Buyer, CD, Max_Price),                        
-     [], 
+     sell,
+     [episode(Episode), Episode > 1000],
      [
-	test(seller(Seller, CD, Price)),
-        rel(Max_Price > Price),
-	act(card_shop, sell(Seller, Buyer, CD)),
+       act(printfg('Finished'))]).
+
+plan(ach,
+     sell,                        
+     [not(closed),buyer(Buyer, CD, Buy_Price)], 
+     [
+    %    act(sleep(0.25)),
+    %    act(printfg('lets go')),
+	test(seller(Seller, CD, Sel_Price)),
+    %    act(printfg('have card')),
+       	rel(Buy_Price > Sel_Price),
+    %    iset(prodej(Buyer, Buy_Price, Sel_Price), BB),
+    %    act(printfg("~w~n",[BB])),
+    %    act(printfg('price ok')),
+        act(card_shop, sell(Seller, Buyer, CD)),
         act(printfg(
-            "~w prodava ~w CDcko ~w za ~w", 
-            [Seller, Buyer, CD, Price]))
+            '~w selling ~w CD ~w for ~w', 
+            [Seller, Buyer, CD, Sel_Price])),
+        ach(sell)
      ]).
 
 
-plan(add,
-     buyer(Buyer, CD, Max_Price),                        
-     [], 
-     [
-	ach(buyer(Buyer, CD, Max_Price))
-     ]).
+plan(ach,
+     sell,                        
+     [closed], [
+       act(printfg('It is closed, finish'))]).

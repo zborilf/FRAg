@@ -23,11 +23,11 @@
 reasoning_method(biggest_joint_reasoning).
 
 
-%!  most_freq_action(Action, Actions, Number, Actions_Freq) is det
-%* Action
-%* Actions
-%* Number
-%* Actions_Freq
+%!  most_freq_action(+Action, +Actions, +Number, -Actions_Freq) is det
+%  @Action
+%  @Actions
+%  @Number
+%  @Actions_Freq
 
 
 % there is only one action for processing

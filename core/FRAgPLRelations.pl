@@ -1,9 +1,10 @@
 
-%
-%	FragPL, raltion acts processing (+ assignment)
-%       Frantisek Zboril jr. 2021 - 2022
-%
-%
+/**
+
+    FragPL, raltion acts processing (+ assignment)
+@author   Frantisek Zboril jr. 2021 - 2022
+@licence
+*/
 
 
 %

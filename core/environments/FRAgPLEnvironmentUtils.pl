@@ -1,8 +1,3 @@
-%
-% 	FragPL, basic environment / ... basic utils for environments
-%       Frantisek Zboril jr. 2023
-%	
-
 
 :-module(env_utils,
     [
@@ -88,10 +83,10 @@ register_clone(Environment, Clone):-
 
 
 %!  clone_environment(Environment, Clone) is det
-%Makes clone of Environment, for every fact(Environment, Environment, Fact),
-%creates clone fact(Environment, Clone, Fact),
-%* Environment: environment name
-%* Clone: clone name
+%   Makes clone of Environment, for every fact(Environment, Environment, Fact),
+%   creates clone fact(Environment, Clone, Fact),
+%  @arg Environment: environment name
+%  @arg Clone: clone name
 
 clone_environment(Environment, Clone):-
     register_clone(Environment, Clone),
@@ -118,11 +113,11 @@ environment_registered(Environment, Clone):-
     environment(Environment, Clone).
         
 %!  situate_agents_clone(+Agents, +Environment, +Clone) is det
-%Situates Agent in Environment, if Clone differs from Environment, then
-%the agent is virtual and interacts with Environment's Clone
-%* Agent: list of agent names / identifier 
-%* Environment: name of environment
-%* Clone: a possible clone of Environment
+%   Situates Agent in Environment, if Clone differs from Environment, then
+%   the agent is virtual and interacts with Environment's Clone
+%  @arg Agent: list of agent names / identifier 
+%  @arg Environment: name of environment
+%  @arg Clone: a possible clone of Environment
 
 situate_agents_clone([], _, _).                    
                   
@@ -278,10 +273,10 @@ add_beliefs(Agent, [Belief| Beliefs]):-
 
 
 %!  add_beliefs_agents(+Agents, +Beliefs) is det
-%Inserts Beliefs to add lists of the Agents 
-%environment (or clone of the environment)
-%* Agents: list of agents' names / identifiers 
-%* Beliefs: list of atoms or formulas
+%   Inserts Beliefs to add lists of the Agents 
+%   environment (or clone of the environment)
+%  @arg Agents: list of agents names / identifiers 
+%  @arg Beliefs: list of atoms or formulas
 
 add_beliefs_agents([], _).
 

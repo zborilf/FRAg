@@ -52,9 +52,12 @@ recomended_path([],[]).
 % for this type of reasoning
 
 
-%
-%	Zpracovani atributu v metasouboru, specialne pro tento modul
-%
+%!  set_reasoning_method_params(Parameters) is det
+%@arg Parameters: expected mcts_params(+Expansions, +Simulations, +Steps)
+%* Expansions: Number of expansions during model update
+%* Simulations: Number of rollout simulations per expansion
+%* Steps: Maximal number of loops/steps in simulation, when agent does not 
+%   finish, then is aborted by force after Steps loops
 
 set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
     retractall(mcts_default_expansions( _ )),

@@ -100,23 +100,23 @@ get_all_environments(Environments):-
 
 
 %!  environment_loaded(+Environment) is semidet
-%Succeed, if Environment has been added to the system
-%*Environment: Name of environment
+%   Succeed, if Environment has been added to the system
+%  @arg Environment: Name of environment
 
 environment_loaded(Environment):-
     environment(Environment).
 
 
 %!  clone_environment(+Environment, +Clone) is det
-% Creates a copy of the environment with the identifier Environment_Clone
-% Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon
-%samostatne Agent muze bude situovan (situate_agent) do puvodniho prostredi,
-%nebo do klonu (see situate_agent)
-%* Envrionment: identifikator prostredi
+%   Creates a copy of the environment with the identifier Environment_Clone
+%   Metody se budou volat jako Envrionment( ..., data ale budou pro kazdy klon
+%   samostatne Agent muze bude situovan (situate_agent) do puvodniho prostredi,
+%   nebo do klonu (see situate_agent)
+%  @arg Envrionment: identifikator prostredi
 %
-%* Environment_Clone: ground nebo free, klon bude odkazovan timto nazvem
-%  pouziti pro situovani agentu (jinak si prostredi pohlida, kteremu agentu
-%  davat data z originaniho prostredi a kteremu z klonu
+%  @arg Environment_Clone: ground nebo free, klon bude odkazovan timto nazvem
+%   pouziti pro situovani agentu (jinak si prostredi pohlida, kteremu agentu
+%   davat data z originaniho prostredi a kteremu z klonu
 
 
 clone_environment(Environment, Clone):-

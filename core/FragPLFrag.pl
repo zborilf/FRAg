@@ -213,8 +213,6 @@ get_intended_means(Means, Event, Intended_Means):-
 
 
 
-
-
 %===============================================================================
 %                                                                              |
 %    FRAg Methods ... for work with substitutions                              |
@@ -555,14 +553,13 @@ simulate_early_bindings(Act_Atom, Context_In, Context_Out):-
 
 
 %!  query(+Query, +Context, -Context_Out).
-%  Queries agent's base by literal Query
-%*  Query
-%*  Context
-%*  Context_Out
+%   Queries agent's base by literal Query
+%  @arg Query
+%  @arg Context
+%  @arg Context_Out
 
-%
-%  not query
-%
+
+%  negative query
 
 query(not(Query), Context, Context_Out):-
     %  writeln(query(not(QUERY), CONTEXT, CONTEXTOUT)),
@@ -581,11 +578,10 @@ query(Query, Context, Context_Out):-
 query( _, _, []).
 
 
-% ! substract_subsets(+Substitutions1, +Substitutions,
-% -Substitutions_Out) is det
-% Removes every substitution from
-% Substitutions1 that is a subset of any substitution from
-% Substitutions2
+% ! substract_subsets(+Substitutions1, +Substitutions, 
+%                     -Substitutions_Out) is det
+%   Removes every substitution from Substitutions1 that is a subset of any
+%   substitution from Substitutions2
 
 substract_subsubstitions(Substitutions1, [], Substitutions1).
 
@@ -631,15 +627,5 @@ delete_binding([A=B| Bindings], C=D, Bindings_Out):-
 
 delete_binding([Binding | Bindings], Binding2, [Binding | Bindings_Out]):-
     delete_binding(Bindings, Binding2, Bindings_Out).
-
-
-
-
-
-
-
-
-
-
 
 

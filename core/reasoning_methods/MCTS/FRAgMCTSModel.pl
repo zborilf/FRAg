@@ -11,7 +11,7 @@
 
 
 
-z%  :-module(fRAgMCTSModel,
+%  :-module(fRAgMCTSModel,
 %    [
 %	mcts_model_init /0,
 %	mcts_expand_node /2,
@@ -75,7 +75,7 @@ get_fresh_node_id(Index):-
 
 %!  generate_children(+Index_starts, +Index_ends, -Children) is det
 %   vytvori seznam indexu od Index_starts do Index_ends,
-%* Index_starts: integer
+%@arg Index_starts: integer
 
 
 generate_children(Index, Index, []).
@@ -85,8 +85,8 @@ generate_children(Start_ID, End_ID, [Start_ID| Indexes]):-
     generate_children(Start_ID2, End_ID, Indexes).
 
 %!  set_children(+Node_index: ke kteremu uzlu se pripojuji decka, +Index_starts, Index_Ends) is det
-%   TODO
-%   * Index_starts: integer
+%   @todo
+%@arg Index_starts: integer
 
 
 set_children(Node_ID, Start_ID, End_ID):-

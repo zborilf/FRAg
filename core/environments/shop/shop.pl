@@ -8,6 +8,13 @@
     ]
 ).
 
+
+/**
+@Author Frantisek Zboril jr.
+@version 0.5 (2023) 
+*/
+
+
 :- discontiguous card_shop/2.
 :- discontiguous card_shop/3.
 
@@ -37,15 +44,14 @@ time_adjust_multiply(30).
 :- dynamic episode_length /1.
 
 
-episode(1).
-
-
 
 :-use_module('../FRAgPLEnvironmentUtils').   % interface to environments
 :-use_module('stat_utils').
 
 
-max_price(200).
+episode(1).
+
+max_price(160).
 
 product(cd1, 100).
 product(cd2, 80).
@@ -84,36 +90,37 @@ previous_time(-1).
 % Inserts beliefs has / price / sells to Agents
 
 init_beliefs(Agents):-
-      findall_environment(card_shop, Agent, has( _, _), Beliefs1),
+    findall_environment(card_shop, Agent, has( _, _), Beliefs1),
     findall_environment(card_shop, Agent, product( _, _), Beliefs2),
     findall_environment(card_shop, Agent, sells( _, _, _), Beliefs3),
-
+    findall_environment(card_shop, Agent, episode( _), Beliefs4),
     add_beliefs_agents(Agents, Beliefs1),
     add_beliefs_agents(Agents, Beliefs2),
-    add_beliefs_agents(Agents, Beliefs3).
+    add_beliefs_agents(Agents, Beliefs3),
+    add_beliefs_agents(Agents, [episode(1)]).
 
                   
 
 %!  card_shop(++Functionality, +Attributes) is det 
 %@arg Functionality is one of 
-%* set_parameters 
-%* add_agent
-%* clone
-%* reset_clone
-%* remove_clone
+%*      set_parameters 
+%*      add_agent
+%*      clone
+%*      reset_clone
+%*      remove_clone
 %@arg Attributes: List of parameters in the form of tuples
-%1. For functionality 'set_attributes' the attributes can be
-%* (products, [Number, Mean_Price, Dispersion])
-%* (b_lambda, Mean) 
-%* (s_lambda, Mean)
-%* (b_price, [Mean, Dispersion])
-%* (s_price, [Mean, Dispersion]) 	
-%* (closing, Episode)
-%* (b_stay, Episodes)
-%* (c_stay, Episodes)
-%* (episoding, sim_time)
-%* (episoding, (real_time, Time)) 
-%2. For functionality 'add_agant' the parameter is agent's name
+%   1. For functionality 'set_attributes' the attributes can be
+%*      (products, [Number, Mean_Price, Dispersion])
+%*      (b_lambda, Mean) 
+%*      (s_lambda, Mean)
+%*      (b_price, [Mean, Dispersion])
+%*      (s_price, [Mean, Dispersion]) 	
+%*      (closing, Episode)
+%*      (b_stay, Episodes)
+%*      (c_stay, Episodes)
+%*      (episoding, sim_time)
+%*      (episoding, (real_time, Time)) 
+%   2. For functionality 'add_agant' the parameter is agent's name
 
 
 card_shop(set_attributes, []).
@@ -171,9 +178,9 @@ change_params(Atom):-
 change_params(Atom):-
     assert(Atom).
 
-%! generate_products(+Number, +Mean_Price, +Dispersion) is det
-% Generates Number of CDs with prices ~N(Mean_Prixe, Dispersion) truncates
-% to tens
+%!  generate_products(+Number, +Mean_Price, +Dispersion) is det
+%   Generates Number of CDs with prices ~N(Mean_Prixe, Dispersion) truncates
+%   to tens
 %@arg Number
 %@arg Mean_Price
 %@arg Dispersion
@@ -192,13 +199,12 @@ generate_products(Number, Mean, Dispersion):-
 
    
  
-
 set_parameter( _, _):-
     format("[ERROR] card shop, wrong parameters").   
 
 %!  card_shop(add_agent, +Agent) is det
-% adds agent Agent to the main instance of card_shop environment
-%* Agent: Name of the agent
+%   Adds agent Agent to the main instance of card_shop environment
+%@arg Agent: Name of the agent
 
 card_shop(add_agent, Agent):-
     situate_agent_environment(Agent, card_shop),
@@ -212,10 +218,11 @@ card_shop(add_agent, Agent):-
                           [stats_([sold(Sold_By2), buyers(Buyers),
                                    sellers(Sellers)])]).
 
+
 %!  card_shop(add_agent, +Instance +Agent) is det
-% adds agent Agent to the +Instance of card_shop environment
-%* Agent: Name of the agent
-%* Instance: Insatnce of the card_shop environment
+%   Adds agent Agent to the +Instance of card_shop environment
+%@arg Agent: Name of the agent
+%@arg Instance: Insatnce of the card_shop environment
 
 card_shop(add_agent, Agent, Instance):-
     situate_agents_clone([Agent], card_shop, Instance),
@@ -223,49 +230,45 @@ card_shop(add_agent, Agent, Instance):-
 
 
 %!  card_shop(clone, +Instance) is det
-% creates a clone 
-%* Instance: Insatnce of the card_shop environment
+%   Creates a clone 
+%@arg Instance: Insatnce of the card_shop environment
 
 card_shop(clone, Instance):-
     clone_environment(card_shop, Instance).
 
+
 %!  card_shop(reset_clone, +Clone) is det
-%Resets clone to its initial state
-%*Clone:
+%   Resets clone to its initial state
+%@arg Clone:
 
 card_shop(reset_clone, Clone):-
     reset_environment_clone(card_shop, Clone),
     get_all_situated(card_shop, Clone, Agents),
     init_beliefs(Agents).
 
+
 %!  card_shop(remove_clone, +Clone) is det
-%Removes clone instance
-%*Clone:
+%   Removes clone instance
+%@arg Clone:
 
 card_shop(remove_clone, Clone):-
     remove_environment_clone(card_shop, Clone).
 
-
-
 card_shop(save_state, Instance, State):-
     save_environment_instance_state(card_shop, Instance, State).
 
-
 card_shop(load_state, Instance, State):-
     load_environment_instance_state(card_shop, Instance, State).
-
 
 card_shop(remove_state, Instance, State):-
     remove_environment_instance_state(card_shop, Instance, State).
 
 
-
-
 %!  card_shop(perceive, +Agent, -Add_List, - Delete_List) is det
-% Passes changes to the Agent in the form od Add_List and Delete_List
-%*Agent: Agent that perceives some instance of card_shop environment
-%*Add_List: New percept since last perceiving
-%*Delete_List: Disapeared peceps since last perceiving
+%   Passes changes to the Agent in the form od Add_List and Delete_List
+%@arg Agent: Agent that perceives some instance of card_shop environment
+%@arg Add_List: New percept since last perceiving
+%@arg Delete_List: Disapeared peceps since last perceiving
 
 card_shop(perceive, Agent , Add_List, Delete_List):-
     check_episode(Agent),
@@ -280,28 +283,44 @@ card_shop(perceive, Agent , Add_List, Delete_List):-
                                                buyers(B), sellers(S)])]).
 
 
+
 %!  check_episode(+Agent) is det
-% Checks if the episode is over and if so, updates environment.
-%TODO should respect particular instances (does not now, for all instances together)
-%*Agent: agent perceiving environment, could be used for episode checking
+%   Checks if the episode is over and if so, updates environment.
+%   TODO should respect particular instances (now it is for all instances)
+%@arg Agent: agent perceiving environment, could be used for episode checking
+
+%   In the case of sim_time, the check allways passes
+
+check_episode(Agent):-
+    episode_mode(sim_time),
+    episode(Episode),
+    delete_facts_beliefs_all(card_shop, Agent,
+                             [episode( Episode )]),
+    Episode2 is Episode + 1,
+    add_facts_beliefs_all(card_shop, Agent, [episode(Episode2)]),
+    update_environment(Agent, 1).    
+
+%   In the case of real_time, 0 to N episodes happened due to time differences
+%   between current and last percieved time 
 
 check_episode( _ ):-
+    episode_mode(real_time),
     previous_time(-1),
     get_time(Time),
     retract(previous_time( _ )),
     assert(previous_time(Time)).
 
-
 check_episode(Agent):-
+    episode_mode(real_time),
     new_episode_time(Agent, N),
+    episode(Episode),
     delete_facts_beliefs_all(card_shop, Agent,
                              [episode( Episode )]),
+    Episode2 is Episode + N,
     add_facts_beliefs_all(card_shop, Agent, [episode(Episode2)]),
-
     update_environment(Agent, N).
 
 check_episode( _ ).
-
 
 
 new_episode_time( _ , N):-
@@ -321,7 +340,6 @@ new_episode_time( _ , N):-
 %*Agent:
 %*Number: Number of updatings
 
-
 update_environment(Agent, 0).
 
 update_environment(Agent, N):-
@@ -331,23 +349,19 @@ update_environment(Agent, N):-
     assert(episode(Episode2)),
 %    format("Updating envir ~w~n",[N]),
     patience_out(Agent, Episode2),
-    if_open_add_customers(Episode2, Time3, Agent),
+    add_customers(Episode2, Time3, Agent),
     N2 is N-1,
     update_environment(Agent, N2).
 
 
 
-
-
-
-if_open_add_customers(Episode, Time_Difference, Agent):-
+add_customers(Episode, Time_Difference, Agent):-
     closing_time(Closing_Time),
     Episode < Closing_Time,
     add_sellers(Agent, Time_Difference),
     add_buyers(Agent, Time_Difference).
 
-
-if_open_add_customers(Episode, _, Agent):-
+add_customers(Episode, _, Agent):-
     closing_time(Episode),
     get_time(Time2),
     retract(previous_time(Time)),
@@ -356,15 +370,18 @@ if_open_add_customers(Episode, _, Agent):-
     closing_time(Episode),
     add_facts_beliefs_all(card_shop, Agent, [closed]).
 
+add_customers( _, _, _).
 
-
-if_open_add_customers( _, _, _).
 
 
 patience_out(Agent, Episode):-
-    findall_environment(card_shop, Agent, deadline(Person, Name, Episode),
+%    findall_environment(card_shop, Agent, deadline(Person, Name, Episode),
+%                        Unpatients),
+    findall_environment(card_shop, Agent, deadline( _, _, Episode),
                         Unpatients),
     unpatients_left(Agent, Unpatients).
+
+
 
 unpatients_left(Agent, []).
 
@@ -387,7 +404,6 @@ remove_unpatient(Agent, deadline(buyer, Buyer, _)):-
                              [buyer(Buyer, _, _)]).
 %   add_facts_beliefs_all(card_shop, Agent,
 %                             [left(Buyer)]).
-
 
 
 
@@ -455,8 +471,6 @@ generate_cd_price(CD, Price_Out, Mean, Dispersion):-
 %    Agent acts
 
 
-
-
 card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
     episode(E),
     query_environment(card_shop, Brooker, seller(Seller, What, Price)),
@@ -482,7 +496,6 @@ card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
 
 
 card_shop(act, _, sell( _, _), false).
-
 
 
 card_shop(act, _, sell( Seller, Buyer, What), false):-
@@ -514,18 +527,17 @@ card_shop(act, _, _, fail).
 
 
 
-
 :-
     env_utils:register_environment(card_shop),
     findall(product(What, Price), product(What, Price), Facts),
+    episode(Episode),
     env_utils:add_facts(card_shop, [stats_([sold([]), buyers(0), sellers(0)])]),
-    env_utils:add_facts(card_shop, Facts).
+    env_utils:add_facts(card_shop, Facts),
+    env_utils:add_facts(card_shop, [episode(Episode)]).
 
 md:-
     use_module(library(pldoc/doc_library)),
     doc_save('shop.pl',[format(html), recursive(true), 
                                           doc_root('../../doc')]).
-
-
 
 
