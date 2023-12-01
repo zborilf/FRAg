@@ -1,8 +1,9 @@
 
-%
-%	Reasoning methods - MCTS supported reasoning
-%	Frantisek Zboril jr. 2022 - 2023
-%
+/**
+	Reasoning methods - MCTS supported reasoning
+        This file is included to FRAgPLAgent.pl file
+	Frantisek Zboril jr. 2022 - 2023
+*/
 
 %
 %  Should define

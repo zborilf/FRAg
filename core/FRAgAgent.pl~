@@ -3,13 +3,11 @@
 :-module(fRAgAgent,
     [
 	fa_init_agent / 2,
-%	go_sync / 2,
 	include_reasoning_method /1,
 	load_environment /1,
         set_control /1,
 	set_default_reasoning /1,
 	get_default_reasoning /3,
-%        get_default_environments/1,
 	set_plan_selection /1,
 	set_default_plan_selection /1,
 	set_intention_selection /1,
@@ -1221,7 +1219,7 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 %   last literal (goal) is next_loop, which checks if the loop
 %   continues.
 
-%  born dead
+%  agent finished
 
 loop(-1, -1).
 
@@ -1361,8 +1359,11 @@ finished:-
 %===============================================================================
 
 
-%!  force_reasoning(+Model_Node, +Plan, +Context).
-%
+%!  force_reasoning(+Model_Reasoning_Node) is det
+%   Forces adaption of plan with Plan_ID in Context for specified WEI
+%  @arg Model_Node: reasoning node of look-ahead model, defined in
+%   FRAgMCTSModel.pl as model_reasoning_node(WEI, Plan_ID,
+%   Context)
 
 force_reasoning(model_reasoning_node(
                     event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
@@ -1382,9 +1383,9 @@ force_reasoning(model_reasoning_node(
 
 
 %!  force_execution(+Model_Act_Node) is multi
-%  @arg Model_Act_Node: It is triple (Intention_ID, Act, Decision)
-%   Performs Act. This Act's instance given by Decision. The instance is
-%   defined explicitly in a model and the model act element is provided.
+%   Performs Act. This Act's instance given by Decision.
+%  @arg Model_Act_Node: act node of look-ahead model, defined in
+%   FRAgMCTSModel.pl as model_act_node(Intention_ID, Act, Decision)
 
 % sub-plan finished, just update intention
 
@@ -1430,22 +1431,26 @@ force_execution(model_act_node( _, _, _)).
 %                                                                              |
 %===============================================================================
 
-%!  set_clauses(+Clauses, +Plan_Index)
-%
-%  @arg Clauses:
+%!  set_clauses(+Clauses, +Plan_ID)
+%   Asserts Clauses that are agent's program. When asserting plans,
+%   index them with Plan_ID, which is original fresh plan's identifier.
+%  @arg Clauses: agent's program
 %  @arg Plan_Index: actual index for a plan, if it is added to agent's
 %   plan base
 
 set_clauses([],_).
 
-set_clauses([plan(Event_Type, Goal_Atom, Conditions, Body)|Clauses], Plan_Index)
-    :-
-    assert(plan(Plan_Index ,Event_Type, Goal_Atom, Conditions, Body)),
-    Plan_Index2 is Plan_Index+1,
-    set_clauses(Clauses, Plan_Index2),
-    !.
+% inserting plan, use the Plan_ID and increment it for possibly next
+% declared plan
 
-% process declared top-level goal -> creates events for them
+set_clauses([plan(Event_Type, Goal_Atom, Conditions, Body)| Clauses], Plan_ID)
+    :-
+    assert(plan(Plan_ID ,Event_Type, Goal_Atom, Conditions, Body)),
+    Plan_ID2 is Plan_ID+1,
+    set_clauses(Clauses, Plan_ID2).
+
+% inserting top-level goal, it generates corresponding event for it
+
 set_clauses([goal(Event_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
     get_fresh_event_number(Event_Index),
     assert(event(Event_Index, Event_Type, Goal_Atom, null, Context, active,
@@ -1453,24 +1458,29 @@ set_clauses([goal(Event_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
     set_clauses(Clauses, Plan_Index),
     !.
 
+% the rest (beliefs) are simply asserted
+
 set_clauses([Clause| Clauses], Plan_Index):-
     assert(Clause),
     set_clauses(Clauses, Plan_Index).
 
 
-clear_agent:-
-    retractall(fact(_)),
-    retractall(event( _, _, _, _, _, _, _)),
-%    retractall(plan( _, _, _, _)),
-    retractall(plan( _, _, _, _, _)),
-    retractall(intention( _, _, _)).
-
+%  read_clause(+Clause, -Clauses, +Stream) is multi
+% @arg
+% @arg
+% @arg
 
 read_clauses(end_of_file, [], _):- !.
 
-read_clauses(Clause, [Clause|Clauses], String):-
-    read_clause(String, Clause2, []),
-    read_clauses(Clause2, Clauses, String).
+read_clauses(Clause, [Clause|Clauses], Stream):-
+    read_clause(Stream, Clause2, []),
+    read_clauses(Clause2, Clauses, Stream).
+
+
+%!  load_program(+Agent, +Clauses) is multi
+%
+%  @arg
+%  @arg
 
 load_program(Agent, Clauses):-
     access_file(Agent, read),! ,
@@ -1499,7 +1509,7 @@ take_snapshot(Snapshot):-
     append([Belief_Snapshot, Event_Snapshot, Plan_Snapshot,
             Intention_Snapshot], Snapshot).
 
-
+%!  take_snapshot_intention(+Intention_Snapshot) is det
 
 take_snapshot_intentions(Intention_Snapshot):-
     findall(intention(Number, PlanStack, Status),

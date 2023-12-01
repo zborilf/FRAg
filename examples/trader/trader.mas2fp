@@ -8,7 +8,7 @@ set_default([(control, terminate(timeout, 1000)),
              (reasoning, random_reasoning),
              (environment, card_shop)]).		
 
-set_environment(card_shop, [(closing, 750), (s_lambda, 0.02), (b_lambda, 0.02), 
+set_environment(card_shop, [(closing, 750), (s_lambda, 0.1), (b_lambda, 0.1), 
                             (b_price,[0.4, 0.2]), (s_price, [0.6, 0.2]),
                             (products, [8, 0.3, 0.1]), 
                     %       (episoding, (real_time, 0.0001)) ]).
@@ -20,5 +20,5 @@ set_environment(card_shop, [(closing, 750), (s_lambda, 0.02), (b_lambda, 0.02),
 
 
 load("paul","../examples/trader/trader",1,[(debug, systemdbg)]).
-% load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late)]).
+load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late)]).
 			  

@@ -3,7 +3,7 @@
     [
         normal_dist_sample /3,
         get_discount / 3,
-        new_events_number / 3
+        new_events_number / 2
      ]
 ).
 
@@ -37,9 +37,8 @@ new_events_number2(N, Lambda, S, X, Events):-
     N2 is N+1,
     new_events_number2(N2, Lambda, S2, X, Events).
                      
-new_events_number(Lambda, Time_Difference, Events):-
+new_events_number(Lambda, Events):-
     random(0.0, 1.0, X),
-%    Lambda2 is Lambda * Time_Difference,
     new_events_number2(0, Lambda, 0, X, Events).
 
 
@@ -48,7 +47,7 @@ f_normal(X, Mean, Dispersion, Y):-
 
 
 
-normal_dist_sample2(Mean, Dispersion, Y, Y2, X, X):-
+normal_dist_sample2( _, _, Y, Y2, X, X):-
     Y < Y2.
 
 normal_dist_sample2(Mean, Dispersion, _, _, _, X_Out):-

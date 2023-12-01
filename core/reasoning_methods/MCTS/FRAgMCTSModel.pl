@@ -2,7 +2,7 @@
 
 %
 %  children - 1,list of nodes 2, empty list (final state) 3, non_expanded
-%       action model_reasoning_node(goal / wgi , plan number, pus) or
+%       action model_reasoning_node(goal / wei , plan number, pus) or
 % model_act_node(intention, action, decision) - intention is neccessary
 % for exclusive actions tree_node(id node, action, children, visited,
 % points)

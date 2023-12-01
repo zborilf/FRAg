@@ -3,13 +3,11 @@
 :-module(fRAgAgent,
     [
 	fa_init_agent / 2,
-%	go_sync / 2,
 	include_reasoning_method /1,
 	load_environment /1,
         set_control /1,
 	set_default_reasoning /1,
 	get_default_reasoning /3,
-%        get_default_environments/1,
 	set_plan_selection /1,
 	set_default_plan_selection /1,
 	set_intention_selection /1,
@@ -39,7 +37,7 @@
 This module contains code for threads of individual agents
 
 @author Frantisek Zboril
-@version 0.93 (2021 - 2023)
+@version 0.95 (2021 - 2023)
 @license GPL
 */
 
@@ -63,7 +61,6 @@ This module contains code for threads of individual agents
 :- multifile get_plan /4.
 :- multifile update_model /1.
 
-
 % FRAg specific ops / late bindings etc.
 :-include('FRAgPLFRAg.pl').
 % FRAg operations for relations and assignments
@@ -74,7 +71,7 @@ This module contains code for threads of individual agents
 :-use_module('FRAgBlackboard').
 % interface to environments
 :-use_module('FRAgAgentInterface').
-
+  
 
 timeout(200).
 
@@ -105,24 +102,35 @@ terminate(no_job).
 :-thread_local intention /3.
 
 %!  goal(+Type, +Atom, +Context).
+%  @arg Type:
+%  @arg Atom:
+%  @arg Context:
 
 :-thread_local goal /3.
 
+
+
 %!  event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
 %         +History).
-%  @arg Event_Type: ach for achievement, add for add,
+%  @arg Event_ID:
+%  @arg Type: ach for achievement, add for add, del for delete
+%  @arg Atom:
+%  @arg Parent_Intention:
+%  @arg Context:
 %  @arg Status: event state - active / intention number,
 %  @arg History: list of tried plans
 
 :-thread_local event /7.
 
+
+
 %!  intention_fresh(Number)
-%   Next possible ID Number for an intention
+%  @arg Number: Next possible Identifier number for agent's intention
 
 :-thread_local intention_fresh / 1.
 
 %!  event_fresh(Number)
-%   Next possible ID Number for an event
+%  @arg Next possible ID Number for agent's event
 
 :-thread_local event_fresh / 1.
 
@@ -140,6 +148,7 @@ include_reasoning_method(Filename):-
     load_files([Filename], [silent(true)]).
 
 
+
 %!  set_reasoning_params(+Parameters) is det
 %  @arg Parameters: reasoning_method(Parameters), where reasoning_method
 %   is name of a supported reasoning method, @see reasonings.txt
@@ -150,12 +159,14 @@ set_reasoning_params(Parameters):-
     set_reasoning_method_params(Parameters).
 
 
+
 %!  load_environment(+Filename) is det
 %   includes file library for environment
 %  @arg Filename: environment source file
 
 load_environment(Filename):-
     fRAgAgentInterface:add_environment_library(Filename).
+
 
 
 %!  get_default_environment(-Environments) is det
@@ -179,6 +190,7 @@ is_debug(Debug, true):-
 is_debug(_, false).
 
 
+
 print_debug(Content, Debug):-
     agent_debug(Debug),
     write(Content).
@@ -192,6 +204,7 @@ print_debug(String, Data, Debug):-
     format(String, Data).
 
 print_debug(_, _, _).
+
 
 
 println_debug(Content, Debug):-
@@ -213,6 +226,7 @@ print_list_state([H|T], S, String_Out):-
     print_list_state(T, S3, String_Out).
 
 
+
 print_plans([], String, String).
 
 print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)|
@@ -221,6 +235,7 @@ print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)|
            [Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body]),
     concat(String_In, String1, String2),
     print_plans(Plans, String2, String_Out).
+
 
 
 print_intention([], String, String).
@@ -246,8 +261,11 @@ print_intentions(String_In, String_Out):-
     print_intention(Intentions, String1, String2),
     concat(String2, "}\n", String_Out).
 
+
+
 print_intentions(String, String_Intention):-
     concat(String,":: INTENTIONS: No intentions\n",String_Intention).
+
 
 
 print_goals(String, String_Goal):-
@@ -264,6 +282,7 @@ print_goals(String, String_Goal):-
     concat(String, ":: EVENTS: No events\n", String_Goal).
 
 
+
 print_beliefs(String_In ,String_Beliefs):-
     bagof(fact(Belief), fact(Belief), Beliefs),
     concat(String_In,":: BELIEFS {\n", String1),
@@ -272,6 +291,7 @@ print_beliefs(String_In ,String_Beliefs):-
 
 print_beliefs(Label, Belief):-
     concat(Label, ":: BELIEFS: No beliefs\n", Belief).
+
 
 
 print_agent_state(Debug):-
@@ -290,6 +310,7 @@ print_agent_state(Debug):-
     print_debug(String10, Debug).
 
 
+
 print_state( _ ):-
     agent_debug(no_debug).
 
@@ -299,6 +320,7 @@ print_state(Message):-
     print_agent_state(reasoningdbg).
 
 print_state(_).
+
 
 
 write_stats(String):-
@@ -329,7 +351,7 @@ agents_stats( _ ).
 
 %!  process_add_list(+Beliefs) is det
 %   Incorporates Beliefs to agent's BB
-%  @arg Beliefs: List of beliefs (atoms)
+%  @arg Beliefs: List of belief atoms
 
 process_add_list([]).
 
@@ -342,9 +364,11 @@ process_add_list([Belief| Beliefs]):-
     create_event(add, Belief),
     process_add_list(Beliefs).
 
+
+
 %!  process_delete_list(+Beliefs)
-% Removes Beliefs to agent's BB
-%@arg Beliefs: List of beliefs (atoms)
+%   Removes Beliefs to agent's BB
+%  @arg Beliefs: List of belief atoms
 
 process_delete_list([]).
 
@@ -354,7 +378,7 @@ process_delete_list([Belief | Beliefs]):-
     create_event(del, Belief),
     process_delete_list(Beliefs).
 
-% not present in BB, need not to be deleted
+%   not present in BB, need not to be deleted
 process_delete_list([_ |Beliefs]):-
     process_delete_list(Beliefs).
 
@@ -365,6 +389,7 @@ process_delete_list([_ |Beliefs]):-
 %    COMMUNICATION HANDLER                                                     |
 %                                                                              |
 %===============================================================================
+
 
 %!  process_messages
 %   Receives messages (through thread) and creates corresponding add
@@ -400,7 +425,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
 		 plan(Event_Type, Event_Atom, Conditions, Context2, Acts),
         true)
     :-
-% 'decisioning' clause is defined in FRAgPLFrag.pl
+%   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Belief, Context, Context2),
     assert(fact(Belief)),
     create_event(add, Belief).
@@ -412,11 +437,10 @@ execute(_ ,
         plan(Event_Type, Event_Atom, Conditions, Context, [del(Belief)| Acts]),
 	plan(Event_Type, Event_Atom, Conditions, New_Context, Acts),
         true):-
-% 'decisioning' clause is defined in FRAgPLFrag.pl
+%   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Belief, Context, New_Context),
     try_retract_belief(fact(Belief)),
     create_event(del, Belief).
-
 
 
 % Making instance set. Makes instance set of Atom using actual Context of
@@ -426,20 +450,20 @@ execute(_ ,
 execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
                 [iset(Atom, Instance_Set)| Acts]),
 	   plan(Event_Type, Event_Atom, Conditions, Context, Acts), true):-
-% 'instance_set' clause is defined in FRAgPLFrag.pl
+%   'instance_set' clause is defined in FRAgPLFrag.pl
     instance_set(Atom, Context, Instance_Set).
 
 
-% Performing the test goal
+%   Performing the test goal
 
 execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]),
 	    plan(Event_Type, Event_Atom, Conditions, Context_New, Acts),
             Result):-
-% 'query' clause is defined in FRAgPLFrag.pl
+%   'query' clause is defined in FRAgPLFrag.pl
     query(Goal, Context, Context2),
     simulate_early_bindings(Goal, Context2, Context_New),
-% If the resulting context is nonempty, the test goal is successful. Otherwise,
-% it is unsuccessful.
+%   If the resulting context is nonempty, the test goal is successful. Otherwise,
+%   it is unsuccessful.
     nonempty_context(Context_New, Result).
 
 
@@ -451,15 +475,19 @@ execute(Intention_ID,
         true)
     :-
     retract(intention(Intention_ID, Plan_Stack, active)),
-% this intention is blocked now
+
+%   this intention is blocked now
     assertz(intention(Intention_ID, Plan_Stack, blocked)),
-% variables of the goal declared
+
+%   variables of the goal declared
     term_variables(Goal, Goal_Variables),
-% short context of the original level by variables in the goal declared
-% 'shorting' clause is defined in FRAgPLFrag.pl
+
+%   short context of the original level by variables in the goal declared
+%   'shorting' clause is defined in FRAgPLFrag.pl
     shorting(Goal, Goal2, Context, Goal_Variables, Context_New,_),
     get_fresh_event_number(Event_ID),
-% create ach event with proper parent intention and context
+
+%   create ach event with proper parent intention and context
     assert(event(Event_ID, ach, Goal2, Intention_ID, Context_New, active, [])).
 
 
@@ -470,11 +498,11 @@ execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context, []),
         plan(Event_Type, Goal_Atom, Conditions, Context, []), true).
 
 
-% execution of relation / assertion act. For instance alop(X<3) or alop
-% (X is Y+1). It does not do decisioning, but it works with the whole
-% context. Resulting context contains all that survived this relational
-% constraint. F.e. [[X=1],[X=5],[X=3],[X=2]] -> [[X=1],[X=2]] for
-% alop(X<3).
+%   execution of relation / assertion act. For instance alop(X<3) or alop
+%   (X is Y+1). It does not do decisioning, but it works with the whole
+%   context. Resulting context contains all that survived this relational
+%   constraint. F.e. [[X=1],[X=5],[X=3],[X=2]] -> [[X=1],[X=2]] for
+%   alop(X<3).
 
 execute(_ ,
         plan(Event_Type, Goal_Atom, Conditions, Context_In, [rel(Term1 is Term2)|
@@ -483,14 +511,15 @@ execute(_ ,
     :-
     alop(Term1 is Term2, Context_In, Context_Out, Result).
 
+
 execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context,
                 [rel(Relation)| Acts]),
 	plan(Event_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
     functor(Relation, Operator, _),
-% 'is_relational_operator' clause is defined in FRAgPLRealtions.pl
+%   'is_relational_operator' clause is defined in FRAgPLRealtions.pl
     is_relational_operator(Operator),
-% 'alop' clause is defined in FRAgPLRealtions.pl
+%   'alop' clause is defined in FRAgPLRealtions.pl
     alop(Relation, Context, Context_Out, Result).
 
 
@@ -500,7 +529,7 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
                 [act(Environment, Action)| Acts]),
 	plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Restult)
     :-
-% 'decisioning' clause is defined in FRAgPLFrag.pl
+%   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out),
     !,
     execute_environment(Environment, Action, Restult).
@@ -509,13 +538,11 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
                                                              Acts]),
             plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Result)
     :-
-% 'decisioning' clause is defined in FRAgPLFrag.pl
+%   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out),
     !,
     % execute action in 'basic' FRAg environment
     execute_environment(basic, Action, Result).
-
-
 
 % Act execution failed. Plan remains the same, the Result is 'false'
 
@@ -525,11 +552,12 @@ execute(_ ,
         false).
 
 
+
 %!  execute_plan(+Intention_ID, +Plan_In, -Plan_Out, -Result) is nondet
 %   Plan is linear and only one act is executed per cycle
-%  @arg Intention_ID:
-%  @arg Plan_ID:
-%  @arg Plan_Out:
+%  @arg Intention_ID: Intention identifier
+%  @arg Plan_In: Input / original plan 
+%  @arg Plan_Out: Output / modified plan
 %  @arg Result: true / false / atom
 
 execute_plan(Intention_ID,
@@ -546,37 +574,42 @@ execute_plan(Intention_ID,
     !.
 
 
-%!  execute_environment(+Environment, +Action, -Result) is nondet
-%  @arg Environment: identifier of Environment
-%  @arg Action: specifies which Action is to perform in Environment
+
+%!  execute_environment(+Environment, +Act, -Result) is nondet
+%   Tries to perform Act in an instance of Environment, where agent is situated
+%  @arg Environment: Environment identifier
+%  @arg Action: specifies which Act is to perform in Environment
 %  @arg Result: Result of execution (true / false / atom)
 
-execute_environment(Environment, Action, Result):-
+execute_environment(Environment, Act, Result):-
     thread_self(Agent_Name),
-    fRAgAgentInterface:agent_acts(Agent_Name, Environment, Action, Result).
+    fRAgAgentInterface:agent_acts(Agent_Name, Environment, Act, Result).
 
 execute_environment( _, _, false).
 
 
+
 %!  create_event(+Event_Type, +Atom) is det
 %   Creates top-level event of corresponding type and atom + empty context
-%  @arg Event_Type:
-%  @arg Atom:
+%  @arg Event_Type: Event type (ach / add / del)
+%  @arg Atom: Event atom
 
 create_event(Event_Type, Atom):-
     get_fresh_event_number(Event_Index),
     assert(event(Event_Index, Event_Type, Atom, null, [[]], active, [])).
 
 
+
 %!  get_fresh_event_number(+Event_ID) is multi
-%   Provides next fresh ID for an event
-%  @arg Event_ID: Fresh event ID
+%   Provides next fresh ID for an agent's event
+%  @arg Event_ID: Fresh event identifier
 
 get_fresh_event_number(Event_ID):-
     event_fresh(Event_ID),
     retract(event_fresh(Event_ID)),
     Event_ID2 is Event_ID+1,
     assertz(event_fresh(Event_ID2)).
+
 
 
 %!  try_retract_belief(+Belief) is nondet
@@ -589,6 +622,7 @@ try_retract_belief(Belief):-
     create_event(del, Belief).
 
 try_retract_belief( _).
+
 
 
 %!  nonempty(+Context, -Is_Empty) is det
@@ -614,9 +648,10 @@ nonempty_context( _, true).
 
 
 %!  select_intention(-Intention) is multi
-% Selects one active intention due to active reasoning method (see
-% FRAgPLFRAg.pl and FRAg*Reasoning.pl files) @tbd @arg Intention: Chosen
-% Intention from active intentions
+%   Selects one active intention due to active reasoning method (see
+%   FRAgPLFRAg.pl and FRAg*Reasoning.pl files) @tbd @arg Intention: Chosen
+%   Intention from active intentions
+%  @arg Intention: Selected intention
 
 select_intention(intention(Intention_ID_Out, Plan_Stack_Out, Status_Out)):-
     findall(intention(Intention_ID, Plan_Stack, Status),
@@ -630,7 +665,7 @@ select_intention(intention(Intention_ID_Out, Plan_Stack_Out, Status_Out)):-
 %    EXTEND INTENTION
 %===============================================================================
 
-
+%!  extend_intention(+Intention_ID, +Plan, -Status) is multi
 % means found for top level goal
 
 extend_intention(null, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body),
@@ -644,7 +679,7 @@ extend_intention(null, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body),
 	       ).
 
 
-% means found for a subgoal
+%   means found for a subgoal
 
 extend_intention(Intention_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions,
                                      Body), Context], Intention_ID)
@@ -656,13 +691,14 @@ extend_intention(Intention_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions
 	            )
 		).
 
-% exception / error raised when Indention_ID does not match any intention
-% (this clause should never be reached, but for sure)
+%   exception / error raised when Indention_ID does not match any intention
+%   (this clause should never be reached, but for sure)
 
 extend_intention(Intention_ID, Plan_Stack, Status):-
     format(atom(String),"[ERROR] Lost intention ~w",
            [intention(Intention_ID, n, Plan_Stack, Status)]),
     println_debug(String, error).
+
 
 
 %!  get_fresh_intention_number(+Intention_ID) is multi
@@ -748,14 +784,14 @@ try_retract_event( _).
 
 
 %!  update_intention(+Intention, +Result) is det
-%  Processing the outcome of an act at the level of intentions. There
-%  may be a successful completion of a top-level plan or sub-plan (in a
-%  given intention), a top-level plan or sub-plan fails by an
-%  unsuccessfully executed act, or only a successfully executed act in a
-%  plan that was not the last act. If the intent is blocked, no change
-%  occurs.
-% @arg Intention:
-% @arg Result:
+%   Processing the outcome of an act at the level of intentions. There
+%   may be a successful completion of a top-level plan or sub-plan (in a
+%   given intention), a top-level plan or sub-plan fails by an
+%   unsuccessfully executed act, or only a successfully executed act in a
+%   plan that was not the last act. If the intent is blocked, no change
+%   occurs.
+%  @arg Intention:
+%  @arg Result:
 %  @tbd navazat na pravidla z clanku
 %
 
@@ -1052,9 +1088,9 @@ simulate_early_reasoning([[plan(Plan_ID, Event_Type, Goal_Atom,
 
 
 %!  expand_plans(Plans1, Plans2) is det
-% Divides a single WPI with a context that can contain multiple
-% substitutions into a set of WPIs with contexts that contain only one
-% substitution
+%   Divides a single WPI with a context that can contain multiple
+%   substitutions into a set of WPIs with contexts that contain only one
+%   substitution
 %  @Means_In: One means in the form of WPI [plan_definition, context]
 %  @Means_Out: Set of means after crushing the Means_In into WPI
 %   with only one substitution in context
@@ -1228,7 +1264,7 @@ loop(-1, -1).
 %
 
 loop(Steps, Steps_Left):-
-/    loop_number(Loop_Number),
+    loop_number(Loop_Number),
 	    format(atom(String1),
 "~n
 [RSNDBG] =====================================================================
@@ -1361,10 +1397,11 @@ finished:-
 %===============================================================================
 
 
-%!  force_reasoning(+Model_Node, +Plan, +Context).
-%  @arg
-%  @arg
-%  @arg
+%!  force_reasoning(+Model_Reasoning_Node) is det
+%   Forces adaption of plan with Plan_ID in Context for specified WEI
+%  @arg Model_Node: reasoning node of look-ahead model, defined in
+%   FRAgMCTSModel.pl as model_reasoning_node(WEI, Plan_ID,
+%   Context)
 
 force_reasoning(model_reasoning_node(
                     event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
@@ -1384,9 +1421,9 @@ force_reasoning(model_reasoning_node(
 
 
 %!  force_execution(+Model_Act_Node) is multi
-%  @arg Model_Act_Node: It is triple (Intention_ID, Act, Decision)
-%   Performs Act. This Act's instance given by Decision. The instance is
-%   defined explicitly in a model and the model act element is provided.
+%   Performs Act. This Act's instance given by Decision.
+%  @arg Model_Act_Node: act node of look-ahead model, defined in
+%   FRAgMCTSModel.pl as model_act_node(Intention_ID, Act, Decision)
 
 % sub-plan finished, just update intention
 
@@ -1450,7 +1487,7 @@ set_clauses([plan(Event_Type, Goal_Atom, Conditions, Body)| Clauses], Plan_ID)
     Plan_ID2 is Plan_ID+1,
     set_clauses(Clauses, Plan_ID2).
 
-% process declared top-level goal -> creates events for them
+% inserting top-level goal, it generates corresponding event for it
 
 set_clauses([goal(Event_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
     get_fresh_event_number(Event_Index),
@@ -1459,38 +1496,44 @@ set_clauses([goal(Event_Type, Goal_Atom, Context)| Clauses], Plan_Index):-
     set_clauses(Clauses, Plan_Index),
     !.
 
+% the rest (beliefs) are simply asserted
+
 set_clauses([Clause| Clauses], Plan_Index):-
     assert(Clause),
     set_clauses(Clauses, Plan_Index).
 
 
-clear_agent:-
-    retractall(fact(_)),
-    retractall(event( _, _, _, _, _, _, _)),
-%    retractall(plan( _, _, _, _)),
-    retractall(plan( _, _, _, _, _)),
-    retractall(intention( _, _, _)).
 
+%!  load_program(+Filename, -Clauses) is multi
+%   Loads agent program from specified file
+%  @arg Filename: Name of agent's program file
+%  @arg Causes: List of loaded clauses
 
-read_clauses(end_of_file, [], _):- !.
-
-read_clauses(Clause, [Clause|Clauses], String):-
-    read_clause(String, Clause2, []),
-    read_clauses(Clause2, Clauses, String).
-
-load_program(Agent, Clauses):-
-    access_file(Agent, read),! ,
-    open(Agent, read, String, [close_on_abort(true)]),
-    read_clause(String, Clause, []),
+load_program(Filename, Clauses):-
+    access_file(Filename, read),! ,
+    open(Filename, read, Stream, [close_on_abort(true)]),
+% reads the first Clause from the Stream
+    read_clause(Stream, Clause, []),
     !,
-    read_clauses(Clause, Clauses, String),
-    close(String, [force(true)]).
+    read_clauses(Clause, Clauses, Stream),
+    close(Stream, [force(true)]).
 
-load_program(Agent_File, []):-
-    format("[FRAG] Agent file ~w does not exists.~n", [Agent_File]),
+load_program(Filename, []):-
+    format("[FRAG] Agent file ~w cannot be opened.~n", [Filename]),
     !,
     fail.
 
+
+%!  read_clause(+Clause, -Clauses, +Stream) is multi
+%  @arg Clause: The first clause as input (to check end_of_file)
+%  @arg Clauses: List of Clauses in Stream
+%  @arg Stream: File Stream
+
+read_clauses(end_of_file, [], _):- !.
+
+read_clauses(Clause, [Clause|Clauses], Stream):-
+    read_clause(Stream, Clause2, []),
+    read_clauses(Clause2, Clauses, Stream).
 
 
 %!  take_snapshot(+Snapshot)
@@ -1498,72 +1541,63 @@ load_program(Agent_File, []):-
 %  @arg Snapshot: snapshot of agent state
 
 take_snapshot(Snapshot):-
-    take_snapshot_beliefs(Belief_Snapshot),
-    take_snapshot_goals(Event_Snapshot),
-    take_snapshot_plans(Plan_Snapshot),
-    take_snapshot_intentions(Intention_Snapshot),
-    append([Belief_Snapshot, Event_Snapshot, Plan_Snapshot,
-            Intention_Snapshot], Snapshot).
+    take_snapshot_beliefs(Beliefs_Snapshot),
+    take_snapshot_goals(Events_Snapshot),
+    take_snapshot_plans(Plans_Snapshot),
+    take_snapshot_intentions(Intentions_Snapshot),
+    append([Beliefs_Snapshot, Events_Snapshot, Plans_Snapshot,
+            Intentions_Snapshot], Snapshot).
 
+%!  take_snapshot_intention(+Intentions_Snapshot) is det
 
-
-take_snapshot_intentions(Intention_Snapshot):-
+take_snapshot_intentions(Intentions_Snapshot):-
     findall(intention(Number, PlanStack, Status),
-          intention(Number, PlanStack, Status), Intention_Snapshot).
+          intention(Number, PlanStack, Status), Intentions_Snapshot).
 
-take_snapshot_intentions([]).
+%!  take_snapshot_intention(+Plans_Snapshot) is det
 
-
-
-take_snapshot_plans(Plan_Snapshot):-
+take_snapshot_plans(Plans_Snapshot):-
     findall(plan(Number, Type, Predicate, Context, Body),
-          plan(Number, Type, Predicate, Context, Body), Plan_Snapshot).
+          plan(Number, Type, Predicate, Context, Body), Plans_Snapshot).
 
-take_snapshot_plans([]).
+%!  take_snapshot_beliefs(+Beliefs_Snapshot) is det
 
+take_snapshot_beliefs(Beliefs_Snapshot):-
+    findall(fact(X), fact(X), Beliefs_Snapshot).
 
+%!  take_snapshot_events(+Events_Snapshot) is det
 
-take_snapshot_beliefs(SnapshotB):-
-    bagof(fact(X),fact(X),SnapshotB).
-
-take_snapshot_beliefs([]).
-
-
-
-take_snapshot_goals(Event_Snapshot):-
+take_snapshot_goals(Events_Snapshot):-
     findall(event(Event_Index, Type, Predicate, Intention, Context, Status,
                 History),
 	  event(Event_Index, Type, Predicate, Intention, Context, Status,
                 History),
-	  Event_Snapshot).
-
-take_snapshot_goals([]).
+	  Events_Snapshot).
 
 
-%
-%	Initiation and settings
-%
 
-
-% 'wait_go' waits for 'go' atom on the blackboard
-% go(0) ... cancel execution, go(1) ... go on agent execution
+%!  wait_go(Trigger) is multi
+%   Synchronizes agent's execution. At this distribution it is used only to
+%   make active waiting barrier at the start of the multiagent system 
+%  @arg Trigger: 0 ... cancel execution, 1 ... go on with agent execution
 
 wait_go( _ ):-
-    go(0),
+    fRAgBlackboard:go(0),
     thread_exit(1).
 
-wait_go(I):-
-    go(I),
+wait_go(Trigger):-
+    fRAgBlackboard:go(Trigger),
     !.
 
-wait_go(I):-
-    wait_go(I).
+wait_go(Trigger):-
+    wait_go(Trigger).
+
 
 
 
 go_sync(Steps, I):-
     thread_self(Agent),
-    assert(ready(Agent)),
+    assert(fRAgBlackboard:ready(Agent)),
     wait_go(I),
     call_time(loop(Steps, Steps_Left),Time),
     get_dict(cpu, Time, Cpu_Time),
@@ -1571,7 +1605,7 @@ go_sync(Steps, I):-
     timeout(Max_Iterations),
     Steps_Total is Max_Iterations - Steps_Left,
     write_stats(stats(Agent, Cpu_Time, Steps_Total)),
-    assert(ready(Agent)).
+    assert(fRAgBlackboard:ready(Agent)).
 
 
 fa_init_com(Filename):-
@@ -1585,9 +1619,11 @@ fa_finalize_com:-
     told.
 
 
-%! set_control(+Terminating) is det
-%*
-%* Terminating: timeout/ no_job / never ... others = never
+%!  set_control(+Terminating) is det
+%   Sets Terminanting mode. Agents can finish their doing when there is no more
+%   Intention or Event to process, or after a certain number of execution 
+%   cycles. or runs continuously until externally terminated.
+%  @Terminating: timeout / no_job / never ... others = never
 
 set_control(terminate(timeout, Steps)):-
     retract(terminate( _ )),
@@ -1606,16 +1642,16 @@ set_control(terminate(Terminating)):-
 % get_default_environments([]).
 
 
-%! set_default_environment(+Environment) is det
-%*
-%@arg Environment: environment to be added to the multiagent system
 
+%!  set_default_environment(+Environment) is det
+%   Declares the environment to be used by all agents by default. The 
+%   environment must already be loaded on the system.
+%  @arg Environment: environment to be assignet defaultly to the agents
 
 set_default_environment(Environment):-
     % such environment is loaded
     environment_loaded(Environment),
     assert(default_environment(Environment)).
-
 
 set_default_environment(Environment):-
     format(atom(String),"[ERROR] Environment '~w' does not exists~n",
@@ -1624,19 +1660,9 @@ set_default_environment(Environment):-
 
 
 
-%!  set_late_bindings
-
-set_late_bindings:-
-    retractall(late_bindings( _ )),
-    assert(late_bindings(true)).
-
-%!  set_early_bindings
-
-set_early_bindings:-
-    retractall(late_bindings( _ )),
-    assert(late_bindings(false)).
-
-
+%!  set_late_bindings(+Bindings) is det
+%   Sets active bindings strategy to Bindigs (true -> late, false -> early)
+%  @arg Bindings: Bindings strategy, (true -> late, false -> early)
 
 set_late_bindings(Bindings):-
     retractall(late_bindings( _ )),
@@ -1644,10 +1670,54 @@ set_late_bindings(Bindings):-
 
 
 
+%!  set_late_bindings is det
+%   Sets active bindings strategy to 'late'
+
+set_late_bindings:-
+    retractall(late_bindings( _ )),
+    assert(late_bindings(true)).
+
+
+
+%!  set_early_bindings is det
+%   Sets active bindings strategy to 'early'
+
+set_early_bindings:-
+    retractall(late_bindings( _ )),
+    assert(late_bindings(false)).
+
+
+
+%!  set_default late_bindings(+Bindings) is det
+%   Sets default bindings strategy to Bindigs 
+%   When agent starts, this bindings strategy will be set to active
+%  @arg Bindings: Bindings strategy, (true -> late, false -> early)
+
 set_default_late_bindings(Bindings):-
     retractall(default_late_bindings( _ )),
     assert(default_late_bindings(Bindings)).
 
+
+
+%!  is_late_bindings
+%   Succeed, if active bindings strategy is 'late'
+
+is_late_bindings:-
+    late_bindings(true).
+
+
+
+%!  is_default%late_bindings
+%   Succeed, if default bindings strategy is 'late'
+
+is_default_late_bindings:-
+    default_late_bindings(true).
+
+
+
+%!  set_environment(+Environment) is det
+%   Situates the agent in the main instance of the Environment
+%  @Environment: Environment name
 
 set_environment(Environment):-
     thread_self(Agent),
@@ -1656,13 +1726,6 @@ set_environment(Environment):-
            [Agent, Environment]),
     println_debug(String, systemdbg).
 
-
-
-is_late_bindings:-
-    late_bindings(true).
-
-is_default_late_bindings:-
-    default_late_bindings(true).
 
 
 init_intention_selection( _ ):-
@@ -1720,6 +1783,18 @@ fa_init_reasoning:-
 
 
 
+
+fa_init_environments:-
+    bagof(Environment, default_environment(Environment), Environments),
+    !,
+    fa_init_environments2(Environments).
+
+fa_init_environments:-
+    thread_self(Agent),
+    format(atom(STRINGS), "[SYSDBG] No environment for agent ~w~n", [Agent]),
+    println_debug(STRINGS, systemdbg).
+
+
 fa_init_environments2([]).
 
 fa_init_environments2([Environment| Environments]):-
@@ -1734,17 +1809,9 @@ fa_init_environments2([Environment| Environments]):-
     fa_init_environments2(Environments).
 
 
-fa_init_environments:-
-    bagof(Environment, default_environment(Environment), Environments),
-    !,
-    fa_init_environments2(Environments).
 
-fa_init_environments:-
-    thread_self(Agent),
-    format(atom(STRINGS), "[SYSDBG] No environment for agent ~w~n", [Agent]),
-    println_debug(STRINGS, systemdbg).
-
-
+%!  fa_init_run is det
+%   Set bindings strategy and resets 'fresh' identifiers
 
 fa_init_run:-
     retractall(late_bindings( _ )),
@@ -1764,6 +1831,19 @@ fa_init_run:-
     !,
     fail.
 
+
+
+%!  fa_init_process_attrs(+Attributes) is det
+%   Process list of attributes, attribute is specified in tuple (key, value)
+%   Possible attributes are specified in @todo documentation
+%  @arg Attributes: List of attributes
+
+fa_init_process_attrs([]).
+
+fa_init_process_attrs([(Key, Value)| Attributes]):-
+    fa_init_set_attrs(Key, Value),
+    !,
+    fa_init_process_attrs(Attributes).
 
 
 fa_init_set_attrs(environment, Environment):-
@@ -1794,16 +1874,12 @@ fa_init_set_attrs(Key, Value):-
     println_debug(String, error).
 
 
-%!  fa_init_process_attrs(
 
-fa_init_process_attrs([]).
-
-fa_init_process_attrs([(Key, Value)| Attributes]):-
-    fa_init_set_attrs(Key, Value),
-    !,
-    fa_init_process_attrs(Attributes).
-
-
+%!  fa_init_agent(+Filename, +Attributes) is det
+%   Loads agent from specified file, set default properties (attributes, 
+%   reasonings etc.)
+%  @arg Filename: 'fap' file with agent program
+%  @arg Attributes: agent's attributes specified in mas2fp metafile 
 
 fa_init_agent(Filename, Attributes):-
     timeout(Iterations),
@@ -1821,7 +1897,6 @@ fa_init_agent(Filename, Attributes):-
     go_sync(Iterations, 1),
     fa_finalize_com,
     thread_exit(1).
-
 
 fa_init_agent( _, _):-
     go_sync(-1, _),		% born dead

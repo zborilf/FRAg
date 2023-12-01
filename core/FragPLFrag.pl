@@ -1,16 +1,11 @@
 
-%
-%	FRAg clauses for late bindings
-%	2021 - 2022
-%	Frantisek Zboril
-%
-
 /**
 This file is part of the FRAg program. It is insluded into agent's file 
 FRAgAgent.pl. This separate file is created for clauses that are specific 
 to the late variable binding system when interpreting agent code.
 
 @author Frantisek Zboril
+@version 2021 - 2023
 @license GPL
 
 */
@@ -244,9 +239,9 @@ broad_unification2(_ ,[], []).
 
 broad_unification2(Atom1, [Atom2| Atoms], [Substitution_Out| Substitutions])
     :-
-% SUBSTITUTION = mgu(G,BELIEF)
+% Substitution1 = mgu(G,BELIEF)
     unifiable(Atom1, Atom2, Substitution1),
-% SUBSTITUTION2 is SUBSTITUTION without renamings
+% Substitution2 is SUBSTITUTION without renamings
     remove_renamings(Substitution1, Substitution_Out),
 % next mgu for the next belief
     broad_unification2(Atom1, Atoms, Substitutions).
@@ -255,7 +250,11 @@ broad_unification2(Atom, [_ | Atoms], Substitutions):-
     broad_unification2(Atom, Atoms, Substitutions).
 
 
-%!  remove_renamings(
+%!  remove_renamings(+Bindings_In, -Bindings_Out) is det
+%   Removes renamings (bindings with two variables) from Bindings_In and the
+%   result is in Bindings_Out
+%  @arg Bindings_In: input bindings
+%  @arg Bindings_Out: output bindings
 
 remove_renamings([],[]).
 
@@ -268,12 +267,11 @@ remove_renamings([H| T1],[H| T2]):-
 
 
 
-%!  instance_set(+Atom, +PUS, -Atoms) is det
+%!  instance_set(+Atom, +Substitutions, -Atoms) is det
 % Creates a set of instances of Atom by applying substitutions from PUS
-%* Atom
-%* PUS: set of substitutions 
+%* Atom:
+%* Substitutions: set of substitutions (PUS) 
 %* Atoms: Atoms that are created by applying PUS substitutions to the Atom
-
 
 instance_set(_ ,[],[]).
 
@@ -292,7 +290,7 @@ apply_substitutions([Binding| Bindings]):-
     apply_substitutions(Bindings).
 
 
-%!  restriction()
+%!  restriction(+Substitutions1, +Substitutions2, -Substitutions_Out) is det
 %
 %*
 %*

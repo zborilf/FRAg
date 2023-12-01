@@ -51,7 +51,7 @@ This is the main module of the FRAg system.
 :- discontiguous frag_choice/1.
 :- discontiguous frag_choice/2.
 
-version("0.99").
+version("0.95").
 
 
 %!  set_bindings(+Binding_Method) is det
@@ -172,56 +172,13 @@ load_agents([load(Agent, Program, Number, Attributes)| Agents],
 %  Attrs: (bindings, [early|late])
 %
 
-frag_process_clause(_ , end_of_file, []):-
-    !.
-
-%  sets default attributes
-
-frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
-    fRAgAgent:set_environment_attributes(Environment, Attributes),
-    !,
-    load_multiagent(Stream, Clauses).
-
-
-frag_process_clause(Stream, set_default(Attributes), Clauses):-
-    frag_process_attributes(Attributes),
-    !,
-    load_multiagent(Stream, Clauses).
-
-frag_process_clause(Stream, include_reasoning(Filename), Clauses):-
-    fRAgAgent:include_reasoning_method(Filename),
-    !,
-    load_multiagent(Stream, Clauses).
-
-frag_process_clause(Stream, include_environment(Filename), Clauses):-
-    fRAgAgent:load_environment(Filename),
-    !,
-    load_multiagent(Stream, Clauses).
-
-
-% loads a new agent in some number and attributes
-
-frag_process_clause(Stream, load(Filename, Agent, Number, Attributes),
-		    [load(Filename, Agent, Number, Attributes)| Clauses])
-    :-
-    !,
-    load_multiagent(Stream, Clauses).
-
-frag_process_clause(Stream, load(Filename), Clauses):-
-    consult(Filename),
-    !,
-    load_multiagent(Stream, Clauses).
-
-frag_process_clause(Stream, Clause, Clauses):-
-    format("[MAS2FP] Error processing clause ~w~n", [Clause]),
-    !,
-    load_multiagent(Stream, Clauses).
 
 
 
 %!  frag_process_attributes(+List_Of_Attributes)
 %   Process default attributes of the system
-%* List_Of_Attributes
+%  @arg List_Of_Attributes: attribute is a tuple (Key, Value)
+%   Possible attributes are in documentation @see @tbd
 
 frag_process_attributes([]).
 
@@ -259,34 +216,10 @@ set_default_attribute(environment, Environment):-
 
 
 
-load_multiagent(Stream, Clauses):-
-    read_clause(Stream, Clause, []),
-    !,
-    frag_process_clause(Stream, Clause, Clauses).
-
-load_multiagent(_, []).
-
-
-%
-%  __frag_master code
-%
-
-wait_agents([]).		% no agents loaded
-
-wait_agents(Threads):-
-    bagof(Agent, ready(Agent), Agents_Ready),
-    length(Agents_Ready, Agents_Ready_Length),
-    length(Threads, Agents_Ready_Length),
-    retractall(ready( _ )).
-
-wait_agents(Threads):-
-    wait_agents(Threads).
-
-
 %!  frag(+Filename) is det
 %   Loads and performs multiagent system declared in file Filename.
-%@arg Filename: multiagent file for the FRAg system
-%@see documentation for the mas2fp file format
+%  @arg Filename: multiagent file for the FRAg system
+%  @see documentation for the mas2fp file format
 
 frag(Filename):-
     format(atom(Mas2FP),"~w.mas2fp",[Filename]),
@@ -311,8 +244,93 @@ frag(Filename):-
 frag(Filename):-
     format("[MAS2FP] Metafile ~w.mas2fp does not exists.~n", [Filename]).
 
+
+
+%!  load_multiagent(+Stream, Clauses) is det TODO
+%
+%  @arg Stream:
+%  @arg Clauses:
+
+load_multiagent(Stream, Clauses):-
+    read_clause(Stream, Clause, []),
+    !,
+    frag_process_clause(Stream, Clause, Clauses).
+
+load_multiagent(_, []).
+
+
+%!  frag_process_claues(+Stream, +Clause, +Clauses) is det
+%   Process 'mas2fp' metafile. Possible clauses are commented below.
+%  @arg Stream: Metafile stream
+%  @arg Clause: Actual clause to process
+%  @arg Clauses:
+
+frag_process_clause(_ , end_of_file, []):-
+    !.
+
+%  sets default attributes
+
+frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
+    fRAgAgent:set_environment_attributes(Environment, Attributes),
+    !,
+    load_multiagent(Stream, Clauses).
+
+frag_process_clause(Stream, set_default(Attributes), Clauses):-
+    frag_process_attributes(Attributes),
+    !,
+    load_multiagent(Stream, Clauses).
+
+frag_process_clause(Stream, include_reasoning(Filename), Clauses):-
+    fRAgAgent:include_reasoning_method(Filename),
+    !,
+    load_multiagent(Stream, Clauses).
+
+frag_process_clause(Stream, include_environment(Filename), Clauses):-
+    fRAgAgent:load_environment(Filename),
+    !,
+    load_multiagent(Stream, Clauses).
+
+% loads a new agent in some number and attributes
+
+frag_process_clause(Stream, load(Filename, Agent, Number, Attributes),
+		    [load(Filename, Agent, Number, Attributes)| Clauses])
+    :-
+    !,
+    load_multiagent(Stream, Clauses).
+
+frag_process_clause(Stream, load(Filename), Clauses):-
+    consult(Filename),
+    !,
+    load_multiagent(Stream, Clauses).
+
+frag_process_clause(Stream, Clause, Clauses):-
+    format("[MAS2FP] Error processing clause ~w~n", [Clause]),
+    !,
+    load_multiagent(Stream, Clauses).
+
+
+
+%!  wait_agents(+Threads) is det
+%   Barrier for all agents to report their readiness by inserting the 
+%   ready(Agent_Name) atom
+%  @arg Threads: List of agents' threads, these threads signalizes 
+%   ready(Agent_Name) when they are ready 
+
+wait_agents([]).		% no agents loaded
+
+wait_agents(Threads):-
+    bagof(Agent, ready(Agent), Agents_Ready),
+    length(Agents_Ready, Agents_Ready_Length),
+    length(Threads, Agents_Ready_Length),
+    retractall(ready( _ )).
+
+wait_agents(Threads):-
+    wait_agents(Threads).
+
+
+
 %!  frag is det
-%   Starts the system as console with menu
+%   Starts the system as a console with menu
 
 frag:-
     writeln("Select your choice"),
@@ -432,7 +450,7 @@ join_threads([Thread| Threads]):-
 
 
 
-%!  mainf_frag is det
+%!  main_frag is det
 %   Initializes the FRAg system. Initialization parameters is in
 %   multiagent file @see fraginit.mas2fp. Then prints initial
 %   information about the system, including settings of essential

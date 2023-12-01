@@ -3,9 +3,9 @@
 
 skript
 \core\run.bat
-sekvence 20ti (lze upravit) spusteni FRAga s metamodelem \examples\trader2.mas2fp
+sekvence 20ti (lze upravit) spusteni FRAga s metamodelem \examples\trader.mas2fp
 
-Trader2
+Trader
 Spousti jednoho nebo dva agenty petra a pavla, podle toho, co se zaremuje %
 Doporucuji spoustet petra, pavla, nebo oba bez (systemdbt reasoningdbg)
 Program vypisuje agenty v souborech trader_peter.out a trader_paul.out, v 

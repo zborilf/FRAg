@@ -1,9 +1,11 @@
  
-%
-% 	FragPL, basic environment / ... internal actions
-%       Frantisek Zboril jr. 2021 - 2023
-%	
-%
+/**
+ 	FragPL, basic environment / ... internal actions
+       
+@author Frantisek Zboril jr. 
+@version 2021 - 2023
+@licence
+*/
 
 
 % environment(basic).			% zde by mely byt standardni akce, komunikace ...
@@ -47,7 +49,7 @@ joint_action(basic, jprintfg, 1).
 
 
 population(Population):-
-    bagof(Agent, agent(Agent), Population).
+    bagof(Agent, fRAgBlackboard:agent(Agent), Population).
 
 
 concatTerm(String1, String2, String):-
@@ -113,18 +115,18 @@ send(Receiver, Payload):-
     thread_send_message(Receiver, message(Me, inform, pld(Payload))).
 
 
-bcast2([],_).
+bcast2([], _).
+           
+bcast2([Agent| Agents], Payload):-
+    sendfg(Agent, Payload),
+    bcast2(Agents, Payload).
 
-bcast2([H|T], Payload):-
-    sendfg(H, Payload),
-    bcast2(T, Payload).
 
-
-  bcast(Payload):-
-        bagof(X,agent(X),L),
-	bcast2(L, Payload).
+bcast(Payload):-
+    bagof(Agent, fRAgBlackboard:agent(Agent) , Agents),
+    bcast2(Agents, Payload).
 		
-  bcast(_).
+bcast(_).
 
 
 %
