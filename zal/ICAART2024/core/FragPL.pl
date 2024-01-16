@@ -15,7 +15,7 @@
 %		###                  ###           ###    ###           ###       ################
 %                                                                                               ###
 %                                                                                ###           ###
-%                                                                                 ###############
+%                                                                            .     ###############
 %						                                    ############
 %
 %
@@ -39,7 +39,7 @@
 This is the main module of the FRAg system.
 {pldoc link stranta.txt} dalsi stranka
 
-@author Frantisek Zboril jr.
+@author Frantisek Zboril
 @license GPL
 
 */
@@ -64,7 +64,6 @@ set_bindings(late):-
 
 set_bindings(early):-
     fRAgAgent:set_early_bindings.
-
 
 
 %!  get_frag_attributes(+Key, -Value) is det
@@ -122,8 +121,8 @@ set_default_reasoning(all, Reasoning):-
 %   Creates thread for Agent, loads Agent's Program  and sets it up
 %  @arg Agent: Agent name
 %  @arg Program: fap program code
-%  @arg Attributes: agent attributes @see @tbd
-%  @arg Thread: created thread for the agent
+%  @arg Attributes:
+%  @arg Thread:
 
 load_agent(Agent, Program, Attributes, Thread):-
     term_string(Agent_Term, Agent),
@@ -147,7 +146,6 @@ load_same_agents(Agent, Program, Number, Attributes, [THREAD| THT]):-
     load_agent(AGENTNAME, Program, Attributes, THREAD),
     Number2 is Number - 1,
     load_same_agents(Agent, Program, Number2, Attributes, THT).
-
 
 
 %!  load_agents(Agent_To_Load, Agent_Threads) is det
@@ -327,7 +325,7 @@ frag_process_clause(Stream, Clause, Clauses):-
 %!  wait_agents(+Threads) is det
 %   Barrier with active waiting. All agents have to report their readiness by 
 %   inserting the ready(Agent_Name) atom
-%  @arg Threads: List of agents threads, these threads signalizes 
+%  @arg Threads: List of agents' threads, these threads signalizes 
 %   ready(Agent_Name) when they are ready 
 
 wait_agents([]).		% no agents loaded
@@ -474,7 +472,7 @@ main_frag:-
     nl,
     version(Version),
     format(
-"FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
+"FRAg version ~w, 2021 - 2023, by Frantisek Zboril & Frantisek Vidensky,
 Brno University of Technology~n~n",
 	   [Version]),
     frag('fraginit'),

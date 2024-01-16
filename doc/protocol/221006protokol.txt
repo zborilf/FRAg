@@ -81,6 +81,6 @@
 
 30.8.23 Pracuji na prostredich, klony, nahravani stavu, potreba utestovat. Potreba se poprat s nazvy v modulech, pak rozjet MCTS
 
-
+6.12.23 Po perném semestru opìt èistím a komentuju, tentokrát hlavní modul + správné referování modulù, snad i dokumentaci
 
 

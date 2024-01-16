@@ -1,0 +1,50 @@
+Folder PATH listing for volume Windows 
+Volume serial number is 005C0042 2E79:5283
+C:.
+-   fragagent.fap
+-   FRAgAgent.pl		(vars ok, koment beta)
+-   FRAgAgentInterface.pl       (vars ok, koment castecne)
+-   FRAgBlackboard.pl           (ok, ale je nezbytna? -> FRAgAgent jako shared)
+-   fraginit.mas2fp
+-   FragPL.pl                   (vars ok, koment beta)
+-   FRAgPLFRAg.pl
+-   FRAgPLRelations.pl
+-   
++¦¦¦doc
+-       108970.pdf
+-       FRAG_Operational_semantics.pdf
+-       
++¦¦¦environments
+-   -   FRAgPLEnvironmentUtils.pl
+-   -   
+-   +¦¦¦basic
+-   -       basic.pl
+-   -       
+-   +¦¦¦counter
+-   -       counter.pl
+-   -       
+-   +¦¦¦doc
+-   -       
+-   +¦¦¦miconic
+-   -       miconic.pl
+-   -       
+-   L¦¦¦shop
+-           shop.pl
+-           stat_utils.pl
+-           
++¦¦¦logs
+-       
+L¦¦¦reasoning_methods
+    +¦¦¦Basic
+    -       FRAgPLReasoningCAN.pl
+    -       FRAgPLReasoningRandom.pl
+    -       FRAgPLReasoningSimple.pl
+    -       
+    +¦¦¦Joint
+    -       FRAgPLReasoningBiggestJoint.pl
+    -       FRAgPLReasoningSnakes.pl
+    -       
+    L¦¦¦MCTS
+            FRAgMCTSModel.pl
+            FRAgPLReasoningMCTS.pl
+            

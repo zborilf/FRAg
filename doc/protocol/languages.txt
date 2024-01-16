@@ -79,5 +79,5 @@ Facts:
 Goals:
 
 Plans:
-    plan(+Event_Type, +Event_Term, +Conditions, +Context, +Body)
+    plan(+Event_Type, +Event_Atom, +Conditions, +Context, +Body)
 

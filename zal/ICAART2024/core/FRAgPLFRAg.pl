@@ -1,12 +1,13 @@
 
 /**
 This file is part of the FRAg program. It is insluded into agent's file 
-FRAgAgent.pl. Contains clauses that are specific  to the late variable binding 
-system when interpreting agent code.
+FRAgAgent.pl. This separate file is created for clauses that are specific 
+to the late variable binding system when interpreting agent code.
 
 @author Frantisek Zboril
 @version 2021 - 2023
 @license GPL
+
 */
 
 
@@ -164,7 +165,7 @@ get_default_reasoning(Intention_Selection, Plan_Selection,
 
 
 update_models2([]).
-        
+
 update_models2([Model| Models]):-
     update_model(Model),			% v jednotlivych reasoninzich
     update_models2(Models).
@@ -221,11 +222,11 @@ get_intended_means(Means, Event, Intended_Means):-
 
 
 %!  broad_unification(+Atom, +Atoms, -PUS_Out) is det
-%  @arg Atom: query to a base
-%  @arg Atoms: the base
-%  @arg PUS_Out: Possible unifier set for Atom and Atoms
-%   Performs broad unification of Atom in Atoms (Belief base). Resulti is
-%   a set of substitutions in PUS_Out
+% Performs broad unification of Atom in Atoms (Belief base). Resulti is
+% a set of substitutions in PUS_Out
+%* Atom: query to base
+%* Atoms: the base
+%* PUS_Out: Possible unifier set for Atom and Atoms
 
 
 broad_unification(Atom, Atoms, PUS_Out):-
@@ -250,10 +251,10 @@ broad_unification2(Atom, [_ | Atoms], Substitutions):-
 
 
 %!  remove_renamings(+Bindings_In, -Bindings_Out) is det
-%  @arg Bindings_In: input bindings
-%  @arg Bindings_Out: output bindings
 %   Removes renamings (bindings with two variables) from Bindings_In and the
 %   result is in Bindings_Out
+%  @arg Bindings_In: input bindings
+%  @arg Bindings_Out: output bindings
 
 remove_renamings([],[]).
 
@@ -267,10 +268,10 @@ remove_renamings([H| T1],[H| T2]):-
 
 
 %!  instance_set(+Atom, +Substitutions, -Atoms) is det
-%   Creates a set of instances of Atom by applying substitutions from PUS
-%  @arg Atom:
-%  @arg Substitutions: set of substitutions (PUS) 
-%  @arg Atoms: Atoms that are created by applying PUS substitutions to the Atom
+% Creates a set of instances of Atom by applying substitutions from PUS
+%* Atom:
+%* Substitutions: set of substitutions (PUS) 
+%* Atoms: Atoms that are created by applying PUS substitutions to the Atom
 
 instance_set(_ ,[],[]).
 
@@ -314,7 +315,7 @@ restriction2(Substitution1, [Substitution2| Substitutions], PUS_Out):-
     restriction2(Substitution1, Substitutions, PUS1),
     append_not_empty([Substitution3], PUS1, PUS_Out).
 
-%!  merging()
+%%  merging()
 %	MERGING
 %       PUMerged = PU1 m PU2 =def ... see [1]
 %	merging(PU1,PU2,PUMerged).
@@ -412,14 +413,14 @@ shorting(Goal1, Goal2, PUS_In, Vars_In, PUS_Out, Vars_Out):-
     term_variables(PUS_Out, Vars_Out).
 
 
-%!  shorting(Substitutions_In,Var_List, Substitutions_Out) is det
-%   basic shorting: substitution x list of variables -> substitutions just
-%   for these variables
+% shorting(SUBSTITUTIONS,VARLIST, S
+% basic shorting: substitution x list of variables -> substitutions just
+% for these variables
 
 shorting_pus([],_,[]).
 
-%   shorts every substitution from the first list with respect with the list of
-%   variables V (only V-pairs remains)
+% shorts every substitution from the first list with respect with the list of
+% variables V (only V-pairs remains)
 
 shorting_pus([H1|T1],V,[H2|T2]):-
     shorting(H1,V,H2),
@@ -427,13 +428,13 @@ shorting_pus([H1|T1],V,[H2|T2]):-
 
 
 
-%   empty context remains empty context
+% empty context remains empty context
 shorting([], _, []).
-%   no variable -> empty context
+% no variable -> empty context
 shorting(_, [], []).
 
-%   shorts one substitution due to the variables in VARS
-%   [A->a,B->,D->d,F->d],[A,D] -> [A->a,D->d]
+% shorts one substitution due to the variables in VARS
+% [A->a,B->,D->d,F->d],[A,D] -> [A->a,D->d]
 
 shorting([Bind| Bindings], Variables, [Bind| Bindings2]):-
     memberVar(Bind, Variables),
@@ -444,9 +445,9 @@ shorting([_| Bindings], Variables, Bindings2):-
 
 
 %
-%   After execution PUS may include weird tubles constant=constant even for a
-%   pair with distinc constants these should be reducet, or better PUS should 
-%   be reduced only to those mapping variables to a term
+% After execution PUS may include weird tubles constant=constant even for a
+% pair with distinc constants these should be reducet, or better PUS should be
+% reduced only to those mapping variables to a term
 %	shortNoVars(PUS, PUS).
 %
 
@@ -464,14 +465,11 @@ short_variables_binds([Substitution| Substitutions], PUSs):-
 
 
 
-
-
-%!  intersection(+Atom1, +Context_In, +Atom2, -Context_Out) is det
-%   Atom1, Context_In ~ Atom2 =def BU(IS(Atom1, Context), Atom2)
-%   @see [1] (Late Bindings) ...
-%  @arg Atom1: original plan goal atom
-%  @arg Context_In: original plan context
-%  @arg Atom2: new plan triggering event atom
+%
+%	INTERSECTION   (1)
+%	goal1,context ~ goal2 =def BU(IS(Goal1,Context),Goal2)
+%	intersection(Goal1, Context, Goal2, 'Goal1,Context ~ Goal2')
+%
 
 intersection(Goal_Atom1, PUS1, Goal_Atom2, PUS2):-
     instance_set(Goal_Atom1, PUS1, Instance_Set1),
@@ -479,16 +477,11 @@ intersection(Goal_Atom1, PUS1, Goal_Atom2, PUS2):-
     term_variables(Goal_Atom2, Goal_Atom2_Variables),
     shorting_pus(Answers, Goal_Atom2_Variables, PUS2).
 
-
-%!  intersection(+Atom1, +Context1, +Atom2, +Context2, -Context_Out) is det
-%   Atom1, Context_In ~ Atom2, Context2 =def Restriction(
-%                                                BU(IS(Atom1, Context1), Atom2), 
-%                                                Context2
-%						)
-%   @see [1] (Late Bindings) ...
-%  @arg Atom1: upper plan goal atom
-%  @arg Context1: upper plan context
-%  @arg Atom2: sub-plan triggering event atom
+%
+% INTERSECTION   (2)
+% goal1,context ~ goal2, PUS =def REST(BU(IS(goal1,context),goal2),PUS)
+%
+%
 
 intersection(Goal_Atom1, Context1, Goal_Atom2, Context2, Context_Out):-
     intersection(Goal_Atom1, Context1, Goal_Atom2, Context3),
@@ -496,40 +489,26 @@ intersection(Goal_Atom1, Context1, Goal_Atom2, Context2, Context_Out):-
 
 
 
-%!  decide_context(+Atom, +Context_In, +Variables, +Context_Out) is nondet
-%  @arg Atom:
-%  @arg Context_In:
-%  @arg Variables:
-%  @arg Context_Out:
-%    
-
-decide_context( _, _, [], []).		% no vars / nothing to decide
-
-decide_context(Atom, Context, Variables, Context2):-
-    active_substitution_selection(Substitution_Selection),
-% get_substitution is implemented in particular reasoning files (included by
-% the system during FRAg initialization.
-    get_substitution(Substitution_Selection, Atom, Context, Variables, 
-                     Context2),
-    loop_number(Loop),
-    format(atom(String),
-           "[RSNDBG] GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
-[......] DECISION -> ~w~n",
-		   [Loop, Substitution_Selection, Atom, Context, Context2]),
-	print_debug(String, reasoningdbg).
 
 
-%!  decidioning(+Action_Term, +Context, -Context_Out) is nondet
-%   Takes the first PUS from the context / simple reasoning
-%   selects one substitution from the context due to requestet variebles
-%   'to ground' all the substitutions in the context must soud to the variables
-%   bindings in the selected context
-%  @arg Action_Term:
-%  @arg Context:
-%  @arg Context_Out:
-
-%   uses reasoning method due to active_reasoning_method(-Method)
 %
+%	DECISIONING
+%
+
+% PUS , pro mnozinu promennych vybere z jednoho prvku PUS prirazeni,
+% restriction na tyto prirazeni a aplikace
+
+
+
+% takes the first PUS from the context / simple reasoning
+% selects one substitution from the context due to requestet variebles
+% 'to ground'all the substitutions in the context must soud to the variables
+% bindings in the selected context
+
+% uses reasoning method due to active_reasoning_method(-Method)
+%
+
+
 
 decisioning(Action_Term, Context, Context_Out):-
     term_variables(Action_Term, Action_Variables),
@@ -538,24 +517,32 @@ decisioning(Action_Term, Context, Context_Out):-
     apply_substitutions(Context2).
 
 
+% decide_context(action atom, context, variables in action,
+% chosen substitutions)
+
+decide_context( _, _, [], []).		% no vars / nothing to decide
+
+decide_context(Atom, Context, Variables, Context2):-
+    active_substitution_selection(Substitution_Selection),
+    get_substitution(Substitution_Selection, Atom, Context, Variables, Context2),
+    loop_number(Loop),
+    format(atom(String),
+           "[RSNDBG] GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
+[......] DECISION -> ~w~n",
+		   [Loop, Substitution_Selection, Atom, Context, Context2]),
+	print_debug(String, reasoningdbg).
+
+
 
 
 %
 %	Queries
 %
 
-%!   simulate_early_bindings(+Atom, +Context_In, -Context_Out) is nondet
-%   @arg Atom:
-%   @arg Context_In:
-%   @arg Context_Out:
-%    If Context_In is non-empty and the early binding strategy is active, it 
-%    decides how the free variables in the Atom should be bound. It selects one
-%    of the substrings from Context_In and modifies the context on Context_Out
-%    to respect the chosen bindings.
-
+% it failed
 simulate_early_bindings( _, [], []).
 
-%   late bindings are set, so do not simulate early bindings
+% late bindings are set, so do not simulate early bindings
 simulate_early_bindings( _, Context, Context):-
     late_bindings(true).
 
@@ -589,22 +576,18 @@ query(Query, Context, Context_Out):-
 query( _, _, []).
 
 
-
-% ! substract_subsets(+Substitutions1, +Substitutions2, 
+% ! substract_subsets(+Substitutions1, +Substitutions, 
 %                     -Substitutions_Out) is det
-%  @arg Substitutions1:
-%  @arg Substitutions2:
-%  @arg Substitutions_Out:
-%   Removes every substitution from Substitutions1 that is a subset of some
+%   Removes every substitution from Substitutions1 that is a subset of any
 %   substitution from Substitutions2
 
-substract_subsubstitions(Substitutions, [], Substitutions).
+substract_subsubstitions(Substitutions1, [], Substitutions1).
 
-substract_subsubstitions(Substitutions1, [Substitution | Substitutions2T],
+substract_subsubstitions(Substitutions1, [Substitution | Substitutions2],
                          Substitutions_Out)
     :-
     substract_subsubstitions2(Substitutions1, Substitution, Substitutions3),
-    substract_subsubstitions(Substitutions3, Substitutions2T,
+    substract_subsubstitions(Substitutions3, Substitutions2,
                              Substitutions_Out).
 
 

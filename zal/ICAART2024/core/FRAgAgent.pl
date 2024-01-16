@@ -37,7 +37,7 @@
 This module contains code for threads of individual agents
 
 @author Frantisek Zboril
-@version 0.95 (2021 - 2024)
+@version 0.95 (2021 - 2023)
 @license GPL
 */
 
@@ -61,29 +61,25 @@ This module contains code for threads of individual agents
 :- multifile get_plan /4.
 :- multifile update_model /1.
 
-%   FRAg specific ops / late bindings etc.
+% FRAg specific ops / late bindings etc.
 :-include('FRAgPLFRAg.pl').
-
-%   FRAg operations for relations and assignments
+% FRAg operations for relations and assignments
 :-include('FRAgPLRelations.pl').
 
 :- use_module(library(thread)).
-
-%   shared data among threads (agents etc.)
+% shared data among threads (agents etc.)
 :-use_module('FRAgBlackboard').
-
-%   interface to environments
+% interface to environments
 :-use_module('FRAgAgentInterface').
   
 
 timeout(200).
 
-%   no_job, because the 'init' agent should finish ASAP
-%   @see documentation for termination modes
+% no_job, because the 'init' agent should finish ASAP
 terminate(no_job).
 
 
-%   dynamic atoms
+% dynamic atoms
 
 :-dynamic default_late_bindings / 1.
 :-dynamic default_environment /1.
@@ -106,10 +102,9 @@ terminate(no_job).
 :-thread_local intention /3.
 
 %!  goal(+Type, +Atom, +Context).
-%  @arg Type: goal type [only 'ach']
-%  @arg Atom: goal atom
-%  @arg Context: should be empty [[]], but can contain some substutitutions
-%   in the form [[
+%  @arg Type:
+%  @arg Atom:
+%  @arg Context:
 
 :-thread_local goal /3.
 
@@ -472,7 +467,7 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]
     nonempty_context(Context_New, Result).
 
 
-%   Performing the achievement goal
+% Performing the achievement goal
 
 execute(Intention_ID,
         plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
