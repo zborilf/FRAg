@@ -3,7 +3,7 @@
 include_environment("/environments/shop/shop.pl").
 
 
-set_default([(control, terminate(timeout, 1000)),
+set_agents([(control, terminate(timeout, 1000)),
              (bindings, early),
              (reasoning, random_reasoning),
              (environment, card_shop)]).		

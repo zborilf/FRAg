@@ -33,7 +33,15 @@ membervo(A, [B=_|_]):-
 
 membervo(_,_).
 
-
+%!  alop(Operation, Context_In, Context_Out, Result) is det
+%   Operation can be either the assignment of a term to a variable in the 
+%   Prolog form 'A is B' either a relation (comparsion) defined in FRAg. 
+%   Result of execution is stored in Operation_Result. For other than 'thre'
+%   result see documentation to 'aloprel' below
+%  @arg Operation
+%  @arg Context_In
+%  @arg Context_Out
+%  @arg Result:
 
 alop(_ is _,[],[], true).
 
@@ -58,18 +66,15 @@ alop(A ,Context1 ,Context2 , Result):-
 alop2(A is B, Context1, Context3):-
     !,
     copy_term([A, B, Context1], [C, D, Context2]),
-
 %   we have to remember the renamings, we rely on term_variables to always 
 %   return the variables in the same order
     apply_substitutions(Context2), % X should be instantiated,
-
 %   to test later whether the left side was already numbered after the
 %   substitution
     copy_term(C, E),
     alop3(E, A, C, D, Context1, Context3).
 
 alop2(_ is _, _, []).
-
 
 
 alop3(E, A, C, D, Context1, Context2):-
@@ -98,20 +103,18 @@ evolve_context(A, _, Context, Context):-
 evolve_context(_, B=C, Context, [B=C| Context]).
 
 
-
 %!  aloprel(+Operator, +Operand1, +Operand2, +Context_In, -Context_Out) is det
-%  @arg Operator:
-%  @arg Term1:
-%  @arg Term2:
-%  @arg Context_In:
-%  @arg Context_Out:
 %   RELATIONS (as a part of arithmetical / relational operations)
 %   Performs the operation for all term instances by Context, the output
 %   context corresponds to the operation performed For example, for a
 %   relation > , the output context will contain only those substitutions
 %   that match it, e.g. A>B, [ [[A=3],[B=5]], [[A=5],[B=3]] ,
 %   [[A=2],[B=0]] ] -> [ [[A=5],[B=3]] , [[A=2],[B=0]] ]
-
+%  @arg Operator: Binary operator
+%  @arg Term1: The first term / operand
+%  @arg Term2: The second term / operand
+%  @arg Context_In: Input context, set of substitutions
+%  @arg Context_Out: Output context after the operation
 
 %   Context is empty, and then it remains empty
 
@@ -142,14 +145,12 @@ alopreltry(_ ,_ ,_ ,_ , Contexts, Contexts).
 
 
 %!  get_term(+Term_In, +Substitution, -Term_Out) is det
-%  @arg Term_In: Input term, can be either number, expression reducable to 
-%   number, or variable that is bounded in Substitution
-%  @arg Substitution
-%  @arg Term_Out: must be a constant (usually number)  
-%  @arg Substitution:
-%  @arg Term_Out:
-%   Evaluates Term_In regarding Substitution. 
-
+%   Evaluates Term_In regarding Substitution.
+%  @arg Term_In: The input expression can be a number, an expression reducible
+%   to a number or a variable to be bound by applying Substitution
+%  @arg Term_In: Input term
+%  @arg Substitution: Substitution to be application
+%  @arg Term_Out: Output term, should be a constant (usually number)  
 
 get_term(Atom, _, Atom):-
     number(Atom).
@@ -165,8 +166,3 @@ get_term(Var1, [Var2 = Term| _], Term):-
 
 get_term(Var, [_ | Bindings], Term):-
     get_term(Var, Bindings, Term).
-
-
-
-
-

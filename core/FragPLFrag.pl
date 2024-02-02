@@ -1,22 +1,16 @@
 
 /**
 This file is part of the FRAg program. It is insluded into agent's file 
-FRAgAgent.pl. Contains clauses that are specific  to the late variable binding 
+FRAgAgent.pl. Contains clauses that are specific to the late variable binding 
 system when interpreting agent code.
 
 @author Frantisek Zboril
-@version 2021 - 2023
+@version 2021 - 2024
 @license GPL
 */
 
 
 
-%===============================================================================
-%                                                                              |
-%	Reasoning methods - intention, plan and substitution selections        |
-%                                                                              |
-%                                                                              |
-%===============================================================================
 
 
 % reasoning - plan selection + substitution selection (decide op.) + intention
@@ -29,6 +23,16 @@ system when interpreting agent code.
 :-dynamic default_plan_selection /1.
 :-dynamic default_substitution_selection /1.
 
+
+%===============================================================================
+%                                                                              |
+%	Reasoning methods - intention, plan and substitution selections        |
+%	Setting default and actual strategies (methods)                        |
+%       Getting actuaul strategies                                             |
+%                                                                              |
+%===============================================================================
+
+% In this version of FRAg, the actual strategy setting is only used for MCTS 
 
 set_intention_selection(Intention_Selection):-
 % checks if such reasoning exists
@@ -151,6 +155,7 @@ set_default_reasoning(Reasoning):-
     print_debug(String, error).
 
 
+%
 
 get_default_reasoning(Intention_Selection, Plan_Selection,
                       Substitution_Selection):-
@@ -159,15 +164,18 @@ get_default_reasoning(Intention_Selection, Plan_Selection,
     default_substitution_selection(Substitution_Selection).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%===============================================================================
+%                                                                              |
+%	Model ...        |
+%                                                                              |
+%                                                                              |
+%===============================================================================
 
-update_models2([]).
-        
-update_models2([Model| Models]):-
-    update_model(Model),			% v jednotlivych reasoninzich
-    update_models2(Models).
+%!  update_models is det
+%   
+%   
+
 
 update_models:-
     active_intention_selection(Intention_Selection),
@@ -181,6 +189,19 @@ update_models:-
 update_models.
 
 
+update_models2([]).
+        
+update_models2([Model| Models]):-
+    update_model(Model),			% v jednotlivych reasoninzich
+    update_models2(Models).
+
+
+
+%!  get_intention(+Intentions, -Intention) is nondet // depends on strategy
+%  @Intentions: an input set of intentions
+%  @Intention: selected intention
+%   Selects one of the intention according to how the intention selection 
+%   strategy is set up
 
 get_intention(Intentions, intention(Intention_ID, Context, Plan_Stack)):-
     active_intention_selection(Intention_Selection),
@@ -206,6 +227,7 @@ get_intended_means(Means, Event, Intended_Means):-
     print_debug(String, reasoningdbg).
 
 
+% TODO get_substitution is missing
 
 %===============================================================================
 %                                                                              |
@@ -291,9 +313,9 @@ apply_substitutions([Binding| Bindings]):-
 
 %!  restriction(+Substitutions1, +Substitutions2, -Substitutions_Out) is det
 %
-%*
-%*
-%*
+%  @arg
+%  @arg
+%  @arg
 
 
 restriction([[]],[[]],[[]]).    % empty PUS's restriction

@@ -9,7 +9,7 @@ include_reasoning("/reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl").
 include_environment("/environments/shop/shop.pl").
 
 
-set_default([(bindings, early),
+set_agents([(bindings, early),
              (reasoning, simple_reasoning), 
              (reasoning_params, mcts_params(5,10,50)),
  	     (environment, shop)]).		

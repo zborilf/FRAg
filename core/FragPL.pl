@@ -69,7 +69,7 @@ set_bindings(early):-
 
 %!  get_frag_attributes(+Key, -Value) is det
 %   Returns actual setting of attributes
-%  @arg Key: Attribute name
+%  @arg Key: Attribute name, @see documentation
 %  @arg Value: Attribute value
 
 get_frag_attributes(default_bindings, late):-
@@ -280,7 +280,7 @@ frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
 
 %  sets default attributes
 
-frag_process_clause(Stream, set_default(Attributes), Clauses):-
+frag_process_clause(Stream, set_agents(Attributes), Clauses):-
     frag_process_attributes(Attributes),
     !,
     load_multiagent(Stream, Clauses).
@@ -453,8 +453,8 @@ frag_choice( _ ):-
 
 
 %!  join_threads(+Threads) is det
-%   Joins Threads to the main thread before finish the 'frag' clause
-%  @arg Threads: list of threads to join the main thread
+%   Joins Threads (agents) to the main thread. These agents have finished. 
+%  @arg Threads: List of threads to join the main thread
 
 join_threads([]).
 

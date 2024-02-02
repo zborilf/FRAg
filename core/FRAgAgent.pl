@@ -118,12 +118,15 @@ terminate(no_job).
 %!  event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
 %         +History).
 %  @arg Event_ID:
-%  @arg Type: ach for achievement, add for add, del for delete
-%  @arg Atom:
-%  @arg Parent_Intention:
-%  @arg Context:
+%  @arg Type: 'ach' for achievement, 'add' for add, 'del' for delete
+%  @arg Atom: Event atom.
+%  @arg Parent_Intention: Intention that raised this event
+%  @arg Context: Event context - PUS, usualy empty, but it could be
 %  @arg Status: event state - active / intention number,
-%  @arg History: list of tried plans
+%  @arg History: a list of details of plans that have already been tried for
+%    the event, concretely list of 
+%                    'used_plan(Plan_ID, Goal_Atom, Conditions, Context)' 
+	           
 
 :-thread_local event /7.
 
@@ -1151,8 +1154,8 @@ execution.  % no intention in agent's
 
 %!  put_back_plan(Plan_ID, Status) is multi
 %   If Staus is 'false' then plan with Plan_ID is asserted at the
-%   end of datapase.
-%  @arg Plan_ID:
+%   end of database.
+%  @arg Plan_ID: 
 %  @arg Status:
 
 put_back_plan(Plan_ID, false):-
@@ -1164,7 +1167,7 @@ put_back_plan(_,_).     % akce planu byla OK, nedavame nakonec
 
 
 %!  reasoning is det
-%   Processes all events simultaneously. For each a means is searched.
+%   Processes all events simultaneously. For each event a means is searched.
 %   If found, the corresponding intention is created or expanded
 
 reasoning:-
@@ -1374,7 +1377,7 @@ next_loop( _, Steps_Left):-
 
 
 %!  increment_loop is multi
-%   increases loop_number in database
+%   increases loop_number in Prolog database 
 
 increment_loop:-
     retract(loop_number(Loop)),
