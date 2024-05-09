@@ -1,18 +1,16 @@
-%
-% Reasoning methods - the simple ones
-% Frantisek Zboril jr. 2022
-%
 
-%
-% Should define
-%   get_intention(+Reasoning_type, +Intentions, -Intention).
-%   get_substitution(+Reasoning_type, +ActionTerm, +SubstitutionList, 
-%                    +VariableList,-SubstitutionList).
-%   get_plan(+Reasoning_type, +Event, +RelAppPlans, -IntendedMeans).
-%
+/**
 
-% This module is loaded / included in the FRAgAgent file
+This file is part of the FRAg program. It is insluded into agent's file 
+FRAgAgent.pl. It contains clauses that are applied to strategies for selecting 
+intentions, plans and substitutions. Simple reasoning always selects the first 
+option from a set of provided options.
 
+@author Frantisek Zboril
+@version 2021 - 2022
+@license GPL
+
+*/
 
 
   reasoning_method(simple_reasoning).
@@ -39,7 +37,19 @@ get_substitution(simple_reasoning, _, [Context| _ ], Variables, Context_Out):-
 % sort it by id
 get_plan(simple_reasoning, _, [Intended_Means| _ ], Intended_Means).
 
+
+
+%!  update_model(simple_reasoning) is det
+%   No update is needed. This clause is assessed as valid without  
+%   implementation of sub-goals
+
 update_model(simple_reasoning).
-				
+
+
+		
+%!  update_model(random_reasoning) is det
+%   No initialization is needed. This clause is assessed as valid without  
+%   implementation of sub-goals
+		
 init_reasoning(simple_reasoning).
 

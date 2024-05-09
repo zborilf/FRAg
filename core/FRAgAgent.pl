@@ -30,7 +30,6 @@
   ).
 
 
-
 /**
 <module> fRAgAgent
 
@@ -80,6 +79,7 @@ timeout(200).
 
 %   no_job, because the 'init' agent should finish ASAP
 %   @see documentation for termination modes
+
 terminate(no_job).
 
 
@@ -93,7 +93,7 @@ terminate(no_job).
 :-dynamic finish_time /1.
 
 
-%!  plan(+Event_Type, +Event_Atom, +Conditions,, +Context, +Body).
+%!  plan(+Event_Type, +Event_Atom, +Conditions, +Context, +Body).
 
 :-thread_local plan/5.
 
@@ -418,6 +418,7 @@ process_messages.
 %    ONE ACT EXECUTION, 4th interpretation level / execution                   |
 %                                                                              |
 %===============================================================================
+
 
 
 %!  execute(+Intention, +Plan_Before, - Plan_After) is det
@@ -1477,6 +1478,19 @@ force_execution(model_act_node( _, _, _)).
 %                                                                              |
 %===============================================================================
 
+%!  clear_agent is det
+%   retract all agent parts of its configuration 
+%   (used in mcts reasoning)		
+
+clear_agent:-
+    retractall(fact(_)),
+    retractall(event( _, _, _, _, _, _, _)),
+    retractall(plan( _, _, _, _)),
+    retractall(plan( _, _, _, _, _)),
+    retractall(intention( _, _, _)).
+
+
+
 %!  set_clauses(+Clauses, +Plan_ID)
 %   Asserts Clauses that are agent's program. When asserting plans,
 %   index them with Plan_ID, which is original fresh plan's identifier.
@@ -1602,6 +1616,8 @@ wait_go(Trigger):-
 
 
 
+%!  synchronous start of all the agents in system 
+%   Synchronized by shared atom on FRAg's blackboard
 
 go_sync(Steps, I):-
     thread_self(Agent),
@@ -1625,6 +1641,7 @@ fa_init_com(Filename):-
 
 fa_finalize_com:-
     told.
+
 
 
 %!  set_control(+Terminating) is det

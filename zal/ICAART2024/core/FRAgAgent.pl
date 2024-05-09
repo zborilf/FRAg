@@ -37,7 +37,7 @@
 This module contains code for threads of individual agents
 
 @author Frantisek Zboril
-@version 0.95 (2021 - 2023)
+@version 0.95 (2021 - 2024)
 @license GPL
 */
 
@@ -61,25 +61,29 @@ This module contains code for threads of individual agents
 :- multifile get_plan /4.
 :- multifile update_model /1.
 
-% FRAg specific ops / late bindings etc.
+%   FRAg specific ops / late bindings etc.
 :-include('FRAgPLFRAg.pl').
-% FRAg operations for relations and assignments
+
+%   FRAg operations for relations and assignments
 :-include('FRAgPLRelations.pl').
 
 :- use_module(library(thread)).
-% shared data among threads (agents etc.)
+
+%   shared data among threads (agents etc.)
 :-use_module('FRAgBlackboard').
-% interface to environments
+
+%   interface to environments
 :-use_module('FRAgAgentInterface').
   
 
 timeout(200).
 
-% no_job, because the 'init' agent should finish ASAP
+%   no_job, because the 'init' agent should finish ASAP
+%   @see documentation for termination modes
 terminate(no_job).
 
 
-% dynamic atoms
+%   dynamic atoms
 
 :-dynamic default_late_bindings / 1.
 :-dynamic default_environment /1.
@@ -102,9 +106,10 @@ terminate(no_job).
 :-thread_local intention /3.
 
 %!  goal(+Type, +Atom, +Context).
-%  @arg Type:
-%  @arg Atom:
-%  @arg Context:
+%  @arg Type: goal type [only 'ach']
+%  @arg Atom: goal atom
+%  @arg Context: should be empty [[]], but can contain some substutitutions
+%   in the form [[
 
 :-thread_local goal /3.
 
@@ -113,12 +118,15 @@ terminate(no_job).
 %!  event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
 %         +History).
 %  @arg Event_ID:
-%  @arg Type: ach for achievement, add for add, del for delete
-%  @arg Atom:
-%  @arg Parent_Intention:
-%  @arg Context:
+%  @arg Type: 'ach' for achievement, 'add' for add, 'del' for delete
+%  @arg Atom: Event atom.
+%  @arg Parent_Intention: Intention that raised this event
+%  @arg Context: Event context - PUS, usualy empty, but it could be
 %  @arg Status: event state - active / intention number,
-%  @arg History: list of tried plans
+%  @arg History: a list of details of plans that have already been tried for
+%    the event, concretely list of 
+%                    'used_plan(Plan_ID, Goal_Atom, Conditions, Context)' 
+	           
 
 :-thread_local event /7.
 
@@ -467,7 +475,7 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]
     nonempty_context(Context_New, Result).
 
 
-% Performing the achievement goal
+%   Performing the achievement goal
 
 execute(Intention_ID,
         plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
@@ -1146,8 +1154,8 @@ execution.  % no intention in agent's
 
 %!  put_back_plan(Plan_ID, Status) is multi
 %   If Staus is 'false' then plan with Plan_ID is asserted at the
-%   end of datapase.
-%  @arg Plan_ID:
+%   end of database.
+%  @arg Plan_ID: 
 %  @arg Status:
 
 put_back_plan(Plan_ID, false):-
@@ -1159,7 +1167,7 @@ put_back_plan(_,_).     % akce planu byla OK, nedavame nakonec
 
 
 %!  reasoning is det
-%   Processes all events simultaneously. For each a means is searched.
+%   Processes all events simultaneously. For each event a means is searched.
 %   If found, the corresponding intention is created or expanded
 
 reasoning:-
@@ -1369,7 +1377,7 @@ next_loop( _, Steps_Left):-
 
 
 %!  increment_loop is multi
-%   increases loop_number in database
+%   increases loop_number in Prolog database 
 
 increment_loop:-
     retract(loop_number(Loop)),

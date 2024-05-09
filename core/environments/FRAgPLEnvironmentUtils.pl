@@ -2,7 +2,7 @@
 :-module(env_utils,
     [
         register_environment /1,
-        register_clone /2,   % nutne??
+%        register_clone /2,   
         clone_environment /2,
 	environment_registered /2,
         situate_agent_environment /2,
@@ -38,10 +38,10 @@
 
 /** <module>  Environments Supporting Clauses 
 
-Work with instances, facts, beliefs, agents
+Work with environment instances, facts, beliefs, agents
  
 
-@author Frantisek Zboril
+@author Frantisek Zboril 2023 - 2024
 @license GPL
 */
 
@@ -52,9 +52,9 @@ Work with instances, facts, beliefs, agents
 :-dynamic fact/4.
 :-dynamic episode_list /1.
 
-:-dynamic add/2.
-:-dynamic delete/2.
-:-dynamic environment /2.    % Registered environment / clone
+:-dynamic add/2.              % addlist for agents' beliefs update
+:-dynamic delete/2.           % deletelist for agents' belief update
+:-dynamic environment /2.     % Registered environment / clone
 :-dynamic situated_agent /3.  % Agents in this environment or clone
 
 
@@ -74,15 +74,6 @@ register_environment(Environment):-
     assert(environment(Environment, Environment)).
 
 
-% not exported
-
-register_clone(Environment, Clone):-
-    environment(Environment, Clone). % already registered
-
-register_clone(Environment, Clone):-
-    assert(environment(Environment, Clone)).
-
-
 
 %!  clone_environment(Environment, Clone) is det
 %   Makes clone of Environment, for every fact(Environment, Environment, Fact),
@@ -94,6 +85,14 @@ clone_environment(Environment, Clone):-
     register_clone(Environment, Clone),
     findall(Fact, fact(Environment, Environment, Fact), Facts),
     add_facts_clone(Environment, Clone, Facts).
+
+
+register_clone(Environment, Clone):-
+    environment(Environment, Clone). 		% already registered
+
+register_clone(Environment, Clone):-
+    assert(environment(Environment, Clone)).
+
 
 
 
@@ -375,6 +374,7 @@ add_facts_beliefs(Environment, Agent, Beliefs):-
     add_facts_agent(Environment, Agent, Beliefs),
     add_beliefs(Agent, Beliefs).
 
+
 %!  add_facts_beliefs_all(+Environment, +Agent, +Beliefs) is det
 %Add Beliefs to the Environment or its clone where Agent is
 %and also process add/delete lists for all the agents in  Environent instance
@@ -497,7 +497,7 @@ delete_facts_beliefs_all(Environment, Agent, Beliefs):-
 
 
 %!  retreive_add_delete(+Agent, -Add_List, -Delete_List) is det
-%   Provides add/delete lists for Agent 
+%   Provides add/delete lists for specified Agent 
 %  @arg Agent: agent name
 %  @arg Add_List: new percepts
 %  @arg Delete_List: lost percepts
@@ -595,11 +595,6 @@ md:-
  %   doc_load_library,
     doc_save('FRAgPLEnvironmentUtils.pl',[format(html), recursive(true), 
                                           doc_root('../../doc')]).
-
-
-
-
-
 
 
                                                   

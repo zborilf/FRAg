@@ -18,6 +18,7 @@ Blackboard for distributed communication
 */
 
 
+% Shared variables 
 
 :-dynamic frag_debug / 1.
 :-dynamic agent /1.				

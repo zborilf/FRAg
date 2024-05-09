@@ -12,7 +12,8 @@ goal(ach,go2,[[]]).
 plan(ach, go2, [b(5,5)],
     [
          test(b(2,1)),
-         act(sleep(1)),
+	 ach(go),
+        % act(sleep(0.2)),
          act(printfg("test prosel"))
     ]).
 

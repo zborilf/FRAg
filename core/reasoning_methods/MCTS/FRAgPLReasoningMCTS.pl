@@ -1,16 +1,18 @@
 
+
 /**
-	Reasoning methods - MCTS supported reasoning
-        This file is included to FRAgPLAgent.pl file
-	Frantisek Zboril jr. 2022 - 2023
+
+This file is part of the FRAg program. It is insluded into agent's file 
+FRAgAgent.pl. It contains clauses that are applied to strategies for selecting 
+intentions, plans and substitutions. MCTS reasoning performs selection of 
+actions, plans and substitutions based on Monte Carlo Tree Search simulations.
+
+@author Frantisek Zboril
+@version 2022 - 2024
+@license GPL
+
 */
 
-%
-%  Should define
-%                       get_intention(+Reasoning_type, +Intentions, -Intention).
-%                       get_substitution(+Reasoning_type, +ActionTerm, +SubstitutionList, +VariableList, -SubstitutionList).
-%                       get_plan(+Reasoning_type, +Event, +RelAppPlans, -IntendedMeans).
-%
 
 % This module is loaded / included in the FRAgAgent file
 
@@ -647,24 +649,29 @@ update_model(mcts_reasoning):-
     retractall(simulate_late_bindings( _ )),
     assert(simulate_late_bindings(BINDINGS)),
     println_debug('[MCTS] Updating model',mctsdbg),
+
 % here allways late bindings (for mcts simulation)
 % set_late_bindings(true),
 % in Program is now a snapshot of actual agent state
     take_snapshot(Program),
+
 % ProgramS does not produce outputs now
     silence_program(Program, Silent_Program),
 
     println_debug('',mctsdbg),
     println_debug(Silent_Program, mctsdbg),
     println_debug('simstr',mctsdbg),
+
 % Expansions <- number of expansions per (the next) simulation
     mcts_expansions(Expansions),
+
 % Number of simulations per expansion
     mcts_number_of_simulations(SIMULATIONS),
 
     mcts_simulation(Silent_Program, Expansions, SIMULATIONS),
     print_mcts_model(mctsdbg_path),
     mcts_get_best_ucb_path(PATH, false),
+
 % REASONING: 'reasoning node' prefix of PATH, ACT is the first ACT in PATH
     mcts_divide_path(PATH, REASONING, ACT),
     print_debug('[MCTS] Path:', mctsdbg),
@@ -704,6 +711,7 @@ get_plan_for_goal(event(Event_ID, Event_Type, Event_Atom, INTENTION,
 
 
 get_plan_for_goal(_, _, no_plan, _).
+
 
 
 get_intention(mcts_reasoning,Intentions,intention(INTIDX,CONTENT,active)):-

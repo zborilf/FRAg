@@ -1,9 +1,4 @@
 
-%                               
-%  	FRAg shared blackboard
-%  	Frantisek Zboril jr. 2021 - 2023
-%  	   
-
 
 :-module(fRAgBlackboard,[
 			    frag_debug / 1,
@@ -14,7 +9,15 @@
 	).
 
 
-% agent(Name), agent Name is a part of the mutliagent system
+/** <module>  FRAg Environment Interface
+
+Blackboard for distributed communication
+
+@author Frantisek Zboril
+@license GPL
+*/
+
+
 
 :-dynamic frag_debug / 1.
 :-dynamic agent /1.				

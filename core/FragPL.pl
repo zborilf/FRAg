@@ -56,8 +56,8 @@ version("0.95").
 
 
 %!  set_bindings(+Binding_Method) is det
-%   Nastavi metodu navazovani promennych
-%  @arg BINDINGS_METHOD: late, early
+%   Sets variable bindings method / strategy
+%  @arg Binding_Method: one from 'late', 'early'
 
 set_bindings(late):-
     fRAgAgent:set_late_bindings.
@@ -68,9 +68,9 @@ set_bindings(early):-
 
 
 %!  get_frag_attributes(+Key, -Value) is det
-%   Returns actual setting of attributes
-%  @arg Key: Attribute name, @see documentation
-%  @arg Value: Attribute value
+%   Returns actual values of attributes
+%  @arg Key: attribute name, @see documentation
+%  @arg Value: attribute value
 
 get_frag_attributes(default_bindings, late):-
     fRAgAgent:is_default_late_bindings.
@@ -101,8 +101,6 @@ get_frag_attributes(environments, Environments):-
 %  @arg Reasoning: intention_selection, plan_selection, substitution_selection, all/
 %  @arg Reasoning_method: one of possible reasoning or a list of three in 
 %   the case of 'all'
-%   Distribution provides: simple_reasoning, random_reasoning, 
-%   biggest_joint_reasoning, snakes_reasoning, mcts_reasoning
 
 set_default_reasoning(intention_selection, Intention_Selection):-
     set_default_intention_selection(Intention_Selection).
@@ -120,8 +118,8 @@ set_default_reasoning(all, Reasoning):-
 
 %!  load_agent(+Agent, +Program, +Attributes, -Thread) is det
 %   Creates thread for Agent, loads Agent's Program  and sets it up
-%  @arg Agent: Agent name
-%  @arg Program: fap program code
+%  @arg Agent: agent name
+%  @arg Program: agent program - 'fap' program file
 %  @arg Attributes: agent attributes @see @tbd
 %  @arg Thread: created thread for the agent
 
@@ -133,11 +131,11 @@ load_agent(Agent, Program, Attributes, Thread):-
 
 
 
-%!  load_same_agents(+Agent, +Program, +Number, +Attributes, -Threads) is det
-%  @arg Agent: Agent name prefix (names will be Agent1, Agent2 ... AgentNumber)
-%  @arg Program: fap program code
-%  @arg Number: Number of agents to be created
-%  @arg Attributes: Attributes declared for these agents
+%!  load_same_agents(+Agent, +Program, +Number, +Attributes, -Threads) is nondet
+%  @arg Agent: agent name prefix (names will be Agent1, Agent2 ... AgentNumber)
+%  @arg Program: agent program - 'fap' program file
+%  @arg Number: number of agents to be created
+%  @arg Attributes: attributes declared for these agents
 %  @arg Threads: created Threads for the agents
 
 load_same_agents(_, _, 0, _, []).
@@ -155,7 +153,7 @@ load_same_agents(Agent, Program, Number, Attributes, [THREAD| THT]):-
 %   sets Attributes for each agent type
 %  @arg Agent_To_Load: load(Agent, Program, Number, Attributes) where Agent is
 %   agent 'root' name, Number is number of agents that should be created from 
-%   given Program - then the names contains indexec from 1 to Number, and 
+%   given Program - then the names contains indexes from 1 to Number, and 
 %   Attributes are attribudes specified for the agent type
 %  @Agent_Threads: List of threads of each created agent
 
@@ -475,7 +473,7 @@ main_frag:-
     version(Version),
     format(
 "FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
-Brno University of Technology~n~n",
+Brno University of Technology ~n~n",
 	   [Version]),
     frag('fraginit'),
     !,

@@ -86,8 +86,10 @@ episode_length(0.01). % in secs
 
 previous_time(-1).
 
+
 %!  init_beliefs(+Agents)
-% Inserts beliefs has / price / sells to Agents
+%   Inserts beliefs has / price / sells to Agents
+%  @arg Agents: List of agents for which beliefs should be initialized
 
 init_beliefs(Agents):-
     findall_environment(card_shop, Agent, has( _, _), Beliefs1),
@@ -97,17 +99,16 @@ init_beliefs(Agents):-
     add_beliefs_agents(Agents, Beliefs2),
     add_beliefs_agents(Agents, Beliefs3),
     add_beliefs_agents(Agents, [episode(1)]).
-
                   
 
 %!  card_shop(++Functionality, +Attributes) is det 
-%@arg Functionality is one of 
+%  @arg Functionality is one of 
 %*      set_parameters 
 %*      add_agent
 %*      clone
 %*      reset_clone
 %*      remove_clone
-%@arg Attributes: List of parameters in the form of tuples
+%  @arg Attributes: List of parameters in the form of tuples
 %   1. For functionality 'set_attributes' the attributes can be
 %*      (products, [Number, Mean_Price, Dispersion])
 %*      (b_lambda, Mean) 
@@ -181,12 +182,13 @@ change_params(Atom):-
 change_params(Atom):-
     assert(Atom).
 
+
 %!  generate_products(+Number, +Mean_Price, +Dispersion) is det
 %   Generates Number of CDs with prices ~N(Mean_Prixe, Dispersion) truncates
 %   to tens
-%@arg Number
-%@arg Mean_Price
-%@arg Dispersion
+%  @arg Number: Number of products to be generated
+%  @arg Mean_Price:
+%  @arg Dispersion:
 
 generate_products(0, _, _).
 
@@ -202,10 +204,9 @@ generate_products(Number, Mean, Dispersion):-
 
    
  
-
 %!  card_shop(add_agent, +Agent) is det
 %   Adds agent Agent to the main instance of card_shop environment
-%@arg Agent: Name of the agent
+%  @arg Agent: Name of the agent
 
 card_shop(add_agent, Agent):-
     situate_agent_environment(Agent, card_shop),
@@ -222,8 +223,8 @@ card_shop(add_agent, Agent):-
 
 %!  card_shop(add_agent, +Instance +Agent) is det
 %   Adds agent Agent to the +Instance of card_shop environment
-%@arg Agent: Name of the agent
-%@arg Instance: Insatnce of the card_shop environment
+%  @arg Agent: Name of the agent
+%  @arg Instance: Insatnce of the card_shop environment
 
 card_shop(add_agent, Agent, Instance):-
     situate_agents_clone([Agent], card_shop, Instance),
@@ -232,7 +233,7 @@ card_shop(add_agent, Agent, Instance):-
 
 %!  card_shop(clone, +Instance) is det
 %   Creates a clone 
-%@arg Instance: Insatnce of the card_shop environment
+%  @arg Instance: Insatnce of the card_shop environment
 
 card_shop(clone, Instance):-
     clone_environment(card_shop, Instance).
@@ -240,7 +241,7 @@ card_shop(clone, Instance):-
 
 %!  card_shop(reset_clone, +Clone) is det
 %   Resets clone to its initial state
-%@arg Clone:
+%  @arg Clone:
 
 card_shop(reset_clone, Clone):-
     reset_environment_clone(card_shop, Clone),
@@ -250,7 +251,7 @@ card_shop(reset_clone, Clone):-
 
 %!  card_shop(remove_clone, +Clone) is det
 %   Removes clone instance
-%@arg Clone:
+%  @arg Clone:
 
 card_shop(remove_clone, Clone):-
     remove_environment_clone(card_shop, Clone).
@@ -267,9 +268,9 @@ card_shop(remove_state, Instance, State):-
 
 %!  card_shop(perceive, +Agent, -Add_List, - Delete_List) is det
 %   Passes changes to the Agent in the form od Add_List and Delete_List
-%@arg Agent: Agent that perceives some instance of card_shop environment
-%@arg Add_List: New percept since last perceiving
-%@arg Delete_List: Disapeared peceps since last perceiving
+%  @arg Agent: Agent that perceives some instance of card_shop environment
+%  @arg Add_List: New percept since last perceiving
+%  @arg Delete_List: Disapeared peceps since last perceiving
 
 card_shop(perceive, Agent , Add_List, Delete_List):-
     check_episode(Agent),
@@ -284,11 +285,10 @@ card_shop(perceive, Agent , Add_List, Delete_List):-
                                                buyers(B), sellers(S)])]).
 
 
-
 %!  check_episode(+Agent) is det
 %   Checks if the episode is over and if so, updates environment.
 %   TODO should respect particular instances (now it is for all instances)
-%@arg Agent: agent perceiving environment, could be used for episode checking
+%  @arg Agent: agent perceiving environment, could be used for episode checking
 
 %   In the case of sim_time, the check allways passes
 
@@ -337,9 +337,9 @@ new_episode_time( _ , Number):-
 
 
 %!  update_environment(+Agent, +Number) is det
-%Updates environment Number-times.
-%*Agent:
-%*Number: Number of updatings
+%   Updates environment Number-times.
+%  @arg Agent: For which agent to update the environment
+%  @arg Number: Number of updates
 
 update_environment( _, 0).
 

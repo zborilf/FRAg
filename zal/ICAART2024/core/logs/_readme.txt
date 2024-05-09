@@ -1,3 +1,5 @@
+// in czech only
+
 
 Cislovani je podivne
 1. cislo je kolik jiz realny agent udelal kroku, od tohoto kroku se simuluje

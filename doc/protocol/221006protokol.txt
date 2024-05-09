@@ -83,4 +83,5 @@
 
 6.12.23 Po perném semestru opìt èistím a komentuju, tentokrát hlavní modul + správné referování modulù, snad i dokumentaci
 
+4.4.24 Další nakoknutí. Budu pracovat na MCTS metodì, snad i dokumentaci, ale hlavnì doladìní a pøíkladech
 

@@ -79,8 +79,6 @@ new_events_number(1.8, _ , Y),
 
 
 
-
-
 g(_, 0).
 
 g(L, X):-

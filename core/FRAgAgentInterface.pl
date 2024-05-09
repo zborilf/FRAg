@@ -94,6 +94,7 @@ set_environment_attributes(Environment, Attributes):-
     Environment_Attrs.
 
 
+
 %!  get_all_environments(-Environments) is det
 %   Provides all the available present in the system
 %  @arg Environment: List of environments
@@ -102,12 +103,14 @@ get_all_environments(Environments):-
     findall(Environment, environment(Environment), Environments).
 
 
+
 %!  environment_loaded(+Environment) is semidet
 %   Succeed, if Environment has been added to the system
 %  @arg Environment: Environment identifier
 
 environment_loaded(Environment):-
     environment(Environment).
+
 
 
 %!  clone_environment(+Environment, +Clone) is det
@@ -124,6 +127,7 @@ clone_environment(Environment, Clone):-
     Clone_Environment=..[Environment, clone, Clone],
     !,
     Clone_Environment.
+
 
 
 %!  situate_agent(+Agent:atom, +Environment) is det
@@ -154,6 +158,7 @@ situate_agent2(Agent, Environment):-
             [Agent, Environment]).
 
 
+
 %!  situate_agent(+Agent, +Environment, +Clone) is det
 %   Situates agent to an environment. Agent will percieve the environment and
 %   may act in it
@@ -177,6 +182,8 @@ situate_agent2(Agent, Environment, Clone):-
     fail.
 
 
+
+
 %!  get_agent_environments(+Agent, +Environments) is det
 %   Provides all the Environments where Agent is situated in
 %  @arg Agent: agent name / identifier
@@ -193,7 +200,7 @@ get_agent_environments(_, []).
 %!  get_agent_instance(+Agent, +Environment, +Clone) is det
 %   Provides Clone for an Environment where Agent is sistuated in
 %  @arg Agent: agent name / identifier
-%  @arg Environment2: One of Environment(s), where Agent is situated in
+%  @arg Environment2: One of Environments, where Agent is situated in
 %  @arg Clone, where the Agent is. If it is the same as Envronment, Agent is in
 %   the original instance of Environment
 
@@ -224,6 +231,7 @@ virtualize_agent(Agent, Agent2):-
     virtualize_agent_environments(Agent2, Environments).
 
 virtualize_agent(_, _).
+
 
 
 %!  virtualize_agents(+Agent, ?Virtual_Agents) is det

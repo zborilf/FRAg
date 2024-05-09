@@ -15,7 +15,7 @@
 %		###                  ###           ###    ###           ###       ################
 %                                                                                               ###
 %                                                                                ###           ###
-%                                                                            .     ###############
+%                                                                                 ###############
 %						                                    ############
 %
 %
@@ -39,7 +39,7 @@
 This is the main module of the FRAg system.
 {pldoc link stranta.txt} dalsi stranka
 
-@author Frantisek Zboril
+@author Frantisek Zboril jr.
 @license GPL
 
 */
@@ -66,9 +66,10 @@ set_bindings(early):-
     fRAgAgent:set_early_bindings.
 
 
+
 %!  get_frag_attributes(+Key, -Value) is det
 %   Returns actual setting of attributes
-%  @arg Key: Attribute name
+%  @arg Key: Attribute name, @see documentation
 %  @arg Value: Attribute value
 
 get_frag_attributes(default_bindings, late):-
@@ -121,8 +122,8 @@ set_default_reasoning(all, Reasoning):-
 %   Creates thread for Agent, loads Agent's Program  and sets it up
 %  @arg Agent: Agent name
 %  @arg Program: fap program code
-%  @arg Attributes:
-%  @arg Thread:
+%  @arg Attributes: agent attributes @see @tbd
+%  @arg Thread: created thread for the agent
 
 load_agent(Agent, Program, Attributes, Thread):-
     term_string(Agent_Term, Agent),
@@ -146,6 +147,7 @@ load_same_agents(Agent, Program, Number, Attributes, [THREAD| THT]):-
     load_agent(AGENTNAME, Program, Attributes, THREAD),
     Number2 is Number - 1,
     load_same_agents(Agent, Program, Number2, Attributes, THT).
+
 
 
 %!  load_agents(Agent_To_Load, Agent_Threads) is det
@@ -278,7 +280,7 @@ frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
 
 %  sets default attributes
 
-frag_process_clause(Stream, set_default(Attributes), Clauses):-
+frag_process_clause(Stream, set_agents(Attributes), Clauses):-
     frag_process_attributes(Attributes),
     !,
     load_multiagent(Stream, Clauses).
@@ -325,7 +327,7 @@ frag_process_clause(Stream, Clause, Clauses):-
 %!  wait_agents(+Threads) is det
 %   Barrier with active waiting. All agents have to report their readiness by 
 %   inserting the ready(Agent_Name) atom
-%  @arg Threads: List of agents' threads, these threads signalizes 
+%  @arg Threads: List of agents threads, these threads signalizes 
 %   ready(Agent_Name) when they are ready 
 
 wait_agents([]).		% no agents loaded
@@ -451,8 +453,8 @@ frag_choice( _ ):-
 
 
 %!  join_threads(+Threads) is det
-%   Joins Threads to the main thread before finish the 'frag' clause
-%  @arg Threads: list of threads to join the main thread
+%   Joins Threads (agents) to the main thread. These agents have finished. 
+%  @arg Threads: List of threads to join the main thread
 
 join_threads([]).
 
@@ -472,7 +474,7 @@ main_frag:-
     nl,
     version(Version),
     format(
-"FRAg version ~w, 2021 - 2023, by Frantisek Zboril & Frantisek Vidensky,
+"FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
 Brno University of Technology~n~n",
 	   [Version]),
     frag('fraginit'),

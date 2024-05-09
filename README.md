@@ -72,5 +72,5 @@ Aktuální verze
 
 [1] Zboril, Vidensky, Koci, Zboril V.: Late Bindings in AgentSpeak(L), ICAART, 2022
 [2] Vidensky, Zboril, Koci, Zboril V.: Operational Semantic of an AgentSpeak(L) Interpreter using Late Bindings, ICAART, 2023
-[3] Vidensky, Zboril, Beran, Koci, Zboril V.: ICAART 2024
+[3] Vidensky, Zboril, Beran, Koci, Zboril V.: Comparing Variable Handling Strategies in BDI Agents: Experimental Study, ICAART 2024
 
