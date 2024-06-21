@@ -1,0 +1,11 @@
+
+
+
+set_agents([(bindings, late),(reasoning, can_reasoning)]).
+		
+
+load("kamil","../examples/kamil/kamil", 1, 
+	[(debug, candbg), (debug, interdbg), (debug, reasoningdbg), (debug, systemdbg)]).
+
+			   
+			  

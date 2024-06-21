@@ -1,6 +1,7 @@
  
 /**
- 	FragPL, basic environment / ... internal actions
+
+FragPL, basic environment / ... internal actions
        
 @author Frantisek Zboril jr. 
 @version 2021 - 2023

@@ -1,0 +1,48 @@
+
+fact(a(1)).
+fact(a(2)).
+fact(a(3)).
+fact(a(4)).
+fact(a(5)).
+fact(a(6)).
+fact(a(7)).
+fact(a(8)).
+fact(a(9)).
+fact(a(10)).
+
+
+fact(b(1,2)).
+fact(b(3,2)).
+fact(b(2,3)).
+fact(b(2,4)).
+% fact(b(3,3)).
+fact(b(4,2)).
+fact(b(2,1)).
+
+fact(c(9,1)).
+fact(c(6,1)).
+fact(c(3,1)).
+
+goal(ach,go(X),[[]]).
+
+plan(ach,go(X),[a(X)],	
+	[
+		test(b(X,X)),
+		act(printfg(X))
+	]).
+
+
+plan(ach,go(X),[b(2,X)],
+	[
+		test(not(b(X,2))),
+		act(printfg("Not ~w",[X]))
+	]).
+/*
+plan(ach,go(X),[c(X,1)],
+	[
+		act(N is X-1),
+		test(not(a(N))),
+		act(printfg("Not ~w",[N])),
+		act(printfg("Plan 3 done"))
+	]).
+*/

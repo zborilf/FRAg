@@ -7,11 +7,11 @@ fact(b(2,1)).
 fact(b(3,3)).
 fact(b(5,5)).
 
-goal(ach,go2,[[]]).
+goal(ach,go,[[]]).
 
-plan(ach, go2, [b(5,5)],
+plan(ach, go, [b(2,3)],
     [
-         test(b(2,1)),
+         test(b(1,5)),
 	 ach(go),
         % act(sleep(0.2)),
          act(printfg("test prosel"))
@@ -24,5 +24,6 @@ plan(ach, go, [b(2,X)],
 
 plan(ach, go, [a(Y),not(b(Y,5))],			
 	[
+		test(c(y)),
 		act(printfg("Plan2 ~w",[Y]))
 	]).

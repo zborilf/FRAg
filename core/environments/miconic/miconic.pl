@@ -35,7 +35,7 @@ This module
 
 
 /*
-  Example model
+  Model Example
 */
 
 lift_at(f0).
@@ -88,7 +88,7 @@ init_beliefs(Agents):-
     add_beliefs_agents(Agents, Beliefs4).
 
 /*
-Exported clauses
+    Exported clauses
 */
 
 
@@ -150,12 +150,12 @@ process_waiting(Agent, Floor):-
 
 
 %!  miconic10(act, +Agent, +Action, -Result) is det
-%Situates agent to an environment. Agent will percieve the environment and
-%may act in it
+%   Situates agent to an environment. Agent will percieve the environment and
+%   may act in it
 %  @arg Agent: agent name / identifier
 %  @arg  Action: 
 %	      go(+Floor_Destination)
-%  @arg Result: action result (see results ling)
+%  @arg Result: action result (see results)
 
 
 

@@ -212,7 +212,7 @@ get_intention(Intentions, intention(Intention_ID, Context, Plan_Stack)):-
 % intention(INTENTIONINDEX, CONTEXT, PLANSTACK2),
     loop_number(Loop),
     format(atom(String),
-           "[RSNDBG] GET INTENTION [~w / ~w] -> ~w~n",
+           "~n[RSNDBG] GET INTENTION [~w / ~w] -> ~w~n",
            [Loop, Intention_Selection,
                intention(Intention_ID, Context, Plan_Stack)]),
     print_debug(String, reasoningdbg).
@@ -224,7 +224,7 @@ get_intended_means(Means, Event, Intended_Means):-
     get_plan(Plan_Selection, Event, Means, Intended_Means),
     loop_number(Loop),
     format(atom(String),
-           "[RSNDBG] GET PLAN [~w / ~w] -> FOR ~w ~n[......] -> PLAN ~w~n",
+           "~n[RSNDBG] GET PLAN [~w / ~w] -> FOR ~w ~n[......] -> PLAN ~w~n",
 		   [Loop, Plan_Selection, Event, Intended_Means]),
     print_debug(String, reasoningdbg).
 
@@ -540,7 +540,7 @@ decide_context(Atom, Context, Variables, Context2):-
                      Context2),
     loop_number(Loop),
     format(atom(String),
-           "[RSNDBG] GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
+           "~n[RSNDBG] GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
 [......] DECISION -> ~w~n",
 		   [Loop, Substitution_Selection, Atom, Context, Context2]),
 	print_debug(String, reasoningdbg).
@@ -559,11 +559,16 @@ decide_context(Atom, Context, Variables, Context2):-
 %   uses reasoning method due to active_reasoning_method(-Method)
 %
 
-decisioning(Action_Term, Context, Context_Out):-
+decisioning(Action_Term, Context, Context_Out, Apply):-
     term_variables(Action_Term, Action_Variables),
     decide_context(Action_Term, Context, Action_Variables, Context2),
     restriction(Context, [Context2], Context_Out),
-    apply_substitutions(Context2).
+    do_apply(Apply, Context2).
+
+do_apply(false, _).
+
+do_apply(true, Context):-
+    apply_substitutions(Context).
 
 
 
@@ -571,23 +576,28 @@ decisioning(Action_Term, Context, Context_Out):-
 %	Queries
 %
 
-%!   simulate_early_bindings(+Atom, +Context_In, -Context_Out) is nondet
-%    If Context_In is non-empty and the early binding strategy is active, it 
-%    decides how the free variables in the Atom will be bound. It selects one
-%    of the substrings from Context_In and modifies the context on Context_Out
-%    to respect the chosen bindings.
-%   @arg Atom: input Atom
-%   @arg Context_In: input Context
-%   @arg Context_Out: output Context
+%!  simulate_early_bindings(+Atom, +Context_In, -Context_Out, +Apply) is nondet
+%   If Context_In is non-empty and the early binding strategy is active, it 
+%   decides how the free variables in the Atom will be bound. It selects one
+%   of the substrings from Context_In and modifies the context on Context_Out
+%   to respect the chosen bindings.
+%  @arg Atom: input Atom
+%  @arg Context_In: input Context
+%  @arg Context_Out: output Context
+%  @arg Apply: apply substituions, instantiate variables
 
 simulate_early_bindings( _, [], []).
 
 %   late bindings are set, so do not simulate early bindings
-simulate_early_bindings( _, Context, Context):-
+simulate_early_bindings( _, Context, Context, _):-
     late_bindings(true).
 
-simulate_early_bindings(Act_Atom, Context_In, Context_Out):-
-    decisioning(Act_Atom, Context_In, Context_Out).
+%   already failed
+simulate_early_bindings( _, [], [], _).
+
+
+simulate_early_bindings(Act_Atom, Context_In, Context_Out, Apply):-
+    decisioning(Act_Atom, Context_In, Context_Out, Apply).
 
 
 
@@ -614,14 +624,14 @@ query(Query, Context, Context_Out):-
 % get list of subsitutions for fact(Query) and Answers
     broad_unification(fact(Query), Answers, Context2),
 % in the case of early bindings, chose on subsitution from Context2
-    simulate_early_bindings(Query, Context2, Context3),   
-    restriction(Context, Context3, Context_Out).
+    restriction(Context, Context2, Context3),
+    simulate_early_bindings(Query, Context3, Context_Out, false).
 
 query( _, _, []).
 
 
 
-% ! substract_subsets(+Substitutions1, +Substitutions2, 
+%!  substract_subsupstitions(+Substitutions1, +Substitutions2, 
 %                     -Substitutions_Out) is det
 %   Removes every substitution from Substitutions1 that is a subset of some
 %   substitution from Substitutions2

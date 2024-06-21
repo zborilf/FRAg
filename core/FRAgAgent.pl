@@ -33,7 +33,7 @@
 /**
 <module> fRAgAgent
 
-This module contains code for threads of individual agents
+This module contains code for thread clauses declarations for individual agents
 
 @author Frantisek Zboril
 @version 0.95 (2021 - 2024)
@@ -106,7 +106,7 @@ terminate(no_job).
 :-thread_local intention /3.
 
 %!  goal(+Type, +Atom, +Context).
-%  @arg Type: goal type [only 'ach']
+%  @arg Type: goal type [only 'ach' in this version]
 %  @arg Atom: goal atom
 %  @arg Context: should be empty [[]], but can contain some substutitutions
 %   in the form [[
@@ -117,27 +117,26 @@ terminate(no_job).
 
 %!  event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
 %         +History).
-%  @arg Event_ID:
+%  @arg Event_ID: event identifier
 %  @arg Type: 'ach' for achievement, 'add' for add, 'del' for delete
-%  @arg Atom: Event atom.
+%  @arg Atom: event atom
 %  @arg Parent_Intention: Intention that raised this event
-%  @arg Context: Event context - PUS, usualy empty, but it could be
+%  @arg Context: event context - PUS, usualy empty, but it could be
 %  @arg Status: event state - active / intention number,
 %  @arg History: a list of details of plans that have already been tried for
 %    the event, concretely list of 
 %                    'used_plan(Plan_ID, Goal_Atom, Conditions, Context)' 
 	           
-
 :-thread_local event /7.
 
 
 
-%!  intention_fresh(Number)
+%!  intention_fresh(-Number)
 %  @arg Number: Next possible Identifier number for agent's intention
 
 :-thread_local intention_fresh / 1.
 
-%!  event_fresh(Number)
+%!  event_fresh(-Number)
 %  @arg Next possible ID Number for agent's event
 
 :-thread_local event_fresh / 1.
@@ -435,7 +434,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context,
         true)
     :-
 %   'decisioning' clause is defined in FRAgPLFrag.pl
-    decisioning(Belief, Context, Context2),
+    decisioning(Belief, Context, Context2, true),
     assert(fact(Belief)),
     create_event(add, Belief).
 
@@ -447,7 +446,7 @@ execute(_ ,
 	plan(Event_Type, Event_Atom, Conditions, New_Context, Acts),
         true):-
 %   'decisioning' clause is defined in FRAgPLFrag.pl
-    decisioning(Belief, Context, New_Context),
+    decisioning(Belief, Context, New_Context, true),
     try_retract_belief(fact(Belief)),
     create_event(del, Belief).
 
@@ -470,7 +469,7 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]
             Result):-
 %   'query' clause is defined in FRAgPLFrag.pl
     query(Goal, Context, Context2),
-    simulate_early_bindings(Goal, Context2, Context_New),
+    simulate_early_bindings(Goal, Context2, Context_New, true),
 %   If the resulting context is nonempty, the test goal is successful. Otherwise,
 %   it is unsuccessful.
     nonempty_context(Context_New, Result).
@@ -539,7 +538,7 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 	plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Restult)
     :-
 %   'decisioning' clause is defined in FRAgPLFrag.pl
-    decisioning(Action, Context, Context_Out),
+    decisioning(Action, Context, Context_Out, true),
     !,
     execute_environment(Environment, Action, Restult).
 
@@ -548,7 +547,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
             plan(Event_Type, Event_Atom, Conditions, Context_Out, Acts), Result)
     :-
 %   'decisioning' clause is defined in FRAgPLFrag.pl
-    decisioning(Action, Context, Context_Out),
+    decisioning(Action, Context, Context_Out, true),
     !,
     % execute action in 'basic' FRAg environment
     execute_environment(basic, Action, Result).
@@ -810,8 +809,9 @@ try_retract_event( _).
 
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
-    println_debug("[RSNDBG] Update intention: INTENTION BLOCKED",
-                  reasoningdbg).
+    format(atom(String),
+           "~n[RSNDBG] Update intention: INTENTION BLOCKED",[]),
+    println_debug(String, reasoningdbg).
 
 % Top-level plan succeeded - there is only one plan in intention's plan
 % stack and its body is empty. Removes the intention and the event that
@@ -821,8 +821,9 @@ update_intention(intention(Intention_ID, _, _), true):-
 update_intention(intention(Intention_ID, [plan(_, _, _, _, _, [])], _),
                  true)
     :-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",
-                  reasoningdbg),
+    format(atom(String),
+           "~n[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
+    println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, _)),
     try_retract_event(Intention_ID).
 
@@ -840,8 +841,9 @@ update_intention(intention(Indention_ID,
                            Status),
                  _ )
     :-
-    println_debug("[RSNDBG] Update intention: SUBPLAN SUCCEEDED",
-                  reasoningdbg),
+    format(atom(String),
+           "~n[RSNDBG] Update intention: SUBPLAN SUCCEEDED",[]),
+    println_debug(String, reasoningdbg),
     intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
     assertz(intention(Indention_ID, [plan(Plan_ID2, Event_Type2, Event_Atom2,
@@ -859,8 +861,9 @@ update_intention(intention(Indention_ID,
 % restore it.
 
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
-    println_debug("[RSNDBG] Update intention: TOP LEVEL PLAN FAILED",
-                  reasoningdbg),
+    format(atom(String),
+           "~n[RSNDBG] Update intention: SUBPLAN FAILED",[]),
+    println_debug(String, reasoningdbg),                  
     retract(intention(Intention_ID, _, Status)),
     !,
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
@@ -881,7 +884,8 @@ update_intention(intention(_, [ _ ], _), false).
 update_intention(intention(Intention_ID,
                            [plan(_, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
-    println_debug("[RSNDBG] Update intention: SUBPLAN FAILED", reasoningdbg),
+    format(atom(String), "~n[RSNDBG] Update intention: SUBPLAN FAILED", []), 
+    println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
     retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
     assertz(intention(Intention_ID, Plans, active)).
@@ -891,7 +895,8 @@ update_intention(intention(Intention_ID,
 %  to its current state.
 
 update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
-    println_debug("[RSNDBG] Update intention: ACTION SUCCEEDED", reasoningdbg),
+    format(atom(String), "~n[RSNDBG] Update intention: ACTION SUCCEEDED", []),
+    println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
     assertz(intention(Intention_ID, Plan_Stack, Status)).
 
@@ -949,8 +954,8 @@ get_relevant_applicable_plans(Event_Type, Event_Atom, Event_Context, Means_Out)
     findall(plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
 	  plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
           Means1),
-    check_relevant_applicable_plans(Event_Atom, Event_Context, Means1, Means2),
-    check_early_reasoning(Means2, Means_Out).
+    check_relevant_applicable_plans(Event_Atom, Event_Context, Means1, Means_Out).
+%    check_early_reasoning(Means2, Means_Out).
 
 % this clause should not be reached (and should be deleted)
 
@@ -1199,11 +1204,16 @@ reasoning2([Event | Events]):-
 %!  reasoning3(+Event) is det
 %   Tries to find a means for Event, if successful, expands or creates
 %   relevant intention
-%  @arg Event:
+%  @arg Event: event as 
+%     event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
+%           +History)
 
 reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                  Context, active, History)):-
     get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
+    format(atom(String5), "~n[INTER] POSSIBLE MEANS: ~w", [Means]),
+    println_debug(String5, interdbg),
+    
     reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, Means).
 
@@ -1248,6 +1258,8 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 
 reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, _):-
+    format(atom(String), "~n[INTER] NO MEANS FOR THE EVENT", []),
+    println_debug(String, interdbg),
     update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                            Context, active, History),
                  false, _).
@@ -1283,11 +1295,11 @@ loop(Steps, Steps_Left):-
           [Loop_Number]),
     println_debug(String1, reasoningdbg),
 
-    format(atom(String2), "[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
+    format(atom(String2), "~n[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
     print_state(String2),
 
     late_bindings(Bindings),    % ???
-    format(atom(String3), "[INTER] Bindings ~w~n", [Bindings]),
+    format(atom(String3), "~n[INTER] Bindings ~w~n", [Bindings]),
     println_debug(String3, interdbg),
 
     sensing,
@@ -1296,19 +1308,19 @@ loop(Steps, Steps_Left):-
     update_models,
     !,
 
-    format(atom(String4), "+|+ RE ~w", [Loop_Number]),
+    format(atom(String4), "[INTER] RE ~w", [Loop_Number]),
     println_debug(String4, interdbg),
 
     reasoning,
     !,
 
-    format(atom(String5), "+|+ EX ~w", [Loop_Number]),
+    format(atom(String5), "[INTER] EX ~w", [Loop_Number]),
     println_debug(String5, interdbg),
 
     execution,
     !,
 
-    format(atom(String6), "+|+ FIN ~w", [Loop_Number]),
+    format(atom(String6), "[INTER] FIN ~w", [Loop_Number]),
     println_debug(String6, interdbg),
     println_debug("loop_finished", interdbg),
     increment_loop,

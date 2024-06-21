@@ -446,18 +446,20 @@ delete_facts_agent(_, _, []).
 
 delete_facts_agent(Environment, Agent, [Fact| Facts]):-
     get_clone_query(Environment, Agent, Fact, Clone_Fact),
-    try_retract(Clone_Fact),
+    format("tr1 ~w ~n",Clone_Fact),
+    try_retract_env(Clone_Fact),
     delete_facts_agent(Environment, Agent, Facts).
 
 delete_facts_agent(Environment, Agent, [Belief| Beliefs]):-
-    try_retract(fact(Environment, Environment, Belief)),
+    format("tr2~n"),
+    try_retract_env(fact(Environment, Environment, Belief)),
     delete_facts_agent(Environment, Agent, Beliefs).
 
 
-try_retract(Clone_Fact):-
+try_retract_env(Clone_Fact):-
     retract(Clone_Fact).
 
-try_retract(Clone_Fact):-
+try_retract_env(Clone_Fact):-
     format("[ERROR] retracting ~w failed~n", [Clone_Fact]).
 
 

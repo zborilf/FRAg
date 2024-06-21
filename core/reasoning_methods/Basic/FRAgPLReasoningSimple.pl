@@ -1,7 +1,7 @@
 
 /**
 
-This file is part of the FRAg program. It is insluded into agent's file 
+This file is part of the FRAg program. It is included into agent's file 
 FRAgAgent.pl. It contains clauses that are applied to strategies for selecting 
 intentions, plans and substitutions. Simple reasoning always selects the first 
 option from a set of provided options.
@@ -13,7 +13,7 @@ option from a set of provided options.
 */
 
 
-  reasoning_method(simple_reasoning).
+reasoning_method(simple_reasoning).
 
 
 % First active
@@ -40,16 +40,14 @@ get_plan(simple_reasoning, _, [Intended_Means| _ ], Intended_Means).
 
 
 %!  update_model(simple_reasoning) is det
-%   No update is needed. This clause is assessed as valid without  
-%   implementation of sub-goals
+%   No update is needed. This clause is valid by default  
 
 update_model(simple_reasoning).
 
 
 		
-%!  update_model(random_reasoning) is det
-%   No initialization is needed. This clause is assessed as valid without  
-%   implementation of sub-goals
+%!  init_reasoning(simple_reasoning) is det
+%   No initialization is needed. This clause is valid by default
 		
 init_reasoning(simple_reasoning).
 

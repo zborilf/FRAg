@@ -1,7 +1,7 @@
 
 /**
 
-This file is part of the FRAg program. It is insluded into agent's file 
+This file is part of the FRAg program. It is included into agent's file 
 FRAgAgent.pl. It contains clauses that are applied to strategies for selecting 
 intentions, plans and substitutions. Random reasoning always selects randomly 
 from a set of provided options.
@@ -34,12 +34,11 @@ get_intention(random_reasoning, Intentions, _):-
 
 
 %!  get_substitution(random_reasoning, _, Context, Vars, Context_Out) is det
-%   cz vybere nahodne jednu substituci a vytahne z ni Vars, toto je vysledek (!!!)
-%   This clause is to select one of the set of substitutions that subsume a 
-%   superset of Vars variables from ...
-%  @arg Context_In:
-%  @arg Vars:
-%  @arg Context_Out
+%   This clause is to select one of the set of substitutions and reduces it to 
+%   just the variables from Vars
+%  @arg Context_In: input context
+%  @arg Vars: the variables for which a decision is to be made
+%  @arg Context_Out: output context
 
 get_substitution(random_reasoning, _, Context_In, Vars, Context_Out):-
     random_member(Substitution, Context_In),
@@ -54,15 +53,13 @@ get_plan(random_reasoning, _ , Means, Intended_Means):-
 
 
 %!  update_model(random_reasoning) is det
-%   No update is needed. This clause is assessed as valid without  
-%   implementation of sub-goals
+%   No update is needed. This clause is valid by default  
 
 update_model(random_reasoning). 
 
 
-%!  update_model(random_reasoning) is det
-%   No initialization is needed. This clause is assessed as valid without  
-%   implementation of sub-goals
+%!  init_reasoning(random_reasoning) is det
+%   No initialization is needed. This clause is valid by default
 
 init_reasoning(random_reasoning).
 
