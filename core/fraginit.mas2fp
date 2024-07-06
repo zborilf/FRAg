@@ -6,7 +6,7 @@ include_reasoning("/reasoning_methods/Basic/FRAgPLReasoningCAN.pl").
 include_reasoning("/reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl").
 include_reasoning("/reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl").
 
-include_environment("/environments/shop/shop.pl").
+% include_environment("/environments/shop/shop.pl").
 
 
 set_agents([(bindings, early),

@@ -189,7 +189,7 @@ frag_process_attributes([(Key, Value)| Attributes]):-
 %!  set_default_attribute(+Key, +Value) is det
 %   Sets attributes of the multiagent system. These settings are default
 %   to agents and can be changed for individual agents in the agent
-%   introducting clauses @see multiagent frag file
+%   declaration clauses @see multiagent frag file
 %  @arg Key: attribute name
 %  @arg Value: attribute value
 %  @see documentation for the mas2fp file format
@@ -271,8 +271,8 @@ frag_process_clause(_ , end_of_file, []):-
 
 %  sets environment's attribute
 
-frag_process_clause(Stream, set_environment(Environment, Attributes), Clauses):-
-    fRAgAgent:set_environment_attributes(Environment, Attributes),
+frag_process_clause(Stream, set_environment(Environment, Parameters), Clauses):-
+    fRAgAgent:set_environment_parameters(Environment, Parameters),
     !,
     load_multiagent(Stream, Clauses).
 

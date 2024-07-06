@@ -145,7 +145,6 @@ enter_lift(Agent, [origin(Person, Floor) | Persons]):-
 process_waiting(Agent, Floor):-
     findall_environment(miconic10, Agent, origin(_, Floor), On_Board),
     enter_lift(Agent, On_Board).
-
  
 
 
@@ -156,8 +155,6 @@ process_waiting(Agent, Floor):-
 %  @arg  Action: 
 %	      go(+Floor_Destination)
 %  @arg Result: action result (see results)
-
-
 
 
 miconic10(act, Agent, go(Destination), true):-
@@ -238,10 +235,10 @@ miconic10(miconic10, Instance, State):-
     findall(position(Floor, Position), position(Floor, Position), Facts2),
     findall(origin(Passenger, Floor), origin(Passenger, Floor), Facts3),
     findall(destin(Passenger, Floor), destin(Passenger, Floor), Facts4),
-    add_facts(miconic10, Facts1),
-    add_facts(miconic10, Facts2),
-    add_facts(miconic10, Facts3),
-    add_facts(miconic10, Facts4).
+    env_utils:add_facts(miconic10, Facts1),
+    env_utils:add_facts(miconic10, Facts2),
+    env_utils:add_facts(miconic10, Facts3),
+    env_utils:add_facts(miconic10, Facts4).
     
 
 

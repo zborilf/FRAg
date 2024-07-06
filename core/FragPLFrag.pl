@@ -430,7 +430,7 @@ shorting(Goal1, Goal2, PUS_In, Vars_In, PUS_Out, Vars_Out):-
     shorting_pus(PUS_In, Vars_In, PUS1),
 % pokud je vystup [[],[],....] udelame z nej pouze [[]]
     set_empty_PUS(PUS1, PUS2),
-% musime prejmenovat, abychom ziskali 'fresh' jmena promennych
+% must rename to get fresh variable names
     copy_term([Goal1, PUS2],[Goal2, PUS_Out]),
 % a vezmem jen promenne, ktere jsou v novem PUS  (promennych bylo vic,
 % nez bylo ve vstupnim PUS) shorting [[A=a],[B=b]],[A,C] ->  [[A=a]],[A]

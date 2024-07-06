@@ -4,7 +4,7 @@
 :-module(fRAgAgentInterface,
 	    [
 		add_environment_library /1,             % + init ihned
-                set_environment_attributes /2,
+                set_environment_parameters /2,
 	        environment_loaded /1,
 		clone_environment /2,
 		situate_agent /2,		% + agent, environment
@@ -82,16 +82,16 @@ add_environment_library(Module_Name):-
 
 
 
-%!  set_environment_attributes(+Environment, +Attributes)
-%   Set Attributes for Environment. Particular possible attributes are described
+%!  set_environment_parameters(+Environment, +Parameters)
+%   Set Parameters for Environment. Particular possible attributes are described
 %   in Environment doncumentation
 %  @arg Environment: Environment identifier
-%  @arg Attributes: Environment's environemnt
+%  @arg Parameters: Environment's environemnt
 
-set_environment_attributes(Environment, Attributes):-
-    Environment_Attrs=..[Environment, set_attributes, Attributes],
+set_environment_parameters(Environment, Parameters):-
+    Environment_Params=..[Environment, set_parameters, Parameters],
     !,
-    Environment_Attrs.
+    Environment_Params.
 
 
 

@@ -1,8 +1,23 @@
 
-set_default(bindings, late).
-set_default(reasoning,biggest_joint_reasoning).
-set_default(reasoning_params, mcts_params(10,30)).
 
-% load("worker","worker.fap",1,[]).
+include_environment("/environments/workshop/workshop.pl").
 
-load("worker","examples/worker/worker",4,[(debug, jointdbg)]).
+
+set_environment(workshop, 
+		[(resources, [resource(wood, 0.1), 
+			      resource(iron, 0.1),
+			    %  resource(metal, 0.1),
+			    %  resource(stone, 0.1),
+			      resource(glass, 0.1)]),
+		(tasks_rate, 15)]
+               ).
+
+
+set_agents([ 
+             (bindings, late),
+             (reasoning, random_reasoning),
+             (environment, workshop)]).		
+
+
+
+load("worker","../examples/worker/worker",1,[(debug, reasoningdbg)]).

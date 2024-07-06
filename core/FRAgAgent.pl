@@ -380,8 +380,8 @@ process_add_list([Belief| Beliefs]):-
 process_delete_list([]).
 
 process_delete_list([Belief | Beliefs]):-
-    fact(Belief), % is in BB, should be deletd
-    retract(fact(Belief)),
+%    fact(Belief), % is in BB, should be deletd
+    retractall(fact(Belief)),
     create_event(del, Belief),
     process_delete_list(Beliefs).
 
@@ -798,7 +798,7 @@ try_retract_event( _).
 %   unsuccessfully executed act, or only a successfully executed act in a
 %   plan that was not the last act. If the intent is blocked, no change
 %   occurs.
-%  @arg Intention:
+%  @arg Intention: intention identifier
 %  @arg Result:
 %  @tbd navazat na pravidla z clanku
 %
@@ -1336,8 +1336,8 @@ sensing:-
     thread_self(Agent),
     agent_perceives(Agent, Add_List, Delete_List),
     % conflict should be resolved in 'agent_perceived'
-    process_add_list(Add_List),
     process_delete_list(Delete_List),
+    process_add_list(Add_List),
     process_messages.
 
 

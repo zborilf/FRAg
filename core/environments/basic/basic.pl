@@ -158,17 +158,24 @@ basic(act, _, silently_(format( _)), true).
 basic(act, _, silently_(format( _, _)), true).
 
 basic(act, Agent, silently_(Act), Result):-
-% neni zde zadna, co opravdu chceme umlcet?
+% there is none, do we need to silent it?
     basic(act, Agent, Act, Result). 
+
+
+%   any joint action
 
 basic(act, _, Act, Result):-
     is_joint_action(basic, Act),
     Act,
     Result is Act.
 
+%   any non-joint action
+
 basic(act, _, Act, true):-
     Act.
 	         
+%   action failed
+
 basic(act, _, _, fail).
 
 
