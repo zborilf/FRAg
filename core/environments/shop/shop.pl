@@ -308,7 +308,6 @@ card_shop(perceive, Agent , Add_List, Delete_List):-
 %   In the case of sim_time, the check allways passes
 
 check_episode(Agent):-
-%% TODO, no check here
     episode_mode(sim_time),
     episode(Episode),
     delete_facts_beliefs_all(card_shop, Agent,

@@ -1,12 +1,60 @@
 
-goal(ach,go,[[]]).
-
-
-plan(ach,go,[],[
-		act(writeln(ahoj)),
-		ach(go)				
-		]).
+goal(ach,take_stone,[[]]).
 
 
 
-		                                        	
+plan(ach,take_stone,[location(construction)],
+	[
+                act(workshop, go(warehouse)),
+		ach(take_stone)
+	]
+     ).
+
+
+plan(ach,take_stone,[location(workshop)],
+	[
+		act(workshop, go(construction)),
+                act(workshop, go(warehouse)),
+		ach(take_stone)
+	]
+     ).
+
+
+plan(ach,take_stone,[location(L),
+		    resource(L, stone, N), N>0],
+	[
+		act(workshop, pick(stone)),
+		ach(produce(machine2, stone))			
+	]
+    ).
+
+plan(ach,take_stone,[carry(worker, resource(stone))],
+	[
+		ach(produce(machine2, stone))			
+	]
+    ).
+
+
+plan(ach, produce(Machine, Material), [location(warehouse)],
+	[
+		act(workshop, go(workshop)),
+		act(workshop, do(Machine, Material)),
+		act(workshop, go(construction)),
+                act(workshop, submit),
+		act(writeln(hotovo))    
+	]
+    ). 
+
+
+plan(ach, produce(Machine, Material), [location(workshop)],
+	[
+		act(workshop, do(Machine, Material)),
+		act(workshop, go(construction)),
+                act(workshop, submit),
+		act(writeln(hotovo))
+	]
+    ). 
+
+
+	                   
+                     	

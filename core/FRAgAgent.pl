@@ -1139,7 +1139,7 @@ expand_plans([plan(Plan_ID, Type, Atom, Conditions, Body),
 %   intention is appropriately updated due to the result. Then, for the
 %   case of joint actions, rest of the intentions is updated as well
 
-execution:-
+acting:-
     select_intention(intention(Intention_ID,
                                [plan(Plan_ID, Event_Type, Event_Atom, Conditions,
                                      Context, Body)| Plans],
@@ -1155,7 +1155,7 @@ execution:-
 % be removed from all intention where it is the actual act for execution
     update_intentions(Result).
 
-execution.  % no intention in agent's
+acting.  % no intention in agent's
 
 
 %!  put_back_plan(Plan_ID, Status) is multi
@@ -1317,7 +1317,7 @@ loop(Steps, Steps_Left):-
     format(atom(String5), "[INTER] EX ~w", [Loop_Number]),
     println_debug(String5, interdbg),
 
-    execution,
+    acting,
     !,
 
     format(atom(String6), "[INTER] FIN ~w", [Loop_Number]),

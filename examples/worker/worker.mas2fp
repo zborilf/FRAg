@@ -4,10 +4,10 @@ include_environment("/environments/workshop/workshop.pl").
 
 
 set_environment(workshop, 
-		[(resources, [resource(wood, 0.1), 
+		[(resources, [resource(wood, 3), 
 			      resource(iron, 0.1),
-			    %  resource(metal, 0.1),
-			    %  resource(stone, 0.1),
+			      resource(metal, 0.1),
+			      resource(stone, 0.1),
 			      resource(glass, 0.1)]),
 		(tasks_rate, 15)]
                ).

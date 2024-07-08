@@ -16,7 +16,7 @@
 
 :-use_module('../FRAgPLEnvironmentUtils').   % interface for environments
 :-use_module('../FRAgPLStatsUtils').
-
+:-use_module('../FRAgPLEpisodeSteps').
 
 %   workshop model, state, clauses for model changes, model interface
 :-include('workshop_model.pl').
@@ -59,9 +59,10 @@ init_beliefs(Agents):-
     Agents = [Agent | _],	% suppose all the agents are in the same instance
     init_location(Location),
     add_location_percepts(Location, Agent),
-    add_facts_beliefs(workshop, Agent, [location(Location)]),
-    add_facts_beliefs(workshop, Agent, [episode(1)]),
-    add_facts_beliefs(workshop, Agent, [reward(0)]).
+    env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
+    env_utils:add_beliefs(Agent, [location(Location)]),
+    env_utils:add_facts_beliefs(workshop, Agent, [episode(1)]),
+    env_utils:add_facts_beliefs(workshop, Agent, [reward(Agent, 0)]).
 
 
 
@@ -164,10 +165,25 @@ workshop(remove_state, Instance, State):-
 %  @arg Delete_List: Disapeared peceps since last perceiving
 
 workshop(perceive, Agent , Add_List, Delete_List):-
-    update_workshop_model(Agent),
+    check_episode(Agent),
+    !,
     update_location_percepts(Agent),
     env_utils:retreive_add_delete(Agent, Add_List, Delete_List).
 
+
+check_episode(Agent):-
+% druhej workshop ma byt instance ws pro Agenta
+    episode_steps:add_agent(Agent, workshop, workshop),
+    episode_steps:is_new_episode,
+    !,
+    query_environment(workshop, Agent, episode(Episode)),
+    delete_facts_beliefs_all(workshop, Agent,
+                             [episode( Episode )]),
+    Episode2 is Episode + 1,
+    add_facts_beliefs_all(workshop, Agent, [episode(Episode2)]),
+    update_workshop_model(Agent).
+
+check_episode( _ ).
 
 %===============================================================================
 %                                                                              |
@@ -175,8 +191,78 @@ workshop(perceive, Agent , Add_List, Delete_List):-
 %                                                                              |
 %===============================================================================
 
-% every act succeeds
-workshop(act, Agent, _, true).
+
+workshop(act, Agent, go(Location), true):-
+    env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
+    !,
+    env_utils:query_environment(workshop, Agent, road(Location2, Location)),
+    env_utils:delete_facts_agent(workshop, Agent, [location(Agent, Location2)]),
+    env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
+    env_utils:delete_beliefs(Agent, [location(Location2)]),
+    env_utils:add_beliefs(Agent, [location(Location)]).
+
+
+workshop(act, Agent, pick(Material), false):-
+    !,
+    env_utils:query_environment(workshop, Agent, carry(Agent, _)).
+                                                          
+    
+workshop(act, Agent, pick(Material), true):- 
+    env_utils:query_environment(workshop, Agent, location(Agent, Location)),
+    !,
+    env_utils:query_environment(workshop, Agent, resource(Location, Material,
+                                                          Number)),
+    !,
+    Number > 0,
+    Number2 is Number - 1,
+    env_utils:delete_facts_agent(workshop, Agent, [resource(Location, Material,
+                                                            Number)]),
+    env_utils:add_facts_agent(workshop, Agent, [resource(Location, Material,
+                                                         Number2)]),
+    env_utils:add_facts_beliefs(workshop, Agent, [carry(Agent,
+                                                        resource(Material))]).
+
+
+workshop(act, Agent, do(Machine, Material), true):-
+    env_utils:query_environment(workshop, Agent, location(Agent, workshop)),
+    !,
+    env_utils:query_environment(workshop, Agent, machine(Machine, true)),
+    !,
+    env_utils:query_environment(workshop, Agent, carry(Agent, 
+						       resource(Material))),
+    env_utils:delete_facts_beliefs(workshop, Agent, 
+                                   [carry(Agent, resource(Material))]),
+    env_utils:add_facts_beliefs(workshop, Agent,[carry(Agent, product(Machine, Material))]).
+
+
+
+workshop(act, Agent, submit, true):-
+    env_utils:query_environment(workshop, Agent, location(Agent, construction)),
+    !,
+    env_utils:query_environment(workshop, Agent, carry(Agent, product(Machine, Material))),
+    !,
+    env_utils:query_environment(workshop, Agent, task(Machine, Material)),
+    !,
+writeln(sa),
+    env_utils:query_environment(workshop, Agent, reward(Agent, Reward)),
+
+writeln(sb),
+    env_utils:delete_facts_beliefs(workshop, Agent, 
+                                   [reward(Agent, Reward)]),
+
+writeln(sc),
+    Reward2 is Reward+1,
+writeln(sd),
+    env_utils:add_facts_beliefs(workshop, Agent,[reward(Agent, Reward2)]),
+    !,
+writeln(se),
+    env_utils:delete_facts_beliefs(workshop, Agent, 
+                                   [carry(Agent, product(Machine, Material))]).
+
+
+
+% every other act succeeds
+workshop(act, Agent, _, false).
 
 
 
@@ -186,9 +272,11 @@ workshop(act, Agent, _, true).
     env_utils:register_environment(workshop),
     findall(resource(Kind, Number), resource(Locaion, Kind, Number), Facts1),
     findall(machine(Type, State), machine(Type, State), Facts2),
+    findall(road(Location1, Location2), road(Location1, Location2), Facts3),
     episode(Episode),
     env_utils:add_facts(workshop, Facts1),
     env_utils:add_facts(workshop, Facts2),
+    env_utils:add_facts(workshop, Facts3),
     env_utils:add_facts(workshop, [episode(Episode)]).
 
 

@@ -157,7 +157,7 @@ increase_material_number(Material, Number, Number_Out):-
 %	PLACE PERCEPTS - ADD/DELETE WHEN ROBOT CHANIGES PLACE
 
 update_location_percepts(Agent):-
-    env_utils:query_environment(workshop, Agent, location(Location)),
+    env_utils:query_environment(workshop, Agent, location(Agent, Location)),
     delete_location_percepts(Location, Agent),
     add_location_percepts(Location, Agent).
 
