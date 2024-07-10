@@ -1,4 +1,4 @@
-
+            
 
 :-module(workshop,
     [
@@ -76,8 +76,7 @@ workshop(set_parameters, [(Key, Value)| Parameters]):-
 
 set_parameter(resources, Resources):-
     retractall(generate_resources_list(_)),
-    assert(generate_resources_list(Resources)),
-    generate_resources(Resources).
+    assert(generate_resources_list(Resources)).
 
 
 set_parameter(tasks_rate, Task_Rate):-
@@ -193,9 +192,10 @@ check_episode( _ ).
 
 
 workshop(act, Agent, go(Location), true):-
+writeln(herewego),
     env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
     !,
-    env_utils:query_environment(workshop, Agent, road(Location2, Location)),
+    env_utils:query_environment(workshop, Agent, path(Location2, Location)),
     env_utils:delete_facts_agent(workshop, Agent, [location(Agent, Location2)]),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
     env_utils:delete_beliefs(Agent, [location(Location2)]),
@@ -243,21 +243,14 @@ workshop(act, Agent, submit, true):-
     !,
     env_utils:query_environment(workshop, Agent, task(Machine, Material)),
     !,
-writeln(sa),
     env_utils:query_environment(workshop, Agent, reward(Agent, Reward)),
 
-writeln(sb),
     env_utils:delete_facts_beliefs(workshop, Agent, 
                                    [reward(Agent, Reward)]),
 
-writeln(sc),
-    Reward2 is Reward+1,
-writeln(sd),
-    env_utils:add_facts_beliefs(workshop, Agent,[reward(Agent, Reward2)]),
-    !,
-writeln(se),
-    env_utils:delete_facts_beliefs(workshop, Agent, 
-                                   [carry(Agent, product(Machine, Material))]).
+
+workshop(act, Agent, drop, true).
+
 
 
 
@@ -272,11 +265,16 @@ workshop(act, Agent, _, false).
     env_utils:register_environment(workshop),
     findall(resource(Kind, Number), resource(Locaion, Kind, Number), Facts1),
     findall(machine(Type, State), machine(Type, State), Facts2),
-    findall(road(Location1, Location2), road(Location1, Location2), Facts3),
+    findall(path(Location1, Location2), path(Location1, Location2), Facts3),
+    findall(resource(Location, Material, Number), 
+	    resource(Location, Material, Number), Facts4),
+    to_issue(Material_To_Issue),
     episode(Episode),
     env_utils:add_facts(workshop, Facts1),
     env_utils:add_facts(workshop, Facts2),
     env_utils:add_facts(workshop, Facts3),
-    env_utils:add_facts(workshop, [episode(Episode)]).
+    env_utils:add_facts(workshop, Facts4),
+    env_utils:add_facts(workshop, [episode(Episode)]),
+    env_utils:add_facts(workshop, [to_issue(Material_To_Issue)]).
 
 

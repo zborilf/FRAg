@@ -22,13 +22,11 @@ add_agent(Agent, Environment, Instance):-
     agents_perceived(List),
     history(List2),
     member(perceived(Agent, Environment, Instance), List),
-writeln(hajaha),
-    writeln(member(perceived(Agent, Environment, Instance), List)),
     assert(new_episode),
     retractall(history(List2)),
     assert(history([new_episode, perceived(Agent, Environment, Instance) | List2])), 
     retractall(agents_perceived(List)),
-    assert(agents_perceived([])).
+    assert(agents_perceived([perceived(Agent, Environment, Instance)])).
 
 
 add_agent(Agent, Environment, Instance):-

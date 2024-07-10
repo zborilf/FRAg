@@ -1,32 +1,36 @@
 
 
-road(construction, warehouse).
-road(warehouse, workshop).
-road(workshop, construction). 
+path(construction, hall).
+path(hall, construction).
+path(hall, warehouse).
+path(warehouse, workshop).
+path(workshop, hall). 
 
-machine(machine1, 10).
+machine(machine1, 6).
 machine(machine2, true).
 machine(machine3, 4).
 machine(machine4, true).
 
-resource(warehouse, metal, 0).
+resource(warehouse, plastic, 0).
 resource(warehouse, stone, 0).
 resource(warehouse, wood, 0).
-resource(warehouse, iron, 0).
+resource(warehouse, metal, 0).
 resource(warehouse, glass, 0).
 
 task(glass, machine1).
 
-max_material(15).
+% limit for issuing material
+to_issue(80).
 
 init_location(construction).
 
 
 :- dynamic resource /3.
-:- dynamic max_material /1.
+:- dynamic to_issue /1.
 :- dynamic generate_resources_list /1.
 :- dynamic task/2.
 :- dynamic tasks_ratio /1.
+:- dynamic to_issue /1.
 
 generate_resources_list([]).
 tasks_rate(5).
@@ -109,18 +113,22 @@ generate_resources([Resource| Resources], Agent):-
 
 generate_resource(resource(Material, Lambda), Agent):-
     frag_stats:poisson_dist_sample(Lambda, Number),
-    increase_material_number(Material, Number, Number2, Agent),
+    writeln(poisson_dist_sample(Lambda, Number)),
+    env_utils:query_environment(workshop, Agemt, to_issue(Number_Max)),
+    Number2 is min(Number, Number_Max),
+    Number3 is Number_Max - Number2,
+    env_utils:query_environment(workshop, Agent, resource(warehouse, Material, Number4)),
+    env_utils:delete_facts_agent(workshop, Agent, 
+				   [to_issue(Number_Max),
+			   	    resource(warehouse, Material, Number4)]),
+    Number5 is Number4 + Number2,
     env_utils:add_facts_agent(workshop, Agent, 
-                              [resource(warehouse, Material, Number2)]).
+			       [to_issue(Number3),
+ 				resource(warehouse, Material, Number5)]).
 
-increase_material_number(Material, Number, Number_Out, Agent):-
-   env_utils:delete_facts_agent(workshop, Agent, 
-				[resource(warehouse, Material, Number2)]),
-   Number3 is Number+Number2,
-   max_material(Number_Max),
-   Number_Out is min(Number3, Number_Max).
-
-
+   
+/*
+ 
 % for original environment
 generate_resources([]).
 
@@ -146,9 +154,12 @@ increase_material_number(Material, Number, Number_Out):-
    Number_Out is min(Number3, Number_Max).
 
 increase_material_number(Material, Number, Number_Out):-
-   max_material(Number_Max),
-   Number_Out is min(Number, Number_Max).
- 
+   to_issue(Number_Max),
+   Number_Out is min(Number, Number_Max),
+   To_Issue is Number_Max - Number,
+   retractall(to_issue),
+   assert(to_issue(To_Issue)).
+*/ 
 
 
 

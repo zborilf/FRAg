@@ -540,6 +540,7 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 %   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out, true),
     !,
+writeln(execute_environment(basic, Action, Result)),
     execute_environment(Environment, Action, Restult).
 
 execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
@@ -550,6 +551,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
     decisioning(Action, Context, Context_Out, true),
     !,
     % execute action in 'basic' FRAg environment
+writeln(execute_environment(basic, Action, Result)),
     execute_environment(basic, Action, Result).
 
 % Act execution failed. Plan remains the same, the Result is 'false'
@@ -1316,7 +1318,7 @@ loop(Steps, Steps_Left):-
 
     format(atom(String5), "[INTER] EX ~w", [Loop_Number]),
     println_debug(String5, interdbg),
-
+          
     acting,
     !,
 
