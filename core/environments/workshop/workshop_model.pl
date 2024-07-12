@@ -20,7 +20,7 @@ resource(warehouse, glass, 0).
 task(glass, machine1).
 
 % limit for issuing material
-to_issue(80).
+to_issue(10).
 
 init_location(construction).
 
@@ -113,7 +113,6 @@ generate_resources([Resource| Resources], Agent):-
 
 generate_resource(resource(Material, Lambda), Agent):-
     frag_stats:poisson_dist_sample(Lambda, Number),
-    writeln(poisson_dist_sample(Lambda, Number)),
     env_utils:query_environment(workshop, Agemt, to_issue(Number_Max)),
     Number2 is min(Number, Number_Max),
     Number3 is Number_Max - Number2,
@@ -207,8 +206,26 @@ get_location_percepts(warehouse, Agent, Percepts):-
     extract_resources(Resources, Percepts).
 
 
+% products in hall
+get_location_percepts(hall, Agent, Percepts):-
+    env_utils:findall_environment(workshop, Agent, product( _, _, _), 
+				  Resources),
+    extract_products(Resources, Percepts).
+
+
 get_location_percepts(_, _, []).
 
+
+
+extract_products([], []).
+
+extract_products([product(_, _, 0) | Products], 
+		 Percepts):-
+    extract_resources(Products, Percepts).
+
+extract_products([product(Machine, Material, Number) | Products], 
+		 [product(Machine, Material, Number) | Percepts]):-
+    extract_products(Products, Percepts).
 
 
 

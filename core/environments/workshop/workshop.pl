@@ -122,7 +122,7 @@ workshop(clone, Instance):-
     env_utils:clone_environment(workshop, Instance).
 
 
-%!  workshop(reset_clone, +Clone) is det
+%!  workshop(res6et_clone, +Clone) is det
 %   Resets clone to its initial state
 %  @arg Clone: workshop environment clone
 
@@ -192,7 +192,6 @@ check_episode( _ ).
 
 
 workshop(act, Agent, go(Location), true):-
-writeln(herewego),
     env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
     !,
     env_utils:query_environment(workshop, Agent, path(Location2, Location)),
@@ -202,12 +201,30 @@ writeln(herewego),
     env_utils:add_beliefs(Agent, [location(Location)]).
 
 
-workshop(act, Agent, pick(Material), false):-
+
+
+workshop(act, Agent, pick(product(Machine, Material)), true):-
+    not(env_utils:query_environment(workshop, Agent, carry(Agent, _))),
     !,
-    env_utils:query_environment(workshop, Agent, carry(Agent, _)).
+    env_utils:query_environment(workshop, Agent, location(Agent, hall)),
+    !,
+    env_utils:query_environment(workshop, Agent, product(Machine, Material,
+                                                          Number)),
+    !,
+    Number > 0,
+    Number2 is Number - 1,
+    env_utils:delete_facts_agent(workshop, Agent, [product(Machine, Material,
+                                                            Number)]),
+    env_utils:add_facts_agent(workshop, Agent, [product(Machine, Material,
+                                                         Number2)]),
+    env_utils:add_facts_beliefs(workshop, Agent, 
+				[carry(Agent, product(Machine, Material))]).
+
                                                           
     
 workshop(act, Agent, pick(Material), true):- 
+    not(env_utils:query_environment(workshop, Agent, carry(Agent, _))),
+    !,
     env_utils:query_environment(workshop, Agent, location(Agent, Location)),
     !,
     env_utils:query_environment(workshop, Agent, resource(Location, Material,
@@ -223,6 +240,9 @@ workshop(act, Agent, pick(Material), true):-
                                                         resource(Material))]).
 
 
+
+
+
 workshop(act, Agent, do(Machine, Material), true):-
     env_utils:query_environment(workshop, Agent, location(Agent, workshop)),
     !,
@@ -232,30 +252,88 @@ workshop(act, Agent, do(Machine, Material), true):-
 						       resource(Material))),
     env_utils:delete_facts_beliefs(workshop, Agent, 
                                    [carry(Agent, resource(Material))]),
-    env_utils:add_facts_beliefs(workshop, Agent,[carry(Agent, product(Machine, Material))]).
+    env_utils:add_facts_beliefs(workshop, Agent,
+                                [carry(Agent, product(Machine, Material))]).
 
 
 
 workshop(act, Agent, submit, true):-
     env_utils:query_environment(workshop, Agent, location(Agent, construction)),
     !,
-    env_utils:query_environment(workshop, Agent, carry(Agent, product(Machine, Material))),
+    env_utils:query_environment(workshop, Agent, carry(Agent, 
+						       product(Machine, Material))),
     !,
     env_utils:query_environment(workshop, Agent, task(Machine, Material)),
     !,
     env_utils:query_environment(workshop, Agent, reward(Agent, Reward)),
+ 
 
     env_utils:delete_facts_beliefs(workshop, Agent, 
+				   [carry(Agent, product(Machine, Material))]),
+    env_utils:delete_facts_beliefs(workshop, Agent, 
                                    [reward(Agent, Reward)]),
+    Reward2 is Reward + 10,
+    env_utils:add_facts_beliefs(workshop, Agent, 
+                                   [reward(Agent, Reward2)]).
 
 
-workshop(act, Agent, drop, true).
+
+workshop(act, Agent, drop, true):-
+    env_utils:query_environment(workshop, Agent, 
+				carry(Agent, resource(Material))),
+    !,
+    env_utils:query_environment(workshop, Agent, location(Agent, warehouse)),
+    !,
+    env_utils:delete_facts_beliefs(workshop, Agent, 
+				   [carry(Agent, resource(Material))]),
+    stock_resource(Material).
+
+
+stock_resource(Material):-
+    env_utils:query_environment(workshop, Agent, 
+				resource(Location, Material, Number)),
+    Number2 is Number + 1,
+    env_utils:delete_facts_agent(workshop, Agent, [resource(Location, Material,
+                                                            Number)]),
+    env_utils:add_facts_agent(workshop, Agent, [resource(Location, Material,
+                                                         Number2)]).
+
+stock_resource(Material):-    
+    env_utils:add_facts_agent(workshop, Agent, 
+			      [resource(workshop, Material, 1)]).
+
+
+
+workshop(act, Agent, drop, true):-
+    env_utils:query_environment(workshop, Agent, 
+				carry(Agent, product(Machine, Material))),
+    !,
+    env_utils:query_environment(workshop, Agent, location(Agent, hall)),
+    !,
+    env_utils:delete_facts_beliefs(workshop, Agent, 
+				   [carry(Agent, product(Machine, Material))]),
+    stock_product(Machine, Material).
+
+
+stock_product(Machine, Material):-
+    env_utils:query_environment(workshop, Agent, 
+				product(Machine, Material,Number)),
+    Number2 is Number + 1,
+    env_utils:delete_facts_agent(workshop, Agent, [product(Machine, Material,
+                                                            Number)]),
+    env_utils:add_facts_agent(workshop, Agent, [product(Machine, Material,
+                                                         Number2)]).
+
+stock_product(Machine, Material):-    
+    env_utils:add_facts_agent(workshop, Agent, 
+			      [product(Machine, Material, 1)]).
 
 
 
 
 % every other act succeeds
-workshop(act, Agent, _, false).
+workshop(act, Agent, ACT, false):-
+   format("Neuspel ~w~n",[ACT]).
 
 
 

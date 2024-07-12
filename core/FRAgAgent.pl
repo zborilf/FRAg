@@ -540,7 +540,7 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 %   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out, true),
     !,
-writeln(execute_environment(basic, Action, Result)),
+writeln(execute_environment(Environment, Action, Result)),
     execute_environment(Environment, Action, Restult).
 
 execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
