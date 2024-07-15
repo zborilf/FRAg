@@ -1,25 +1,61 @@
 
 
-% cesty do warehouse, hall, construction
+% paths to warehouseA, warehouseB, workshop, hall, construction
 
 
-fact(path(hall, warehouse, [warehouse])).
-fact(path(construction, warehouse, [hall, warehouse])).
-fact(path(workshop, warehouse, [hall, warehouse])).
+fact(path(hall, warehouseA, [warehouseA])).
+fact(path(construction, warehouseA, [hall, warehouseA])).
+fact(path(workshop, warehouseA, [hall, warehouseA])).
+fact(path(warehouseB, warehouseA, [workshop, hall, warehouseA])).
+
+fact(path(hall, warehouseB, [warehouseB])).
+fact(path(construction, warehouseB, [hall, warehouseB])).
+fact(path(workshop, warehouseB, [hall, warehouseB])).
+fact(path(warehouseA, warehouseB, [workshop, hall, warehouseB])).
+
 fact(path(construction, hall, [hall])).
 fact(path(workshop, hall, [hall])).
-fact(path(warehouse, hall, [workshop, hall])).
+fact(path(warehouseA, hall, [workshop, hall])).
+fact(path(warehouseB, hall, [workshop, hall])).
+
 fact(path(hall, construction, [construction])).
 fact(path(workshop, construction, [hall, construction])).
-fact(path(warehouse, construction, [workshop, hall, construction])).
+fact(path(warehouseA, construction, [workshop, hall, construction])).
+fact(path(warehouseB, construction, [workshop, hall, construction])).
+
+fact(path(hall, workshop, [warehouseA, workshop])).
+fact(path(construction, workshop, [hall, warehouseA, workshop])).
+fact(path(warehouseA, workshop, [hall, workshop])).
+fact(path(warehouseB, workshop, [hall, workshop])).
 
 
 
+goal(ach, do_round, [[]]).
 
 
-% goal(ach,do_walk([hall, warehouse, workshop, hall, construction]), [[]]).
+% goal(ach,do_walk([hall, warehouseA, workshop, hall, warehouseB, workshop,  hall, construction]), [[]]).
 
-goal(ach, go_to(construction), [[]]).
+
+% goal(ach, go_to(warehouseA), [[]]).
+
+
+plan(ach, do_round, [],
+	[
+		ach(go_to(warehouseB)),
+		test(resource(_, Material, _)),
+		act(workshop, pick(Material)),
+		ach(go_to(construction)),
+		act(writeln(konstrukce)),
+		ach(go_to(warehouseA)),
+		act(workshop, drop),
+		act(writeln(ahoj)),
+		ach(do_round)
+
+	]
+    ).
+
+
+% goal(ach, go_to(construction), [[]]).
 
 plan(ach, do_walk([]), [],
 	[
@@ -29,15 +65,23 @@ plan(ach, do_walk([]), [],
 
 plan(ach, do_walk([Location | Locations]), [],
 	[
+		act(writeln(go(Location))),
 		act(workshop, go(Location)),
 		ach(do_walk(Locations))
+	]
+    ).
+
+plan(ach, go_to(Location), [location(Location)],
+	[
 	]
     ).
 
 
 plan(ach, go_to(Location), [location(Location_Now)],
 	[
+%		act(writeln(testujuA)),
 		test(path(Location_Now, Location, Path)),
+%		act(writeln(testujuA_pak)),
 		ach(do_walk(Path))
 	]
     ).

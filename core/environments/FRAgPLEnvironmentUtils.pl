@@ -24,6 +24,7 @@
         add_facts_agent /3,
         add_facts_beliefs /3,	
         add_facts_beliefs_all /3,
+	delete_facts /2,
 	delete_beliefs /2,
         delete_beliefs_agents /2,
 	delete_beliefs_all /2,
@@ -416,6 +417,25 @@ add_facts_beliefs_all( _, _, []).
 add_facts_beliefs_all(Environment, Agent, Beliefs):-
     add_facts_agent(Environment, Agent, Beliefs),
     add_beliefs_all(Agent, Beliefs).
+
+
+%!  delete_facts(+Environment, +Facts) is det
+%   Deletes facts from Environment's original instantion
+%  @arg Environment: environment name
+%  @arg Facts: list of atoms or formulas
+
+delete_facts( _, []).
+
+delete_facts(Environment, [Fact| Facts]):-
+    delete_fact(fact(Environment, Environment, Fact)),
+    delete_facts(Environment, Facts).
+
+
+delete_fac(Fact):-
+    not(Fact).
+
+delete_fact(Fact):-
+    retractall(Fact).
 
 
 

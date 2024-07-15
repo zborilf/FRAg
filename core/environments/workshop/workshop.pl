@@ -77,13 +77,23 @@ workshop(set_parameters, [(Key, Value)| Parameters]):-
 
 
 
-set_parameter(resources, Resources):-
-    retractall(generate_resources_list(_)),
+set_parameter(resources_rates, Resources):-
+    retractall(generate_resources_list( _ )),
     assert(generate_resources_list(Resources)).
 
 
-set_parameter(tasks_rate, Task_Rate):-
-   change_params(task_rate(Task_Rate)).    
+set_parameter(resources_max, To_Issue):-
+    env_utils:delete_facts(workshop, [to_issue( _ )]),
+    env_utils:add_facts(workshop, [to_issue(To_Issue)]).
+
+
+set_parameter(tasks_rate, Tasks_Rate):-
+   change_params(tasks_rate(Tasks_Rate)).    
+
+set_parameter(tasks_max, Tasks_Limit):-
+   env_utils:delete_facts(workshop, [tasks_limit( _ )]),
+   env_utils:add_facts(workshop, [tasks_limit(Tasks_Limit)]).
+
 
 change_params(Atom):-
    Atom=..[Predicate, _],
@@ -203,7 +213,13 @@ workshop(act, Agent, go(Location), true):-
     env_utils:delete_beliefs(Agent, [location(Location2)]),
     env_utils:add_beliefs(Agent, [location(Location)]).
 
+workshop(act, Agent, go(Location), false):-
+    env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
+    !,
+    not(env_utils:query_environment(workshop, Agent, path(Location2, Location))),
 
+    format("Agent ~w cant go to ~w, there is no path from ~w~n", 
+           [Agent, Location, Location2]).
 
 
 workshop(act, Agent, pick(product(Machine, Material)), true):-
@@ -230,6 +246,7 @@ workshop(act, Agent, pick(Material), true):-
     !,
     env_utils:query_environment(workshop, Agent, location(Agent, Location)),
     !,
+    location_type(Location, warehouse),
     env_utils:query_environment(workshop, Agent, resource(Location, Material,
                                                           Number)),
     !,
@@ -241,6 +258,7 @@ workshop(act, Agent, pick(Material), true):-
                                                          Number2)]),
     env_utils:add_facts_beliefs(workshop, Agent, [carry(Agent,
                                                         resource(Material))]).
+
 
 workshop(act, Agent, pick(Something), false):- 
     env_utils:query_environment(workshop, Agent, carry(Agent, _)),
@@ -305,11 +323,15 @@ workshop(act, Agent, submit, false):-
 
 
 workshop(act, Agent, drop, true):-
+writeln(da),
     env_utils:query_environment(workshop, Agent, 
 				carry(Agent, resource(Material))),
     !,
-    env_utils:query_environment(workshop, Agent, location(Agent, warehouse)),
+    env_utils:query_environment(workshop, Agent, location(Agent, Location)),
+writeln(db),
     !,
+    location_type(Location, warehouse),
+writeln(dc),
     env_utils:delete_facts_beliefs(workshop, Agent, 
 				   [carry(Agent, resource(Material))]),
     stock_resource(Material).
@@ -372,12 +394,13 @@ workshop(act, Agent, ACT, false).
     findall(resource(Location, Material, Number), 
 	    resource(Location, Material, Number), Facts4),
     to_issue(Material_To_Issue),
+    tasks_limit(Tasks_Limit),
     episode(Episode),
     env_utils:add_facts(workshop, Facts1),
     env_utils:add_facts(workshop, Facts2),
     env_utils:add_facts(workshop, Facts3),
     env_utils:add_facts(workshop, Facts4),
     env_utils:add_facts(workshop, [episode(Episode)]),
-    env_utils:add_facts(workshop, [to_issue(Material_To_Issue)]).
-
+    env_utils:add_facts(workshop, [to_issue(Material_To_Issue)]),
+    env_utils:add_facts(workshop, [tasks_limit(Tasks_Limit)]).
 

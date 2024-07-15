@@ -1,36 +1,60 @@
 
 
+:- dynamic resource /3.
+:- dynamic to_issue /1.
+:- dynamic generate_resources_list /1.
+:- dynamic task/2.
+:- dynamic tasks_rate /1.
+:- dynamic to_issue /1.
+:- dynamic tasks_limit /1.
+
+
 path(construction, hall).
-path(hall, warehouse).
-path(warehouse, workshop).
+path(hall, warehouseA).
+path(hall, warehouseB).
+path(warehouseA, workshop).
+path(warehouseB, workshop).
 path(workshop, hall). 
 path(hall, construction).
+
+location_type(warehouseA, warehouse).
+location_type(warehouseB, warehouse).
+location_type(construction, construction).
+location_type(hall, hall).
+location_type(workshop, workshop).
+
 
 machine(machine1, true).
 machine(machine2, true).
 machine(machine3, true).
 machine(machine4, true).
 
-resource(warehouse, plastic, 0).
-resource(warehouse, stone, 0).
-resource(warehouse, wood, 0).
-resource(warehouse, metal, 0).
-resource(warehouse, glass, 0).
+
+
+resource(warehouseA, plastic, 0).
+resource(warehouseA, stone, 0).
+resource(warehouseA, wood, 0).
+resource(warehouseA, metal, 0).
+resource(warehouseA, glass, 0).
+
+resource(warehouseB, plastic, 0).
+resource(warehouseB, stone, 0).
+resource(warehouseB, wood, 0).
+resource(warehouseB, metal, 0).
+resource(warehouseB, glass, 0).
+
+               
+
 
 task(glass, machine1).
 
 % limit for issuing material
 to_issue(20).
+tasks_limit(20).
 
-init_location(warehouse).
+init_location(construction).
 
 
-:- dynamic resource /3.
-:- dynamic to_issue /1.
-:- dynamic generate_resources_list /1.
-:- dynamic task/2.
-:- dynamic tasks_ratio /1.
-:- dynamic to_issue /1.
 
 generate_resources_list([]).
 tasks_rate(5).
@@ -42,10 +66,13 @@ machine_adjustment_rate(2).
 
 update_workshop_model(Agent):-
     generate_resources_list(Resources),
-    generate_resources(Resources, Agent),
+    generate_resources(Resources, warehouseA, Agent),
+    !,
+    generate_resources(Resources, warehouseB, Agent),
+    !,
     generate_tasks(Agent),
-    repair_machines(Agent).
-%    print_workshop_state.
+    repair_machines(Agent),
+    print_workshop_state(Agent).
 
 
 %  !machine_used(Machine) is nondet
@@ -87,19 +114,49 @@ repair_machines(Agent, [machine(Machine, Number)| Machines]):-
 
 
 
-print_workshop_state:-
-    env_utils:findall_environment(workshop, resource(_, _, _), Resources),
+print_workshop_state(Agent):-
+    env_utils:findall_environment(workshop, Agent, resource(_, _, _), 
+				  Resources),
     writeln('resources...'),
-    writeln(Resources),
-    env_utils:findall_environment(workshop, task(_, _), Tasks),
+    print_list(Resources),
+    env_utils:findall_environment(workshop, Agent, task(_, _), Tasks),
     writeln('tasks...'),
-    writeln(Tasks).
+    print_list(Tasks).
+
     
+print_list([]).
+
+print_list([Item | Items]):-
+    writeln(Item),
+    print_list(Items).
+
+
+
 
 generate_tasks(Agent):-
-    tasks_rate(Tasks_Ratio),
-    frag_stats:poisson_dist_sample(Tasks_Ratio, Number),
-    generate_tasks(Number, Agent).
+    tasks_rate(Tasks_Rate),
+    frag_stats:poisson_dist_sample(Tasks_Rate, Number),
+    check_tasks_limit(Agent, Number, Number2),
+    generate_tasks(Number2, Agent).
+
+
+check_tasks_limit(Agent, Number, Number2):-
+    env_utils:query_environment(workshop, Agent, tasks_limit(Limit)),
+    check_tasks_limit(Number, Number2, Limit, Limit2),
+    env_utils:delete_facts_agent(workshop, Agent, [tasks_limit(Limit)]),
+    env_utils:add_facts_agent(workshop, Agent, [tasks_limit(Limit2)]).
+
+
+check_tasks_limit(Number, Number2, Limit, 0):-
+    Number>Limit,
+    Number2 is Limit.
+
+check_tasks_limit(Number, Number2, Limit, Limit2):-
+    Number2 is Number,
+    Limit2 is Limit - Number.
+
+
+
 
 
 generate_tasks(0, Agent).
@@ -120,62 +177,27 @@ generate_tasks(N):- writeln(chyba).
 
 
 % for Agent
-generate_resources([], _).
+generate_resources([], _, _).
 
-generate_resources([Resource| Resources], Agent):-
-    generate_resource(Resource, Agent),
-    generate_resources(Resources, Agent).
+generate_resources([Resource| Resources], Warehouse, Agent):-
+    generate_resource(Resource, Warehouse, Agent),
+    generate_resources(Resources, Warehouse, Agent).
 
-generate_resource(resource(Material, Lambda), Agent):-
+generate_resource(resource(Material, Lambda), Warehouse, Agent):-
     frag_stats:poisson_dist_sample(Lambda, Number),
-    env_utils:query_environment(workshop, Agemt, to_issue(Number_Max)),
+    env_utils:query_environment(workshop, Agent, to_issue(Number_Max)),
     Number2 is min(Number, Number_Max),
     Number3 is Number_Max - Number2,
-    env_utils:query_environment(workshop, Agent, resource(warehouse, Material, Number4)),
+    env_utils:query_environment(workshop, Agent, resource(Warehouse, Material, Number4)),
     env_utils:delete_facts_agent(workshop, Agent, 
 				   [to_issue(Number_Max),
-			   	    resource(warehouse, Material, Number4)]),
+			   	    resource(Warehouse, Material, Number4)]),
     Number5 is Number4 + Number2,
     env_utils:add_facts_agent(workshop, Agent, 
 			       [to_issue(Number3),
- 				resource(warehouse, Material, Number5)]).
+ 				resource(Warehouse, Material, Number5)]).
 
    
-/*
- 
-% for original environment
-generate_resources([]).
-
-generate_resources([Resource| Resources]):-
-    generate_resource(Resource),
-    generate_resources(Resources).
-
-
-% generates resource of material in number given by ~Pois(Lambra)
-generate_resource(resource(Material, Lambda)):-
-    frag_stats:poisson_dist_sample(Lambda, Number),
-    increase_material_number(Material, Number, Number2),
-    env_utils:add_facts(workshop, [resource(Location, Material, Number2)]).
-
-
-% if there is some Material, then increase its number up to max_material
-
-increase_material_number(Material, Number, Number_Out):-
-   env_utils:query_environment(workshop, resource(Location, Material, 
-                               Number2)),
-   Number3 is Number+Number2,
-   max_material(Number_Max),
-   Number_Out is min(Number3, Number_Max).
-
-increase_material_number(Material, Number, Number_Out):-
-   to_issue(Number_Max),
-   Number_Out is min(Number, Number_Max),
-   To_Issue is Number_Max - Number,
-   retractall(to_issue),
-   assert(to_issue(To_Issue)).
-*/ 
-
-
 
 
 
@@ -215,8 +237,9 @@ get_location_percepts(workshop, Agent, Percepts):-
 
 
 % resources
-get_location_percepts(warehouse, Agent, Percepts):-
-    env_utils:findall_environment(workshop, Agent, resource( _, _, _), 
+get_location_percepts(Warehouse, Agent, Percepts):-
+    location_type(Warehouse, warehouse),
+    env_utils:findall_environment(workshop, Agent, resource(Warehouse, _, _), 
 				  Resources),
     extract_resources(Resources, Percepts).
 

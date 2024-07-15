@@ -873,6 +873,8 @@ update_intention(intention(Intention_ID, [ _ ], Status), false):-
     format(atom(String),
            "[RSNDBG] Update intention: SUBPLAN FAILED",[]),
     println_debug(String, reasoningdbg),                  
+    format(atom(String), "[ACTING] Update intention: ACTION FAILED", []),
+    println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
     !,
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
@@ -895,6 +897,8 @@ update_intention(intention(Intention_ID,
                            Status), false):-
     format(atom(String), "[RSNDBG] Update intention: SUBPLAN FAILED", []), 
     println_debug(String, reasoningdbg),
+    format(atom(String), "[ACTING] Update intention: ACTION FAILED", []),
+    println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
     retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
     assertz(intention(Intention_ID, Plans, active)).
