@@ -20,4 +20,10 @@ set_agents([
 
 
 
-load("worker","../examples/worker/worker",1,[(debug, reasoningdbg)]).
+
+% load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, reasoningdbg), (debug, actdbg)]).
+
+load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, actdbg)]).
+
+
+

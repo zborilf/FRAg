@@ -1,14 +1,14 @@
 
 
 path(construction, hall).
-path(hall, construction).
 path(hall, warehouse).
 path(warehouse, workshop).
 path(workshop, hall). 
+path(hall, construction).
 
-machine(machine1, 6).
+machine(machine1, true).
 machine(machine2, true).
-machine(machine3, 4).
+machine(machine3, true).
 machine(machine4, true).
 
 resource(warehouse, plastic, 0).
@@ -20,9 +20,9 @@ resource(warehouse, glass, 0).
 task(glass, machine1).
 
 % limit for issuing material
-to_issue(10).
+to_issue(20).
 
-init_location(construction).
+init_location(warehouse).
 
 
 :- dynamic resource /3.
@@ -34,6 +34,8 @@ init_location(construction).
 
 generate_resources_list([]).
 tasks_rate(5).
+machine_adjustment_rate(2).
+
 
 % !update_workshop_model is det
 %  Updates models ... add resources and tasks, updates machines
@@ -44,6 +46,19 @@ update_workshop_model(Agent):-
     generate_tasks(Agent),
     repair_machines(Agent).
 %    print_workshop_state.
+
+
+%  !machine_used(Machine) is nondet
+%   Sets the time for repair and adjustment of the machine after its use
+%  @arg Machine: name of used machine
+
+machine_used(Machine):-
+    machine_adjustment_rate(Adjustment_Rate),
+    frag_stats:poisson_dist_sample(Adjustment_Rate, Number),
+% at least one episode step repair
+    Number2 is Number+1,
+    env_utils:delete_facts_agent(workshop, Agent, [machine(Machine, _)]),
+    env_utils:add_facts_agent(workshop, Agent, [machine(Machine, Number2)]).
 
 
 repair_machines(Agent):-

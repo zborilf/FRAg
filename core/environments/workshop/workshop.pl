@@ -59,6 +59,9 @@ init_beliefs(Agents):-
     Agents = [Agent | _],	% suppose all the agents are in the same instance
     init_location(Location),
     add_location_percepts(Location, Agent),
+    env_utils:findall_environment(workshop, Agent, path(Location1, Location2), 
+				  Paths),
+    env_utils:add_beliefs(Agent, Paths),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
     env_utils:add_beliefs(Agent, [location(Location)]),
     env_utils:add_facts_beliefs(workshop, Agent, [episode(1)]),
@@ -239,6 +242,11 @@ workshop(act, Agent, pick(Material), true):-
     env_utils:add_facts_beliefs(workshop, Agent, [carry(Agent,
                                                         resource(Material))]).
 
+workshop(act, Agent, pick(Something), false):- 
+    env_utils:query_environment(workshop, Agent, carry(Agent, _)),
+    !,
+    format("Agent ~w cannot pick ~w, it is carriyng already something~n",
+	   [Agent, Something]).
 
 
 
@@ -253,7 +261,17 @@ workshop(act, Agent, do(Machine, Material), true):-
     env_utils:delete_facts_beliefs(workshop, Agent, 
                                    [carry(Agent, resource(Material))]),
     env_utils:add_facts_beliefs(workshop, Agent,
-                                [carry(Agent, product(Machine, Material))]).
+                                [carry(Agent, product(Machine, Material))]),
+    machine_used(Machine).
+
+
+
+workshop(act, Agent, do(Machine, Material), false):- 
+    not(env_utils:query_environment(workshop, Agent, machine(Machine, true))),
+    !,
+    format("Bad luck agent ~w, machine ~w in not available ~n",
+	   [Agent, Machine]).
+
 
 
 
@@ -273,9 +291,17 @@ workshop(act, Agent, submit, true):-
     env_utils:delete_facts_beliefs(workshop, Agent, 
                                    [reward(Agent, Reward)]),
     Reward2 is Reward + 10,
+    format("Task completed, ~w delivered by ~w~n", [product(Machine, Material), 
+                                                  Agent]), 
     env_utils:add_facts_beliefs(workshop, Agent, 
                                    [reward(Agent, Reward2)]).
 
+
+
+workshop(act, Agent, submit, false):-
+   not(env_utils:query_environment(workshop, Agent, task(Machine, Material))),
+   format("Bad luck, agent ~w, task ~w is not needed now~n",
+	  [Agent,task(Machine, Material)]).
 
 
 workshop(act, Agent, drop, true):-
@@ -329,12 +355,11 @@ stock_product(Machine, Material):-
 			      [product(Machine, Material, 1)]).
 
 
+workshop(act, Agent, skip, true).
 
 
 % every other act succeeds
-workshop(act, Agent, ACT, false):-
-   format("Neuspel ~w~n",[ACT]).
-
+workshop(act, Agent, ACT, false).
 
 
 

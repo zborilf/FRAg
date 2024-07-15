@@ -540,7 +540,9 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 %   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out, true),
     !,
-writeln(execute_environment(Environment, Action, Result)),
+    format(atom(String), "[ACTING] Execiuting in environment ~w act ~w",
+		          [Environment, Action]),
+    println_debug(String, actdbg),
     execute_environment(Environment, Action, Restult).
 
 execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
@@ -551,7 +553,9 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
     decisioning(Action, Context, Context_Out, true),
     !,
     % execute action in 'basic' FRAg environment
-writeln(execute_environment(basic, Action, Result)),
+    format(atom(String), "[ACTING] Execiuting in environment basic act ~w",
+		    [Action]),
+    println_debug(String, actdbg),
     execute_environment(basic, Action, Result).
 
 % Act execution failed. Plan remains the same, the Result is 'false'
@@ -559,7 +563,10 @@ writeln(execute_environment(basic, Action, Result)),
 execute(_ ,
         plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
         plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
-        false).
+        false):-
+	format(atom(String), "[ACTING] Plan execution FAILED", []),
+    	println_debug(String, actdbg).
+
 
 
 
@@ -812,7 +819,7 @@ try_retract_event( _).
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
     format(atom(String),
-           "~n[RSNDBG] Update intention: INTENTION BLOCKED",[]),
+           "[RSNDBG] Update intention: INTENTION BLOCKED",[]),
     println_debug(String, reasoningdbg).
 
 % Top-level plan succeeded - there is only one plan in intention's plan
@@ -824,7 +831,7 @@ update_intention(intention(Intention_ID, [plan(_, _, _, _, _, [])], _),
                  true)
     :-
     format(atom(String),
-           "~n[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
+           "[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
     println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, _)),
     try_retract_event(Intention_ID).
@@ -844,7 +851,7 @@ update_intention(intention(Indention_ID,
                  _ )
     :-
     format(atom(String),
-           "~n[RSNDBG] Update intention: SUBPLAN SUCCEEDED",[]),
+           "[RSNDBG] Update intention: SUBPLAN SUCCEEDED",[]),
     println_debug(String, reasoningdbg),
     intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
@@ -864,7 +871,7 @@ update_intention(intention(Indention_ID,
 
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
     format(atom(String),
-           "~n[RSNDBG] Update intention: SUBPLAN FAILED",[]),
+           "[RSNDBG] Update intention: SUBPLAN FAILED",[]),
     println_debug(String, reasoningdbg),                  
     retract(intention(Intention_ID, _, Status)),
     !,
@@ -886,7 +893,7 @@ update_intention(intention(_, [ _ ], _), false).
 update_intention(intention(Intention_ID,
                            [plan(_, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
-    format(atom(String), "~n[RSNDBG] Update intention: SUBPLAN FAILED", []), 
+    format(atom(String), "[RSNDBG] Update intention: SUBPLAN FAILED", []), 
     println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, Status)),
     retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
@@ -897,8 +904,8 @@ update_intention(intention(Intention_ID,
 %  to its current state.
 
 update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
-    format(atom(String), "~n[RSNDBG] Update intention: ACTION SUCCEEDED", []),
-    println_debug(String, reasoningdbg),
+    format(atom(String), "[ACTING] Update intention: ACTION SUCCEEDED", []),
+    println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
     assertz(intention(Intention_ID, Plan_Stack, Status)).
 

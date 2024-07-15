@@ -1,0 +1,97 @@
+
+goal(ach,gather_products,[[]]).
+
+plan(ach, test_warehouse, [location(construction)],
+	[
+        	act(workshop, go(hall)),
+		act(workshop, go(warehouse)),
+		test(resource(warehouse, Material, Number)),	
+		act(workshop, pick(Material)),
+		act(writeln(mam)),
+		act(workshop, drop),
+        	act(workshop, go(workshop)),
+		act(workshop, go(hall)),
+        	act(workshop, go(construction)),
+		ach(test_warehouse)
+	]
+).                                    
+
+
+plan(ach, test_warehouse, [location(warehouse)],
+        [
+		act(workshop, go(workshop)),
+		act(workshop, go(hall)),
+        	act(workshop, go(construction)),
+		ach(test_warehouse)
+	]
+). 
+
+
+plan(ach, complete_task, [location(construction)],
+	[
+		test(task(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(warehouse)),
+		act(workshop, pick(Material)),
+		act(workshop, go(workshop)),
+		act(workshop, do(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(construction)),
+		act(workshop, submit),
+		act(writeln(hotovo)),
+		ach(complete_task)
+	]
+    ).
+
+
+plan(ach, gather_products, [location(construction)],
+	[
+		test(task(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(warehouse)),
+		act(workshop, pick(Material)),
+		act(workshop, go(workshop)),
+		act(workshop, do(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(construction)),
+		act(workshop, submit),
+		ach(gather_products)
+	]
+    ).
+
+plan(ach, gather_products, [not(location(construction))],
+	[
+		ach(go_to(construction)),
+		ach(gather_products)
+	]
+    ).
+
+
+% for this map this work, only hall->construction is not on the ring path
+
+plan(ach, go_to(Destination), [location(Location), 
+		               path(Location, Destination)],
+	[
+	       act(workshop, go(Destination))
+	]
+    ).
+
+% others follow the rign path
+
+plan(ach, go_to(Destination), [location(Location)],
+	[
+	       test(path(Location, Location2)),
+	       act(workshop, go(Location2))
+	]
+    ).
+
+
+
+
+
+
+
+
+
+
+
