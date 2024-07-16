@@ -873,8 +873,8 @@ update_intention(intention(Intention_ID, [ _ ], Status), false):-
     format(atom(String),
            "[RSNDBG] Update intention: SUBPLAN FAILED",[]),
     println_debug(String, reasoningdbg),                  
-    format(atom(String), "[ACTING] Update intention: ACTION FAILED", []),
-    println_debug(String, actdbg),
+    format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
+    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
     !,
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
@@ -897,8 +897,8 @@ update_intention(intention(Intention_ID,
                            Status), false):-
     format(atom(String), "[RSNDBG] Update intention: SUBPLAN FAILED", []), 
     println_debug(String, reasoningdbg),
-    format(atom(String), "[ACTING] Update intention: ACTION FAILED", []),
-    println_debug(String, actdbg),
+    format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
+    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
     retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
     assertz(intention(Intention_ID, Plans, active)).
@@ -1673,7 +1673,7 @@ fa_finalize_com:-
 %   Sets Terminanting mode. Agents can finish their doing when there is no more
 %   Intention or Event to process, or after a certain number of execution 
 %   cycles. or runs continuously until externally terminated.
-%  @Terminating: timeout / no_job / never ... others = never
+%  @Terminating: timeout, Steps / no_job / never ... others = never
 
 set_control(terminate(timeout, Steps)):-
     retract(terminate( _ )),

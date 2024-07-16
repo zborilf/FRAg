@@ -28,17 +28,76 @@ fact(path(construction, workshop, [hall, warehouseA, workshop])).
 fact(path(warehouseA, workshop, [hall, workshop])).
 fact(path(warehouseB, workshop, [hall, workshop])).
 
+fact(warehouses(warehouseA)).
+fact(warehouses(warehouseB)).
 
 
-goal(ach, do_round, [[]]).
+                                                       
+goal(ach, complete_tasks, [[]]).
+
+                        
+plan(ach, complete_tasks, [carry(product( _, _))],
+	[
+		ach(go_to(hall)),
+		act(warehouse, drop),
+		act(warehouse, go(construction)),
+		ach(conplete_tasks)
+	]
+    ).
+
+plan(ach, complete_tasks, [not(carry(product(Machine, Material))), 
+			   not(location(construction))],
+	[
+		ach(go_to(construction)),
+		ach(complete_tasks)
+	]
+    ).
 
 
-% goal(ach,do_walk([hall, warehouseA, workshop, hall, warehouseB, workshop,  hall, construction]), [[]]).
+% this one is here for CAN failure handling ... could assign different tasks 
+plan(ach, complete_tasks, [not(carry( _ )), location(construction),
+			   task(Machine2, Material2)],
+	[
+		ach(complete_task(Machine2, Material2)),
+		% try other tasks after this one is completed
+		ach(complete_tasks)
+	]
+   ).
 
 
-% goal(ach, go_to(warehouseA), [[]]).
+plan(ach, complete_task(Machine, Material), [warehouses(Warehouse)],
+	[
+		ach(go_to(Warehouse)),
+		act(workshop, pick(Material)),
+		act(workshop, go(workshop)),
+		act(workshop, do(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(construction)),
+		act(workshop, submit)
+	]
+    ).
 
 
+plan(ach, complete_task(Machine, Material), [],
+ 	[
+		ach(go_to(hall)),
+		test(product(Machine, Material)),
+		act(warehouse, pick),
+		act(warehouse, go(construction)),
+		act(warethous, submit)
+	]
+    ).
+
+
+plan(ach, make_product(Machine, Material), [machine(Machine, true)],
+	[
+		act(workshop, do(Machine, Material))
+	]
+    ).
+
+
+
+% materials from wB to Wa, for testing
 plan(ach, do_round, [],
 	[
 		ach(go_to(warehouseB)),
@@ -65,7 +124,7 @@ plan(ach, do_walk([]), [],
 
 plan(ach, do_walk([Location | Locations]), [],
 	[
-		act(writeln(go(Location))),
+%		act(writeln(go(Location))),
 		act(workshop, go(Location)),
 		ach(do_walk(Locations))
 	]
@@ -79,67 +138,8 @@ plan(ach, go_to(Location), [location(Location)],
 
 plan(ach, go_to(Location), [location(Location_Now)],
 	[
-%		act(writeln(testujuA)),
 		test(path(Location_Now, Location, Path)),
-%		act(writeln(testujuA_pak)),
 		ach(do_walk(Path))
 	]
     ).
 
-
-
-% pokud nese produkt, natvrdo si ho nejdriv odlozi v hale
-
-plan(ach, complete_task, [carry(product(Machine, Material))],
-	[
-		ach(go_to(hall)),
-		act(workshop, drop),
-		act(workshop, go(contsruction)),
-		ach(complete_task)
-	]
-    ).
-
-
-
-plan(ach, complete_task, [not(carry( _ )), not(location(construction))],
-	[
-		ach(go_to(constructin)),
-		ach(complete_task)
-	]
-    ).
-
-
-
-% je ready, navaze jeden z tasku co vidi a ten se pokusi vykonat
-
-plan(ach, complete_task, [not(carry( _ )), location(construction), 
-			  task(Machine, Material)],
-	[
-		ach(get_and_submit(Machine, Material))
- 	]
-    ).
-
-
-plan(ach, get_and_submit(task(Machine, Material)), [],
-  	[
-		ach(go_to(hall)),
-		act(workshop, pick(product(Machine, Material))),
-		act(workshop, go(workshop)),
-		act(workshop, submit)
-	]
-    ).                                                    
-
-
-plan(ach, get_and_submit(task(Machine, Material)), [],
-	[
-		ach(go_to(warehouse)),
-		act(workshop, pick(Material)),
-		act(workshop, go(workshop)),
-		act(workshop, do(Machine, Material)),
-		act(workshop, go(hall)),
-		act(workshop, go(construction)),
-		act(workshop, submit)
-	]
-    ).
-
-                                   

@@ -61,8 +61,8 @@ tasks_rate(5).
 machine_adjustment_rate(2).
 
 
-% !update_workshop_model is det
-%  Updates models ... add resources and tasks, updates machines
+%!  update_workshop_model is det
+%   Updates models ... add resources and tasks, updates machines
 
 update_workshop_model(Agent):-
     generate_resources_list(Resources),
@@ -75,7 +75,7 @@ update_workshop_model(Agent):-
     print_workshop_state(Agent).
 
 
-%  !machine_used(Machine) is nondet
+%!  machine_used(Machine) is nondet
 %   Sets the time for repair and adjustment of the machine after its use
 %  @arg Machine: name of used machine
 
@@ -91,6 +91,11 @@ machine_used(Machine):-
 repair_machines(Agent):-
     env_utils:findall_environment(workshop, Agent, machine( _, _), Machines),
     repair_machines(Agent, Machines).
+
+
+%!  repair_machines(Machines) is det
+%   In each episodic step the repair time is decremented for machines in repair
+%  @arg Machines: list of all machines in the model
 
 
 repair_machines( _, []).
@@ -117,11 +122,16 @@ repair_machines(Agent, [machine(Machine, Number)| Machines]):-
 print_workshop_state(Agent):-
     env_utils:findall_environment(workshop, Agent, resource(_, _, _), 
 				  Resources),
-    writeln('resources...'),
     print_list(Resources),
     env_utils:findall_environment(workshop, Agent, task(_, _), Tasks),
-    writeln('tasks...'),
-    print_list(Tasks).
+    print_list(Tasks),
+    env_utils:findall_environment(workshop, Agent, location(_, _), 
+				  Locations),
+    print_list(Locations),
+    env_utils:findall_environment(workshop, Agent, reward(_, _), 
+				  Rewards).
+    print_list(Rewards).
+
 
     
 print_list([]).
@@ -131,6 +141,7 @@ print_list([Item | Items]):-
     print_list(Items).
 
 
+%!  geneerate_tasks(Agent) is nondet
 
 
 generate_tasks(Agent):-

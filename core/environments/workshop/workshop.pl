@@ -1,4 +1,26 @@
             
+/*
+
+----------------              --------------
+|              |	      |      xxxxxx|
+|              |	      | warehouseA |
+|              |              |            |
+|              |---------------   ---vv-------
+|              |              >   |         o|
+|              >              |----         o|
+| construction |      hall    <  workshop    |
+|              <              |---          o|
+|              |              >   |         o|
+|              |---------------   ---^^-------
+|              |              |           xx|
+|              |              | warehouseB  |
+|	       |	      |  xx  xxx    |
+---------------               ---------------
+
+*/
+
+
+
 
 :-module(workshop,
     [
@@ -39,10 +61,14 @@ episode(1).
 %*      remove_clone
 %  @arg Attributes: List of parameters in the form of tuples
 %   1. For functionality 'set_parameters' the parameters can be
-%*      (resources, [(Material,Number)*])
+%*      (resources, [(Material,Number)*]).
+%*      (resources_max, Resources_Max)
 %*	(failure_rate, [Mean, Dispersion]).
-%*      (tasks, [Initial_Number, Lambda_Arrivals]).
+%*      (tasks_ratio, Tasks_Rate).
+%*      (tasks_max, Tasks_Max).
 %   2. For functionality 'add_agant' the parameter is agent's name
+
+
 
 
 %===============================================================================
@@ -68,6 +94,14 @@ init_beliefs(Agents):-
     env_utils:add_facts_beliefs(workshop, Agent, [reward(Agent, 0)]).
 
 
+%  !workshop(set_parameters, Parameters) is det
+%  @arg Parameters: List of parameters in the form of tuples
+%*      (resources, [(Material,Number)*]).
+%*      (resources_max, Resources_Max)
+%*	(failure_rate, [Mean, Dispersion]).
+%*      (tasks_ratio, Tasks_Rate).
+%*      (tasks_max, Tasks_Max).
+ 
 
 workshop(set_parameters, []).
 

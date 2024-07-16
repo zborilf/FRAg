@@ -4,11 +4,11 @@ include_environment("/environments/workshop/workshop.pl").
 
 
 set_environment(workshop, 
-		[(resources_rates, [resource(wood, 3), 
-			      resource(plastic, 2),
-			      resource(metal, 2),
-			      resource(stone, 4),
-			      resource(glass, 1)]),
+		[(resources_rates, [resource(wood, 0.3), 
+			      resource(plastic, 0.2),
+			      resource(metal, 0.2),
+			      resource(stone, 0.4),
+			      resource(glass, 0.1)]),
 		 (resources_max, 10),
 		 (tasks_rate, 0.5),
 		 (tasks_max, 30)]
@@ -16,16 +16,18 @@ set_environment(workshop,
 
 
 set_agents([ 
+             (control, terminate(timeout, 1000)),
              (bindings, late),
              (reasoning, random_reasoning),
-             (environment, workshop)]).		
+             (environment, workshop)]
+     ).		
 
 
 
 
-load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, reasoningdbg), (debug, actdbg)]).
+% load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, reasoningdbg), (debug, actdbg)]).
 
-% load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, actdbg)]).
+load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, actdbg)]).
 
 
 
