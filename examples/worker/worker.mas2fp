@@ -1,17 +1,24 @@
-
+                                                                                            
 
 include_environment("/environments/workshop/workshop.pl").
 
 
 set_environment(workshop, 
-		[(resources_rates, [resource(wood, 0.3), 
-			      resource(plastic, 0.2),
+		[(resources_rates, [resource(wood, 0.15), 
+			      resource(plastic, 0.03),
+			      resource(metal, 0.02),
+			      resource(stone, 0.02),
+			      resource(glass, 0.05)]),
+/*
+		[(resources_rates, [resource(wood, 0.5), 
+			      resource(plastic, 0.3),
 			      resource(metal, 0.2),
-			      resource(stone, 0.4),
-			      resource(glass, 0.1)]),
-		 (resources_max, 10),
-		 (tasks_rate, 0.5),
-		 (tasks_max, 30)]
+			      resource(stone, 0.2),
+			      resource(glass, 0.5)]),
+*/
+		 (resources_max, 60),
+		 (tasks_rate, 0.1),
+		 (tasks_max, 70)]
                ).
 
 
@@ -24,10 +31,31 @@ set_agents([
 
 
 
+%load("workerEX","../examples/worker/worker2",1,[(bindings, late), (reasoning, can_reasoning), (debug, reasoningdbg),
+%		 (debug, actdbg)]).
 
-% load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, reasoningdbg), (debug, actdbg)]).
 
-load("worker","../examples/worker/worker",1,[(debug, systemdbg), (debug, actdbg)]).
+/*
+
+load("workerCL","../examples/worker/worker",1,[(bindings, late), (reasoning, can_reasoning), (debug, actdbg)]).
+
+load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, can_reasoning), (debug, actdbg)]).
+
+load("workerL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg)]).
+
+load("workerE","../examples/worker/worker",1,[(bindings, early), (debug, actdbg)]).
+*/
+
+
+
+% load("workerCL","../examples/worker/worker",1,[(bindings, late), (reasoning, can_reasoning), (debug, actdbg), (debug, reasoningdbg)]).
+
+load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, can_reasoning), (debug, actdbg), (debug, reasoningdbg)]).
+
+%load("workerL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg), (debug, reasoningdbg)]).
+
+% load("workerE","../examples/worker/worker",1,[(bindings, early), (debug, actdbg), (debug, reasoningdbg)]).
+
 
 
 

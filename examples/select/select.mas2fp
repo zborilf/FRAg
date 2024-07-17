@@ -1,2 +1,2 @@
 
-load("select","examples/select/select",1,[(reasoning, simple_reasoning), (debug, reasoningdbg)]).
+load("select","..examples/select/select",1,[(reasoning, simple_reasoning), (debug, reasoningdbg)]).

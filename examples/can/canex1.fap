@@ -1,0 +1,59 @@
+
+	
+fact(f1(c)).
+fact(f1(d)).
+fact(f2(a)).
+fact(f2(b)).
+fact(f3(b)).
+fact(f3(c)).
+fact(f4(b)).
+fact(f4(a)).
+
+
+goal(ach, do, [[]]).
+
+
+
+% goal(ach,can(c),[[]]).
+
+
+plan(ach, do, [],
+	[
+	   ach(can(c))
+	]
+   ).
+
+plan(ach,can(X),[f2(Y)],[
+			test(f1(X)),
+			test(f3(Y)),
+			act(printfg(p1)),
+			act(printfg(xx(Y)))
+		]).
+
+
+plan(ach,can(X),[f3(Y)],[
+			test(f2(X)),
+			test(f2(Y)),
+			act(printfg(p2)),
+			act(printfg(xx(Y)))
+		]).
+
+
+
+plan(ach,can(X),[f4(Y)],[	
+			test(f3(X)),
+			test(f1(Y)),
+			act(printfg(p3)),
+			act(printfg(xx(Y)))
+		]).
+
+
+
+plan(ach,can(X),[f1(Y)],[	
+			test(f4(X)),
+			test(f3(Y)),
+			act(printfg(p4)),
+			act(printfg(xx(Y)))
+		]).
+
+

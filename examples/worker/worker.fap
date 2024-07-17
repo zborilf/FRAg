@@ -1,4 +1,4 @@
-
+ 
 
 % paths to warehouseA, warehouseB, workshop, hall, construction
 
@@ -36,16 +36,16 @@ fact(warehouses(warehouseB)).
 goal(ach, complete_tasks, [[]]).
 
                         
-plan(ach, complete_tasks, [carry(product( _, _))],
+plan(ach, complete_tasks, [carry( _ )],
 	[
 		ach(go_to(hall)),
-		act(warehouse, drop),
-		act(warehouse, go(construction)),
+		act(workshop, drop),
+		act(workshop, go(construction)),
 		ach(conplete_tasks)
 	]
     ).
 
-plan(ach, complete_tasks, [not(carry(product(Machine, Material))), 
+plan(ach, complete_tasks, [not(carry( _ )), 
 			   not(location(construction))],
 	[
 		ach(go_to(construction)),
@@ -64,29 +64,48 @@ plan(ach, complete_tasks, [not(carry( _ )), location(construction),
 	]
    ).
 
-
-plan(ach, complete_task(Machine, Material), [warehouses(Warehouse)],
+plan(ach, complete_tasks, [],
 	[
-		ach(go_to(Warehouse)),
-		act(workshop, pick(Material)),
-		act(workshop, go(workshop)),
-		act(workshop, do(Machine, Material)),
-		act(workshop, go(hall)),
+		act(writeln(je_to_divne)),
+		ach(complete_tasks)
+	]
+   ).
+
+
+
+plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
+ 	[
+		ach(go_to(hall)),
+		test(product(Machine, Material)),
+		act(workshop, pick),
 		act(workshop, go(construction)),
 		act(workshop, submit)
 	]
     ).
 
 
-plan(ach, complete_task(Machine, Material), [],
- 	[
-		ach(go_to(hall)),
-		test(product(Machine, Material)),
-		act(warehouse, pick),
-		act(warehouse, go(construction)),
-		act(warethous, submit)
+plan(ach, complete_task(Machine, Material), [warehouses(Warehouse), 
+					     not(carry( _ ))],
+	[
+		ach(go_to(Warehouse)),
+		test(resource(Warehouse, Material, _)),
+		act(workshop, pick(Material)),
+		act(workshop, go(workshop)),
+		ach(make_product(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(construction)),
+		act(workshop, submit),
+		act(writeln(submited))
 	]
     ).
+
+
+plan(ach, complete_task(Machine, Material), [carry(product( _, _))],
+	[
+		act(writeln(cosi_nesu))
+	]
+    ).
+
 
 
 plan(ach, make_product(Machine, Material), [machine(Machine, true)],
@@ -96,23 +115,7 @@ plan(ach, make_product(Machine, Material), [machine(Machine, true)],
     ).
 
 
-
-% materials from wB to Wa, for testing
-plan(ach, do_round, [],
-	[
-		ach(go_to(warehouseB)),
-		test(resource(_, Material, _)),
-		act(workshop, pick(Material)),
-		ach(go_to(construction)),
-		act(writeln(konstrukce)),
-		ach(go_to(warehouseA)),
-		act(workshop, drop),
-		act(writeln(ahoj)),
-		ach(do_round)
-
-	]
-    ).
-
+                    
 
 % goal(ach, go_to(construction), [[]]).
 
@@ -124,7 +127,6 @@ plan(ach, do_walk([]), [],
 
 plan(ach, do_walk([Location | Locations]), [],
 	[
-%		act(writeln(go(Location))),
 		act(workshop, go(Location)),
 		ach(do_walk(Locations))
 	]

@@ -71,8 +71,8 @@ update_workshop_model(Agent):-
     generate_resources(Resources, warehouseB, Agent),
     !,
     generate_tasks(Agent),
-    repair_machines(Agent),
-    print_workshop_state(Agent).
+    repair_machines(Agent).
+ %   print_workshop_state(Agent).
 
 
 %!  machine_used(Machine) is nondet
@@ -120,6 +120,7 @@ repair_machines(Agent, [machine(Machine, Number)| Machines]):-
 
 
 print_workshop_state(Agent):-
+    nl,
     env_utils:findall_environment(workshop, Agent, resource(_, _, _), 
 				  Resources),
     print_list(Resources),
@@ -129,7 +130,7 @@ print_workshop_state(Agent):-
 				  Locations),
     print_list(Locations),
     env_utils:findall_environment(workshop, Agent, reward(_, _), 
-				  Rewards).
+				  Rewards),
     print_list(Rewards).
 
 
@@ -170,7 +171,7 @@ check_tasks_limit(Number, Number2, Limit, Limit2):-
 
 
 
-generate_tasks(0, Agent).
+generate_tasks(0, _).
 
 generate_tasks(N, Agent):-
     findall(m(Machine), env_utils:fact(workshop, workshop, machine(Machine, _)), 
@@ -183,7 +184,7 @@ generate_tasks(N, Agent):-
     N2 is N-1,
     generate_tasks(N2, Agent).
 
-generate_tasks(N):- writeln(chyba).
+generate_tasks( _ ):- writeln(chyba).
 
 
 
@@ -228,7 +229,7 @@ add_location_percepts(Location, Agent):-
 
 %  delete all the percepts about machines, tasks, resources and products
 
-delete_location_percepts(Location, Agent):-
+delete_location_percepts( _ , Agent):-
      env_utils:delete_beliefs(Agent, [task( _, _), machine( _, _), 
 			 	      resource( _, _, _), product( _, _, _)]).
 

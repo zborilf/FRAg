@@ -339,12 +339,15 @@ write_stats(String):-
     close(Stats_File).
 
 
+
 % takes _stats /1 from BB and writes it out
 
 agents_stats(Stats_File):-
-    fact(stats_(Stats)),
-    write(Stats_File, stats_(Stats)),
-    writeln(Stats_File,'.').
+   clause(env_utils:fact(A, B, C), _),
+   findall(rewards(Agent, Reward),
+	   env_utils:fact(workshop, workshop, reward(Agent, Reward)), Rewards),
+   write(Stats_File, stats_(Rewards)),
+   writeln(Stats_File,'.').
 
 agents_stats( _ ).
 
@@ -795,6 +798,20 @@ try_retract_event(Intention_ID):-
 try_retract_event( _).
 
 
+try_refresh_event(Intention_ID):-
+    findall(Event_ID, event(Event_ID, _, _, _, _, Intention_ID, _),
+            Event_IDs),
+    max_list(Event_IDs, Event_ID_Max),
+    retract(event(Event_ID_Max, Type, Atom, Intention_ID, Context, _,
+                  History)),
+    assert(event(Event_ID_Max, Type, Atom, Intention_ID, Context, active, 
+                 History)).
+   
+
+try_refresh_event( _).
+
+
+
 
 %    UPDATE INTENTION
 %===============================================================================
@@ -876,7 +893,7 @@ update_intention(intention(Intention_ID, [ _ ], Status), false):-
     format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
     println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
-    !,
+%    !,  - nema smysl
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
                   History)),
     assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
@@ -893,15 +910,21 @@ update_intention(intention(_, [ _ ], _), false).
 % level plan executes the achievement goal.
 
 update_intention(intention(Intention_ID,
-                           [plan(_, Event_Type, Event_Atom, _, _, _)| Plans],
+                           [plan( _, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
     format(atom(String), "[RSNDBG] Update intention: SUBPLAN FAILED", []), 
     println_debug(String, reasoningdbg),
     format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
     println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
-    retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
+
+    try_refresh_event(Intention_ID),
+
+    assertz(intention(Intention_ID, Plans, blocked)).
+
+/*    retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
     assertz(intention(Intention_ID, Plans, active)).
+*/
 
 %  The act has been successfully carried out and the plan continues. Its
 %  current state is in the Plan_Stack variable. We change the intention
@@ -1261,6 +1284,7 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                                     Parent_Intention, Context, active,
                                     History),
                        Intended_Means),
+format("INTENDED MEANS: ~w~n",[Intended_Means]),
     extend_intention(Parent_Intention, Intended_Means, Intention_ID),
     update_event(Intention_ID,
 	         event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
