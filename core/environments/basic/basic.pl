@@ -71,7 +71,7 @@ printfg(String):-
     format(atom(String4), String3, [Agent]),
     write(current_output, String4).
 
-  printfg(String, Parameters):-
+printfg(String, Parameters):-
 	format(atom(String2), String, Parameters),
 	term_string(String2, String3),
 	printfg(String3).

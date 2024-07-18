@@ -390,7 +390,7 @@ frag_choice(50,52):-
     frag.
 
 frag_choice(50,53):-
-    set_default_reasoning(plan_selection, can_reasoning),
+    set_default_reasoning(plan_selection, robin_reasoning),
     frag.
 
 frag_choice(50):-
@@ -401,7 +401,7 @@ frag_choice(50):-
     writeln("2, simple reasoning"),
     writeln("3, random reasoning"),
     writeln("4, biggest joint (for intention selection only)"),
-    writeln("5, can reasoning (for plan selection only)"),
+    writeln("5, round robin reasoning (for plan selection only)"),
     get_single_char(Choince),
     frag_choice(50, Choince).
 

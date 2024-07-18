@@ -30,6 +30,30 @@ machine(machine3, true).
 machine(machine4, true).
 
 
+product(machine1, plactic,1).
+/*
+product(machine1, stone,1).
+product(machine1, metal,1).
+product(machine2, wood,1).
+product(machine2, glass,1).
+product(machine3, plactic,1).
+product(machine3, stone,1).
+product(machine3, metal,1).
+product(machine4, wood,1).
+product(machine4, glass,1).
+product(machine4, metal,1).
+product(machine4, stone,1).
+product(machine1, wood,1).
+product(machine1, glass,1).
+% product(machine2, plactic,1).
+% product(machine2, stone,1).
+% product(machine2, metal,1).
+% product(machine4, plactic,1).
+% product(machine3, glass,1).
+% product(machine3, wood,1).
+*/
+
+
 
 resource(warehouseA, plastic, 0).
 resource(warehouseA, stone, 0).
@@ -58,7 +82,7 @@ init_location(construction).
 
 generate_resources_list([]).
 tasks_rate(5).
-machine_adjustment_rate(2).
+machine_adjustment_rate(8).
 
 
 %!  update_workshop_model is det
@@ -129,6 +153,15 @@ print_workshop_state(Agent):-
     env_utils:findall_environment(workshop, Agent, location(_, _), 
 				  Locations),
     print_list(Locations),
+    env_utils:findall_environment(workshop, Agent, product(_, _, _), 
+				  Products),
+    print_list(Products),
+
+    env_utils:findall_environment(workshop, Agent, carry(_, _), 
+				  Carries),
+    print_list(Carries),
+
+
     env_utils:findall_environment(workshop, Agent, reward(_, _), 
 				  Rewards),
     print_list(Rewards).
@@ -151,23 +184,7 @@ generate_tasks(Agent):-
     check_tasks_limit(Agent, Number, Number2),
     generate_tasks(Number2, Agent).
 
-
-check_tasks_limit(Agent, Number, Number2):-
-    env_utils:query_environment(workshop, Agent, tasks_limit(Limit)),
-    check_tasks_limit(Number, Number2, Limit, Limit2),
-    env_utils:delete_facts_agent(workshop, Agent, [tasks_limit(Limit)]),
-    env_utils:add_facts_agent(workshop, Agent, [tasks_limit(Limit2)]).
-
-
-check_tasks_limit(Number, Number2, Limit, 0):-
-    Number>Limit,
-    Number2 is Limit.
-
-check_tasks_limit(Number, Number2, Limit, Limit2):-
-    Number2 is Number,
-    Limit2 is Limit - Number.
-
-
+generate_tasks( _ ):- writeln(chyba).
 
 
 
@@ -184,7 +201,24 @@ generate_tasks(N, Agent):-
     N2 is N-1,
     generate_tasks(N2, Agent).
 
-generate_tasks( _ ):- writeln(chyba).
+ 
+
+
+check_tasks_limit(Agent, Number, Number2):-
+    env_utils:query_environment(workshop, Agent, tasks_limit(Limit)),
+    check_tasks_limit(Number, Number2, Limit, Limit2),
+    env_utils:delete_facts_agent(workshop, Agent, [tasks_limit(Limit)]),
+    env_utils:add_facts_agent(workshop, Agent, [tasks_limit(Limit2)]).
+
+
+check_tasks_limit(Number, Number2, Limit, 0):-
+    Number>Limit,
+    Number2 is Limit.
+
+check_tasks_limit(Number, Number2, Limit, Limit2):-
+    Number2 is Number,
+    Limit2 is Limit - Number.
+
 
 
 
@@ -259,8 +293,8 @@ get_location_percepts(Warehouse, Agent, Percepts):-
 % products in hall
 get_location_percepts(hall, Agent, Percepts):-
     env_utils:findall_environment(workshop, Agent, product( _, _, _), 
-				  Resources),
-    extract_products(Resources, Percepts).
+				  Products),
+    extract_products(Products, Percepts).
 
 
 get_location_percepts(_, _, []).
@@ -271,7 +305,7 @@ extract_products([], []).
 
 extract_products([product(_, _, 0) | Products], 
 		 Percepts):-
-    extract_resources(Products, Percepts).
+    extract_products(Products, Percepts).
 
 extract_products([product(Machine, Material, Number) | Products], 
 		 [product(Machine, Material, Number) | Percepts]):-

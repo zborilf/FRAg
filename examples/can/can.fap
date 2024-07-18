@@ -10,7 +10,7 @@ fact(a(6)).
 fact(a(7)).
 fact(a(8)).
 
-fact(b(10)).
+fact(b(7)).
 
 goal(ach, g, [[]]).
 
@@ -21,6 +21,7 @@ plan(ach, g, [],
 	]
    ).
 
+/*
 plan(ach, g1, [a(X)],
 	[
 		test(b(X)),
@@ -28,13 +29,27 @@ plan(ach, g1, [a(X)],
 	]
     ).
 
+
 plan(ach, g1, [a(X)],
 	[
+		
 		test(b(X)),
 		act(writeln(ahoj2))
+		
+	]
+    ).
+*/
+plan(ach, g1, [a(X)],
+	[
+		add(b(2)),
+		test(b(1)),
+                act(writeln(ahoj2b))
+		
 	]
     ).
 
+
+/*
 plan(ach, g1, [a(X)],
 	[
 		test(b(X)),
@@ -42,9 +57,12 @@ plan(ach, g1, [a(X)],
 	]
     ).
 
+
+
 plan(ach, g1, [a(X)],
 	[
 		test(b(X)),
 		act(writeln(ahoj4))
 	]
     ).
+*/

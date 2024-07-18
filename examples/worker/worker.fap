@@ -3,6 +3,7 @@
 % paths to warehouseA, warehouseB, workshop, hall, construction
 
 
+
 fact(path(hall, warehouseA, [warehouseA])).
 fact(path(construction, warehouseA, [hall, warehouseA])).
 fact(path(workshop, warehouseA, [hall, warehouseA])).
@@ -41,7 +42,7 @@ plan(ach, complete_tasks, [carry( _ )],
 		ach(go_to(hall)),
 		act(workshop, drop),
 		act(workshop, go(construction)),
-		ach(conplete_tasks)
+		ach(complete_tasks)
 	]
     ).
 
@@ -66,7 +67,7 @@ plan(ach, complete_tasks, [not(carry( _ )), location(construction),
 
 plan(ach, complete_tasks, [],
 	[
-		act(writeln(je_to_divne)),
+		act(printfg("Zrejme zadny task k dispozici")),
 		ach(complete_tasks)
 	]
    ).
@@ -76,31 +77,52 @@ plan(ach, complete_tasks, [],
 plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
  	[
 		ach(go_to(hall)),
-		test(product(Machine, Material)),
-		act(workshop, pick),
+		test(product(Machine, Material, _)),
+		act(workshop, pick(Machine, Material)),
 		act(workshop, go(construction)),
 		act(workshop, submit)
 	]
     ).
 
 
-plan(ach, complete_task(Machine, Material), [warehouses(Warehouse), 
-					     not(carry( _ ))],
+
+
+plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
 	[
-		ach(go_to(Warehouse)),
-		test(resource(Warehouse, Material, _)),
+%		iset(warehouse(Warehouse), Warehouses),
+%		act(printfg(Warehouses)),
+
+		ach(go_to(warehouseA)),
+		test(resource(warehouseA, Material, _)),
 		act(workshop, pick(Material)),
 		act(workshop, go(workshop)),
 		ach(make_product(Machine, Material)),
 		act(workshop, go(hall)),
 		act(workshop, go(construction)),
-		act(workshop, submit),
-		act(writeln(submited))
+		act(workshop, submit)
 	]
     ).
 
 
-plan(ach, complete_task(Machine, Material), [carry(product( _, _))],
+
+plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
+	[
+		ach(go_to(warehouseB)),
+		test(resource(warehouseB, Material, _)),
+		act(workshop, pick(Material)),
+		act(workshop, go(workshop)),
+		ach(make_product(Machine, Material)),
+		act(workshop, go(hall)),
+		act(workshop, go(construction)),
+		act(workshop, submit)
+	]
+    ).
+
+
+
+
+
+plan(ach, complete_task( _, _), [carry(product( _, _))],
 	[
 		act(writeln(cosi_nesu))
 	]
@@ -110,7 +132,8 @@ plan(ach, complete_task(Machine, Material), [carry(product( _, _))],
 
 plan(ach, make_product(Machine, Material), [machine(Machine, true)],
 	[
-		act(workshop, do(Machine, Material))
+		act(workshop, do(Machine, Material)),
+		act(printfg("Vyrobek zhotoven"))
 	]
     ).
 
@@ -138,7 +161,7 @@ plan(ach, go_to(Location), [location(Location)],
     ).
 
 
-plan(ach, go_to(Location), [location(Location_Now)],
+plan(ach, go_to(Location), [not(location(Location)), location(Location_Now)],
 	[
 		test(path(Location_Now, Location, Path)),
 		ach(do_walk(Path))

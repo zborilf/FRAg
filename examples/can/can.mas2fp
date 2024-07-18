@@ -2,9 +2,9 @@
 
 
 set_agents([ 
-             (bindings, early),
-             (reasoning, can_reasoning)
+             (bindings, lat),
+             (reasoning, robin_reasoning)
              ]
      ).		
 
-load("canagent","../examples/can/can",1,[(debug, reasoningdbg)]).
+load("canagent","../examples/can/can",1,[(debug, actdbg)]).

@@ -36,6 +36,12 @@
 @version 0.1 (2024) 
 */
 
+:- discontiguous workshop/2.
+:- discontiguous workshop/3.
+:- discontiguous workshop/4.
+
+
+
 :-use_module('../FRAgPLEnvironmentUtils').   % interface for environments
 :-use_module('../FRAgPLStatsUtils').
 :-use_module('../FRAgPLEpisodeSteps').
@@ -85,7 +91,7 @@ init_beliefs(Agents):-
     Agents = [Agent | _],	% suppose all the agents are in the same instance
     init_location(Location),
     add_location_percepts(Location, Agent),
-    env_utils:findall_environment(workshop, Agent, path(Location1, Location2), 
+    env_utils:findall_environment(workshop, Agent, path( _, _), 
 				  Paths),
     env_utils:add_beliefs(Agent, Paths),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
@@ -256,7 +262,7 @@ workshop(act, Agent, go(Location), false):-
            [Agent, Location, Location2]).
 
 
-workshop(act, Agent, pick(product(Machine, Material)), true):-
+workshop(act, Agent, pick(Machine, Material), true):-
     not(env_utils:query_environment(workshop, Agent, carry(Agent, _))),
     !,
     env_utils:query_environment(workshop, Agent, location(Agent, hall)),
@@ -266,6 +272,7 @@ workshop(act, Agent, pick(product(Machine, Material)), true):-
     !,
     Number > 0,
     Number2 is Number - 1,
+writeln(produktPicked),
     env_utils:delete_facts_agent(workshop, Agent, [product(Machine, Material,
                                                             Number)]),
     env_utils:add_facts_agent(workshop, Agent, [product(Machine, Material,
@@ -331,7 +338,7 @@ workshop(act, Agent, do(Machine, Material), true):-
 workshop(act, Agent, do(Machine, _), false):- 
     not(env_utils:query_environment(workshop, Agent, machine(Machine, true))),
     !,
-    format("Bad luck agent ~w, machine ~w in not available ~n",
+    format("Bad luck agent ~w, machine ~w is not available ~n",
 	   [Agent, Machine]).
 
 
@@ -379,23 +386,19 @@ workshop(act, Agent, submit, false):-
 
 
 workshop(act, Agent, drop, true):-
-writeln(drwa),
     env_utils:query_environment(workshop, Agent, 
 				carry(Agent, resource(Material))),
     !,
-writeln(drwb),
     env_utils:query_environment(workshop, Agent, location(Agent, Location)),
     !,
-writeln(drwc),
     location_type(Location, warehouse),
     env_utils:delete_facts_agent(workshop, Agent, 
 				 [carry(Agent, resource(Material))]),
-writeln(drwd),
     env_utils:delete_beliefs(Agent, [carry(resource(Material))]),
-    stock_resource(Material, Location).
+    stock_resource(Material, Location, Agent).
 
 
-stock_resource(Material, Location):-
+stock_resource(Material, Location, Agent):-
     env_utils:query_environment(workshop, Agent, 
 				resource(Location, Material, Number)),
     Number2 is Number + 1,
@@ -404,7 +407,7 @@ stock_resource(Material, Location):-
     env_utils:add_facts_agent(workshop, Agent, [resource(Location, Material,
                                                          Number2)]).
 
-stock_resource(Material, Location):-    
+stock_resource(Material, Location, Agent):-    
     env_utils:add_facts_agent(workshop, Agent, 
 			      [resource(Location, Material, 1)]).
 
@@ -412,29 +415,27 @@ stock_resource(Material, Location):-
 
 
 workshop(act, Agent, drop, true):-
-writeln(dra),
     env_utils:query_environment(workshop, Agent, 
 				carry(Agent, product(Machine, Material))),
     !,
-writeln(drb),
     env_utils:query_environment(workshop, Agent, location(Agent, hall)),
     !,
-writeln(drc),
+writeln(produktDroped),
     env_utils:delete_facts_agent(workshop, Agent, 
 				   [carry(Agent, product(Machine, Material))]),
-writeln(drd),
     env_utils:delete_beliefs(Agent, [carry(product(Machine, Material))]),
-    stock_product(Machine, Material).
+    stock_product(Machine, Material, Agent).
 
 
 
 
-workshop(act, _, drop, false):-
-  writeln(dropfalse).
+workshop(act, Agent, drop, false):-
+  writeln(dropfalse),
+  print_workshop_state(Agent).
 
 
 
-stock_product(Machine, Material):-
+stock_product(Machine, Material, Agent):-
     env_utils:query_environment(workshop, Agent, 
 				product(Machine, Material,Number)),
     Number2 is Number + 1,
@@ -443,12 +444,12 @@ stock_product(Machine, Material):-
     env_utils:add_facts_agent(workshop, Agent, [product(Machine, Material,
                                                          Number2)]).
 
-stock_product(Machine, Material):-    
+stock_product(Machine, Material, Agent):-    
     env_utils:add_facts_agent(workshop, Agent, 
 			      [product(Machine, Material, 1)]).
 
 
-workshop(act, Agent, skip, true).
+workshop(act, _, skip, true).
 
 
 % every other act fails
@@ -459,18 +460,22 @@ workshop(act, _, _, false).
 
 :-
     env_utils:register_environment(workshop),
-    findall(resource(Kind, Number), resource(Locaion, Kind, Number), Facts1),
+    findall(resource(Location, Material, Number), 
+            resource(Location, Material, Number), Facts1),
     findall(machine(Type, State), machine(Type, State), Facts2),
     findall(path(Location1, Location2), path(Location1, Location2), Facts3),
     findall(resource(Location, Material, Number), 
-	    resource(Location, Material, Number), Facts4),
+	    resource(Location, Material, Number), Resources),
+    findall(product(Machine, Material, Number), 
+	    product(Machine, Material, Number), Products),
     to_issue(Material_To_Issue),
     tasks_limit(Tasks_Limit),
     episode(Episode),
     env_utils:add_facts(workshop, Facts1),
     env_utils:add_facts(workshop, Facts2),
     env_utils:add_facts(workshop, Facts3),
-    env_utils:add_facts(workshop, Facts4),
+    env_utils:add_facts(workshop, Resources),
+    env_utils:add_facts(workshop, Products),
     env_utils:add_facts(workshop, [episode(Episode)]),
     env_utils:add_facts(workshop, [to_issue(Material_To_Issue)]),
     env_utils:add_facts(workshop, [tasks_limit(Tasks_Limit)]).

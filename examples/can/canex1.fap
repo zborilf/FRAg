@@ -14,7 +14,7 @@ goal(ach, do, [[]]).
 
 
 
-% goal(ach,can(c),[[]]).
+% goal(ach,can(b),[[]]).
 
 
 plan(ach, do, [],

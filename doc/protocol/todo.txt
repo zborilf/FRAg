@@ -57,3 +57,4 @@ Omezit velikost kontextu
 
 
 
+BUG? Asi je problem, kdyz ma plan jednu akci a ta spadne, plan i tak uspeje (objevilo se ve workshopu)

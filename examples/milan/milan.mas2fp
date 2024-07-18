@@ -1,7 +1,7 @@
 
 
 
-set_agents([(bindings, early), (reasoning, can_reasoning), 
+set_agents([(bindings, early), (reasoning, robin_reasoning), 
 		(reasoning_params, mcts_params(20,3,10))]).
 
 % load("milan","examples/milan/milan",10,[(debug, systemdbg), (debug, reasoningdbg)]).

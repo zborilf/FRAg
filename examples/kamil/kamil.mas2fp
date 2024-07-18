@@ -1,7 +1,7 @@
 
 
 
-set_agents([(bindings, late),(reasoning, can_reasoning)]).
+set_agents([(bindings, late),(reasoning, robin_reasoning)]).
 		
 
 load("kamil","../examples/kamil/kamil", 1, 

@@ -3,8 +3,8 @@
 
 
 set_agents([ 
-             (bindings, early),
-             (reasoning, can_reasoning)
+             (bindings, late),
+             (reasoning, robin_reasoning)
              ]
      ).		
 

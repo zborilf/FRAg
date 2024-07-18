@@ -461,6 +461,11 @@ execute(_ ,
 execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
                 [iset(Atom, Instance_Set)| Acts]),
 	   plan(Event_Type, Event_Atom, Conditions, Context, Acts), true):-
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Making instance set ~w",
+		          [Loop_Number, iset(Atom, Instance_Set)]),
+    println_debug(String, actdbg),
+
 %   'instance_set' clause is defined in FRAgPLFrag.pl
     instance_set(Atom, Context, Instance_Set).
 
@@ -470,9 +475,18 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]),
 	    plan(Event_Type, Event_Atom, Conditions, Context_New, Acts),
             Result):-
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Execiuting query ~w",
+		          [Loop_Number, test(Goal, Context)]),
+    println_debug(String, actdbg),
+
 %   'query' clause is defined in FRAgPLFrag.pl
     query(Goal, Context, Context2),
     simulate_early_bindings(Goal, Context2, Context_New, true),
+    format(atom(String2), "[ACTING (~w)] Test goal RESULT: ~w",
+		          [Loop_Number, Context2]),
+    println_debug(String2, actdbg),
+
 %   If the resulting context is nonempty, the test goal is successful. Otherwise,
 %   it is unsuccessful.
     nonempty_context(Context_New, Result).
@@ -485,8 +499,13 @@ execute(Intention_ID,
         plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
         true)
     :-
-    retract(intention(Intention_ID, Plan_Stack, active)),
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Introducting achievement goal ~w",
+		          [Loop_Number, ach(Goal, Context)]),
+    println_debug(String, actdbg),
 
+
+    retract(intention(Intention_ID, Plan_Stack, active)),
 %   this intention is blocked now
     assertz(intention(Intention_ID, Plan_Stack, blocked)),
 
@@ -528,6 +547,13 @@ execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context,
 	plan(Event_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
     functor(Relation, Operator, _),
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Execiuting relation check  ~w",
+		          [Loop_Number, rel(Relation)]),
+    println_debug(String, actdbg),
+
+
+
 %   'is_relational_operator' clause is defined in FRAgPLRealtions.pl
     is_relational_operator(Operator),
 %   'alop' clause is defined in FRAgPLRealtions.pl
@@ -543,10 +569,12 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 %   'decisioning' clause is defined in FRAgPLFrag.pl
     decisioning(Action, Context, Context_Out, true),
     !,
-    format(atom(String), "[ACTING] Execiuting in environment ~w act ~w",
-		          [Environment, Action]),
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Execiuting in environment ~w act ~w",
+		          [Loop_Number, Environment, Action]),
     println_debug(String, actdbg),
     execute_environment(Environment, Action, Restult).
+
 
 execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
                                                              Acts]),
@@ -556,8 +584,9 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
     decisioning(Action, Context, Context_Out, true),
     !,
     % execute action in 'basic' FRAg environment
-    format(atom(String), "[ACTING] Execiuting in environment basic act ~w",
-		    [Action]),
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Execiuting in environment basic act ~w",
+		    [Loop_Number, Action]),
     println_debug(String, actdbg),
     execute_environment(basic, Action, Result).
 
@@ -567,7 +596,9 @@ execute(_ ,
         plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
         plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
         false):-
-	format(atom(String), "[ACTING] Plan execution FAILED", []),
+ 	loop_number(Loop_Number),
+	format(atom(String), "[ACTING (~w)] Plan execution FAILED", 
+			      [Loop_Number]),
     	println_debug(String, actdbg).
 
 
@@ -758,22 +789,17 @@ update_event(Intention_ID_New, event(Event_ID, ach, Event_Atom, Intention_ID,
                 )
           ).
 
+
+
 % No means for an achieve goal, put the goal back
 
 update_event( _, event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
                        active, History), false, _)
     :-
+% resets history
     assert(event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
-                 active, History)).
+                 active, [])).
 
-% Intention extension failed (should not occur, previous clause should handle
-% all 'false' results of reasonings)
-
-update_event(-1, event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
-                       active, History),
-             _, _):-
-    assert(event(Event_ID, ach, Event_Atom, Parent_Intention, Context, active,
-                 History)).
 
 % Other event types (add/del) are removed in both cases, whether a resource has
 % been found for them or not
@@ -887,13 +913,14 @@ update_intention(intention(Indention_ID,
 % restore it.
 
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
+    loop_number(Loop_Number),
     format(atom(String),
-           "[RSNDBG] Update intention: SUBPLAN FAILED",[]),
-    println_debug(String, reasoningdbg),                  
-    format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
-    println_debug(String2, actdbg),
+           "[RSNDBG (~w)] Update intention: SUBPLAN FAILED",[Loop_Number]),
+    println_debug(String, reasoningdbg), 
+%    format(atom(String2), "[ACTINGa (~w)] Update intention: ACTION FAILED", 
+%                           [Loop_Number]),
+%    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
-%    !,  - nema smysl
     retract(event(Event_Index, Type, Atom, null, Context, Intention_ID,
                   History)),
     assertz(event(Event_Index, Type, Atom, null, Context, active, History)).
@@ -912,10 +939,13 @@ update_intention(intention(_, [ _ ], _), false).
 update_intention(intention(Intention_ID,
                            [plan( _, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
-    format(atom(String), "[RSNDBG] Update intention: SUBPLAN FAILED", []), 
+    loop_number(Loop_Number),
+    format(atom(String), "[RSNDBG (~w)] Update intention: SUBPLAN FAILED", 
+                          [Loop_Number]), 
     println_debug(String, reasoningdbg),
-    format(atom(String2), "[ACTING] Update intention: ACTION FAILED", []),
-    println_debug(String2, actdbg),
+%   format(atom(String2), "[ACTINGb (~w)] Update intention: ACTION FAILED", 
+%			   [Loop_Number]),
+%    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
 
     try_refresh_event(Intention_ID),
@@ -931,7 +961,9 @@ update_intention(intention(Intention_ID,
 %  to its current state.
 
 update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
-    format(atom(String), "[ACTING] Update intention: ACTION SUCCEEDED", []),
+    loop_number(Loop_Number),
+    format(atom(String), "[ACTING (~w)] Acting result: ACTION SUCCEEDED", 
+			  [Loop_Number]),
     println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
     assertz(intention(Intention_ID, Plan_Stack, Status)).
@@ -1284,7 +1316,7 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                                     Parent_Intention, Context, active,
                                     History),
                        Intended_Means),
-format("INTENDED MEANS: ~w~n",[Intended_Means]),
+% format("INTENDED MEANS: ~w~n",[Intended_Means]),
     extend_intention(Parent_Intention, Intended_Means, Intention_ID),
     update_event(Intention_ID,
 	         event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
