@@ -95,6 +95,7 @@ init_beliefs(Agents):-
 				  Paths),
     env_utils:add_beliefs(Agent, Paths),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
+    env_utils:add_facts_agent(workshop, Agent, [distance_travelled(Agent, 0)]),
     env_utils:add_beliefs(Agent, [location(Location)]),
     env_utils:add_facts_beliefs(workshop, Agent, [episode(1)]),
     env_utils:add_facts_beliefs(workshop, Agent, [reward(Agent, 0)]).
@@ -248,10 +249,18 @@ workshop(act, Agent, go(Location), true):-
     env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
     !,
     env_utils:query_environment(workshop, Agent, path(Location2, Location)),
-    env_utils:delete_facts_agent(workshop, Agent, [location(Agent, Location2)]),
+    env_utils:delete_facts_agent(workshop, Agent, 
+			 	 [location(Agent, Location2)]),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
     env_utils:delete_beliefs(Agent, [location(Location2)]),
-    env_utils:add_beliefs(Agent, [location(Location)]).
+    env_utils:add_beliefs(Agent, [location(Location)]),
+    env_utils:query_environment(workshop, Agent, 
+				distance_travelled(Agent, Distance)),
+    env_utils:delete_facts_agent(workshop, Agent,
+			      [distance_travelled(Agent, Distance2)]),
+    Distance2 is Distance + 1,
+    env_utils:add_facts_agent(workshop, Agent,
+			      [distance_travelled(Agent, Distance2)]).
 
 workshop(act, Agent, go(Location), false):-
     env_utils:query_environment(workshop, Agent, location(Agent, Location2)),

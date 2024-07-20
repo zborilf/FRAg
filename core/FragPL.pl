@@ -45,7 +45,7 @@ This is the main module of the FRAg system.
 */
 
 
-:- use_module('FRAgBlackboard').
+:- use_module('FRAgSync').
 :- use_module('FRAgAgent').
 
 :- discontiguous frag_choice/1.
@@ -125,6 +125,7 @@ set_default_reasoning(all, Reasoning):-
 
 load_agent(Agent, Program, Attributes, Thread):-
     term_string(Agent_Term, Agent),
+    fa_sync:sync_add_agent(Agent_Term),
     thread_create(fa_init_agent(Program, Attributes), Thread,
                   [alias(Agent_Term)]),
     assert(agent(Agent_Term)).
@@ -140,9 +141,9 @@ load_agent(Agent, Program, Attributes, Thread):-
 
 load_same_agents(_, _, 0, _, []).
 
-load_same_agents(Agent, Program, Number, Attributes, [THREAD| THT]):-
+load_same_agents(Agent, Program, Number, Attributes, [Thread| THT]):-
     concat(Agent, Number, AGENTNAME),
-    load_agent(AGENTNAME, Program, Attributes, THREAD),
+    load_agent(AGENTNAME, Program, Attributes, Thread),
     Number2 is Number - 1,
     load_same_agents(Agent, Program, Number2, Attributes, THT).
 
@@ -227,16 +228,17 @@ frag(Filename):-
     !,
     open(Absolute_Mas2FP, read, Stream, [close_on_abort(true)]),
     thread_setconcurrency(_ , 1000),
-% loads initial multiagent system.
     load_multiagent(Stream, Agents),
     !,
     close(Stream),
+    fa_sync:sync_init,
     load_agents(Agents, Threads),
+    fa_sync:sync_agents_ready,
     !,
-    wait_agents(Threads),
-    % run (unblock) agents
-    assert(go(1)),
-    wait_agents(Threads),
+%    wait_agents(Threads),
+%    run (unblock) agents
+%    assert(go(1)),
+%    wait_agents(Threads),
     join_threads(Threads).
 
 frag(Filename):-
@@ -331,7 +333,7 @@ frag_process_clause(Stream, Clause, Clauses):-
 wait_agents([]).		% no agents loaded
 
 wait_agents(Threads):-
-    bagof(Agent, ready(Agent), Agents_Ready),
+    bagof(Agent, fa_sync:ready(Agent), Agents_Ready),
     length(Agents_Ready, Agents_Ready_Length),
     length(Threads, Agents_Ready_Length),
     retractall(ready( _ )).

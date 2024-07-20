@@ -69,7 +69,7 @@ This module contains code for thread clauses declarations for individual agents
 :- use_module(library(thread)).
 
 %   shared data among threads (agents etc.)
-:-use_module('FRAgBlackboard').
+:-use_module('FRAgSync').
 
 %   interface to environments
 :-use_module('FRAgAgentInterface').
@@ -415,6 +415,28 @@ process_messages:-
 process_messages.
 
 
+
+
+%===============================================================================
+%                                                                              |
+%    SENSING		                                                       |
+%                                                                              |
+%===============================================================================
+
+
+%!  sensing is det
+%   Processes agent input from the environment, including messages.
+
+sensing:-
+    thread_self(Agent),
+    agent_perceives(Agent, Add_List, Delete_List),
+    % conflict should be resolved in 'agent_perceived'
+    process_delete_list(Delete_List),
+    process_add_list(Add_List),
+    process_messages.
+
+
+
 %===============================================================================
 %                                                                              |
 %    ONE ACT EXECUTION, 4th interpretation level / execution                   |
@@ -694,6 +716,7 @@ nonempty_context( _, true).
 %===============================================================================
 
 
+
 %    SELECT INTENTION
 %===============================================================================
 
@@ -710,6 +733,7 @@ select_intention(intention(Intention_ID_Out, Plan_Stack_Out, Status_Out)):-
 % 'get_intention' clause is defined in FRAgPLFrag.pl
     get_intention(Intentions, intention(Intention_ID_Out, Plan_Stack_Out,
                                         Status_Out)).
+
 
 
 
@@ -761,6 +785,7 @@ get_fresh_intention_number(Intention_ID):-
     retract(intention_fresh(Intention_ID)),
     Intention_ID2 is Intention_ID+1,
     assertz(intention_fresh(Intention_ID2)).
+
 
 
 
@@ -822,6 +847,7 @@ try_retract_event(Intention_ID):-
     retract(event(Event_ID_Max, _, _, _, _, _, _)).
 
 try_retract_event( _).
+
 
 
 try_refresh_event(Intention_ID):-
@@ -1335,6 +1361,8 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 
 
 
+
+
 %===============================================================================
 %                                                                              |
 %    AGENT CONTROL LOOP                                                        |
@@ -1398,17 +1426,6 @@ loop(Steps, Steps_Left):-
     next_loop(Steps2, Steps_Left).
 
 
-%!  sensing is det
-%   Processes agent input from the environment, including messages.
-
-sensing:-
-    thread_self(Agent),
-    agent_perceives(Agent, Add_List, Delete_List),
-    % conflict should be resolved in 'agent_perceived'
-    process_delete_list(Delete_List),
-    process_add_list(Add_List),
-    process_messages.
-
 
 %!  next_loop(+Steps, -Steps_Left) is det
 %   are we continuing to execute the loop? No, if 1, the counter is at
@@ -1435,6 +1452,7 @@ next_loop(0,0):-
 next_loop(Steps, Steps_Left):-
     intention(_, _, active),
     !,
+    go_sync_agent,
     loop(Steps, Steps_Left).		% should be gosync
 
 % an event exists, should go on
@@ -1442,6 +1460,7 @@ next_loop(Steps, Steps_Left):-
 next_loop(Steps, Steps_Left):-
     event( _, _, _, _, _, active, _),
     !,
+    go_sync_agent,
     loop(Steps, Steps_Left).         % should be gosync
 
 % if no_job terminating is set, then terminate
@@ -1458,13 +1477,23 @@ next_loop( _, Steps_Left):-
     loop( 1, Steps_Left).
 
 
+% sync when in synchronous mode
+
+go_sync_agent:-
+    thread_self(Agent),
+    loop_number(Loop_Number),
+    fa_sync:agent_salutes(Agent),
+    thread_wait(fa_sync:b_step(Loop_Number), [alias(Agent)]).
+
+
+
 %!  increment_loop is multi
 %   increases loop_number in Prolog database 
 
 increment_loop:-
-    retract(loop_number(Loop)),
-    New_Loop is Loop + 1,
-    assert(loop_number(New_Loop)).
+    retract(loop_number(Loop_Number)),
+    New_Loop_Number is Loop_Number + 1,
+    assert(loop_number(New_Loop_Number)).
 
 
 
@@ -1685,14 +1714,15 @@ take_snapshot_goals(Events_Snapshot):-
 %  @arg Trigger: 0 ... cancel execution, 1 ... go on with agent execution
 
 wait_go( _ ):-
-    fRAgBlackboard:go(0),
+    fa_sync:go(0),
     thread_exit(1).
 
 wait_go(Trigger):-
-    fRAgBlackboard:go(Trigger),
+    fa_sync:go(Trigger),
     !.
 
 wait_go(Trigger):-
+    writeln(wait_go),
     wait_go(Trigger).
 
 
@@ -1702,15 +1732,17 @@ wait_go(Trigger):-
 
 go_sync(Steps, I):-
     thread_self(Agent),
-    assert(fRAgBlackboard:ready(Agent)),
-    wait_go(I),
+  %  assert(fa_sync:ready(Agent)),
+  %  wait_go(I),
+    fa_sync:agent_salutes(Agent),
+    thread_wait(fa_sync:b_step(I), [alias(Agent)]),
     call_time(loop(Steps, Steps_Left),Time),
     get_dict(cpu, Time, Cpu_Time),
     thread_self(Agent),
     timeout(Max_Iterations),
     Steps_Total is Max_Iterations - Steps_Left,
     write_stats(stats(Agent, Cpu_Time, Steps_Total)),
-    assert(fRAgBlackboard:ready(Agent)).
+    assert(fa_sync:ready(Agent)).
 
 
 fa_init_com(Filename):-
@@ -1935,7 +1967,7 @@ fa_init_run:-
     format(atom(String),"[ERROR] Bindings method missing~n", []),
     println_debug(String, error),
     !,
-    fail.
+    fail.                              
 
 
 

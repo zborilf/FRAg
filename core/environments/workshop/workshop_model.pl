@@ -7,6 +7,7 @@
 :- dynamic tasks_rate /1.
 :- dynamic to_issue /1.
 :- dynamic tasks_limit /1.
+% :- dynamic distance_travelled /2.
 
 
 path(construction, hall).
@@ -164,7 +165,10 @@ print_workshop_state(Agent):-
 
     env_utils:findall_environment(workshop, Agent, reward(_, _), 
 				  Rewards),
-    print_list(Rewards).
+    print_list(Rewards),
+    env_utils:findall_environment(workshop, Agent, distance_travelled(_, _), 
+				  Distances),
+    print_list(Distances).
 
 
     

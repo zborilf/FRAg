@@ -1,11 +1,10 @@
 
 
 
-set_agents([(bindings, late),(reasoning, robin_reasoning)]).
-		
+set_agents([(bindings, late), (reasoning, robin_reasoning)]).
 
-load("kamil","../examples/kamil/kamil", 1, 
-	[(debug, candbg), (debug, interdbg), (debug, reasoningdbg), (debug, systemdbg)]).
+
+load("kamil","../examples/kamil/kamil",1,[(debug, reasoningdbg), (debug, systemdbg)]).
 
 			   
 			  

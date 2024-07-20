@@ -15,7 +15,7 @@ fact(b(1,2)).
 fact(b(3,2)).
 fact(b(2,3)).
 fact(b(2,4)).
-% fact(b(3,3)).
+fact(b(3,3)).
 fact(b(4,2)).
 fact(b(2,1)).
 
@@ -27,6 +27,7 @@ goal(ach,go(X),[[]]).
 
 plan(ach,go(X),[a(X)],	
 	[
+		act(printfg(jedu)),
 		test(b(X,X)),
 		act(printfg(X))
 	]).
