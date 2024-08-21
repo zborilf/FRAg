@@ -34,7 +34,13 @@ get_intention(simple_reasoning, [ _ | Intentions], Intention):-
 get_substitution(simple_reasoning, _, [Context| _ ], Variables, Context_Out):-
     shorting(Context, Variables, Context_Out). % from file FRAgPLFRAg
 
-% sort it by id
+
+%!  get_plan(simple_reasoning, +Event, +Means, -Intended_Means) is det
+%   From the listed means for the Event takes the first one
+%  @arg Event:
+%  @arg Means:
+%  @arg Intended_Means:
+
 get_plan(simple_reasoning, _, [Intended_Means| _ ], Intended_Means).
 
 

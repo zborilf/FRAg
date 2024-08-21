@@ -36,8 +36,7 @@
 
 /** <module>  FRAg: The Flexible Reasoning Agent
 
-This is the main module of the FRAg system.
-{pldoc link stranta.txt} dalsi stranka
+Main module of the FRAg system.
 
 @author Frantisek Zboril jr.
 @license GPL

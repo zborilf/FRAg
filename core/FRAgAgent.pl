@@ -97,13 +97,16 @@ terminate(no_job).
 
 :-thread_local plan/5.
 
+
 %!  fact(Belief_Atom).
 
 :-thread_local fact/1.
 
+
 %!  intention(+Intention_ID, +Plan_Stack, +Status).
 
 :-thread_local intention /3.
+
 
 %!  goal(+Type, +Atom, +Context).
 %  @arg Type: goal type [only 'ach' in this version]
@@ -113,6 +116,12 @@ terminate(no_job).
 
 :-thread_local goal /3.
 
+
+%!  virtual_mode(-Virtual_Mode).
+%   virtual mode is used in some reasoning method that use look ahead planning
+%  @arg Virtual_mode: true or false
+
+:-thread_local virtual_mode /1.
 
 
 %!  event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
@@ -142,8 +151,6 @@ terminate(no_job).
 :-thread_local event_fresh / 1.
 
 :-thread_local loop_number /1.
-
-% todo takze centralne z nastenky, nebo lokalne?
 
 :-thread_local agent_debug /1.
 
@@ -333,8 +340,8 @@ print_state(_).
 write_stats(String):-
     open('stats.pl', append, Stats_File),
 %    thread_self(Agent),
-    write(Stats_File, String),
-    writeln(Stats_File,'.'),
+%    write(Stats_File, String),
+%    writeln(Stats_File,'.'),
     agents_stats(Stats_File),
     close(Stats_File).
 
@@ -343,10 +350,12 @@ write_stats(String):-
 % takes _stats /1 from BB and writes it out
 
 agents_stats(Stats_File):-
-   clause(env_utils:fact(A, B, C), _),
-   findall(rewards(Agent, Reward),
-	   env_utils:fact(workshop, workshop, reward(Agent, Reward)), Rewards),
-   write(Stats_File, stats_(Rewards)),
+   clause(env_utils:fact( _, _, _), _),
+   thread_self(Agent),
+   findall(stats(Agent, Environment, Instance, Stats),
+	   env_utils:fact(Environment, Instance, stats_(Agent, Stats)),
+			  Stats_List),
+   write(Stats_File, Stats_List),
    writeln(Stats_File,'.').
 
 agents_stats( _ ).
@@ -643,8 +652,7 @@ execute_plan(Intention_ID,
     execute(Intention_ID,
             plan(Event_Type, Event_Atom, Conditions, Context, Body),
 	    plan(Event_Type, Event_Atom, Conditions, Context2, Body2),
-            Result),
-    !.
+            Result).
 
 
 
@@ -819,7 +827,7 @@ update_event(Intention_ID_New, event(Event_ID, ach, Event_Atom, Intention_ID,
 % No means for an achieve goal, put the goal back
 
 update_event( _, event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
-                       active, History), false, _)
+                       active, _), false, _)
     :-
 % resets history
     assert(event(Event_ID, ach, Event_Atom, Parent_Intention, Context,
@@ -1383,7 +1391,7 @@ loop(-1, -1).
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-	    format(atom(String1),
+    format(atom(String1),
 "~n
 [RSNDBG] =====================================================================
 [RSNDBG] ========================== Loop ~w started ==========================
@@ -1395,7 +1403,7 @@ loop(Steps, Steps_Left):-
     format(atom(String2), "~n[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
     print_state(String2),
 
-    late_bindings(Bindings),    % ???
+    late_bindings(Bindings),    
     format(atom(String3), "~n[INTER] Bindings ~w~n", [Bindings]),
     println_debug(String3, interdbg),
 
@@ -1453,7 +1461,7 @@ next_loop(Steps, Steps_Left):-
     intention(_, _, active),
     !,
     go_sync_agent,
-    loop(Steps, Steps_Left).		% should be gosync
+    loop(Steps, Steps_Left).		
 
 % an event exists, should go on
 
@@ -1461,7 +1469,7 @@ next_loop(Steps, Steps_Left):-
     event( _, _, _, _, _, active, _),
     !,
     go_sync_agent,
-    loop(Steps, Steps_Left).         % should be gosync
+    loop(Steps, Steps_Left).         
 
 % if no_job terminating is set, then terminate
 
@@ -1475,6 +1483,12 @@ next_loop(Steps, Steps):-
 
 next_loop( _, Steps_Left):-
     loop( 1, Steps_Left).
+
+
+% dont sync in virtual mode
+
+go_sync_agent:-
+    virtual_mode(true).
 
 
 % sync when in synchronous mode
@@ -1707,6 +1721,7 @@ take_snapshot_goals(Events_Snapshot):-
 	  Events_Snapshot).
 
 
+/*
 
 %!  wait_go(Trigger) is multi
 %   Synchronizes agent's execution. At this distribution it is used only to
@@ -1725,6 +1740,7 @@ wait_go(Trigger):-
     writeln(wait_go),
     wait_go(Trigger).
 
+*/
 
 
 %!  synchronous start of all the agents in system 
@@ -1732,8 +1748,6 @@ wait_go(Trigger):-
 
 go_sync(Steps, I):-
     thread_self(Agent),
-  %  assert(fa_sync:ready(Agent)),
-  %  wait_go(I),
     fa_sync:agent_salutes(Agent),
     thread_wait(fa_sync:b_step(I), [alias(Agent)]),
     call_time(loop(Steps, Steps_Left),Time),
@@ -1960,8 +1974,7 @@ fa_init_run:-
     retractall(event_fresh( _ )),
     assert(loop_number(1)),
     assert(intention_fresh(1)),
-    assert(event_fresh(1)),
-    !.
+    assert(event_fresh(1)).
 
 fa_init_run:-
     format(atom(String),"[ERROR] Bindings method missing~n", []),
@@ -2020,6 +2033,7 @@ fa_init_set_attrs(Key, Value):-
 %  @arg Attributes: agent's attributes specified in mas2fp metafile 
 
 fa_init_agent(Filename, Attributes):-
+    assert(virtual_mode(false)),
     timeout(Iterations),
     string(Filename),
     format(atom(Filename2), "~w.fap", [Filename]),

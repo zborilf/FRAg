@@ -36,16 +36,22 @@ get_intention(random_reasoning, Intentions, _):-
 %!  get_substitution(random_reasoning, _, Context, Vars, Context_Out) is det
 %   This clause is to select one of the set of substitutions and reduces it to 
 %   just the variables from Vars
-%  @arg Context_In: input context
+%  @arg Context_In: actual context of the agent
 %  @arg Vars: the variables for which a decision is to be made
-%  @arg Context_Out: output context
+%  @arg Context_Out: output context for the Action 
 
 get_substitution(random_reasoning, _, Context_In, Vars, Context_Out):-
     random_member(Substitution, Context_In),
     shorting(Substitution, Vars, Context_Out).	% from file FRAgPLFRAg
 
 
-%!  get_plan(random_reasoning, ...)     
+
+%!  get_plan(random_reasoning, +Event, +Means, -Intended_Means) is det
+%   From the listed means for the Event randomly selects one
+%  @arg Event:
+%  @arg Means:
+%  @arg Intended_Means:
+
 
 get_plan(random_reasoning, _ , Means, Intended_Means):-
     random_member(Intended_Means, Means).

@@ -72,9 +72,8 @@ set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
 
 
 %
-%  strom -> akce, potomkovske akce
-%  akce -> vyber planu pro zamer, nebo akce planu 
-%                     (ale bude to mit desne vetveni)
+%  tree -> act, children acts
+%  act -> plan selection for an intentin od plan act
 %
 
 
@@ -88,7 +87,7 @@ set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
 get_decisions(PUS, Variables, Decisions):-
     shorting_pus(PUS, Variables, Decisions).
 
-
+% ?? 
 perform_reasoning( _, _):-
     true.
 
@@ -348,7 +347,7 @@ garbage_all:-
 
 
 
-frag_simulate_program2(Program, STEPS, 0, RESULTS, EXPANDED):-
+frag_simulate_program(Program, STEPS, 0, RESULTS, EXPANDED):-
     number_of_top_level_goals(GOALSREMAIN),
     print_debug(runResult(RESULTS, 0, EXPANDED, GOALSREMAIN),mctsdbg),
     thread_self(Virtual_Agent),
@@ -363,11 +362,11 @@ frag_simulate_program2(Program, STEPS, 0, RESULTS, EXPANDED):-
 
     garbage_collect_atoms,
     mcts_number_of_simulations(Simulations),
-    frag_simulate_program2(Program, STEPS, Simulations, [], EXPANDED).
+    frag_simulate_program(Program, STEPS, Simulations, [], EXPANDED).
 
 
 
-frag_simulate_program2(Program, STEPS, SIMULATIONS, RESULTS, EXPANDED):-
+frag_simulate_program(Program, Steps, SIMULATIONS, RESULTS, EXPANDED):-
     retractall(loop_number( _ )), % init run
     assert(loop_number(1)),
     clear_agent,
@@ -379,19 +378,20 @@ frag_simulate_program2(Program, STEPS, SIMULATIONS, RESULTS, EXPANDED):-
     load_all_instances_state(Virtual_Agent, mcts_save),
     print_debug("[MCTS] Program to simulate:", mctsdbg),
     println_debug(Program, mctsdbg),
-    loop(STEPS, STEPSLEFT),
-    Steps_Done is STEPS - STEPSLEFT,
+    loop(Steps, STEPSLEFT),
+    Steps_Done is Steps - STEPSLEFT,
     !,
     garbage_all,
     Simulations2 is SIMULATIONS - 1,
-    frag_simulate_program2(Program, STEPS, Simulations2, [Steps_Done| RESULTS],
+    frag_simulate_program(Program, Steps, Simulations2, [Steps_Done| RESULTS],
                            EXPANDED).
 
 
 
 
-frag_simulate_program(Program, Steps, Expanded, Simulations):-
-    frag_simulate_program2(Program, Steps, Simulations, [], Expanded).
+% frag_simulate_program(Program, Steps, Expanded, Simulations):-
+%    frag_simulate_program2(Program, Steps, Simulations, [], Expanded).
+
 
 %
 % Node selection
@@ -458,7 +458,7 @@ set_debugs(false).
 
 
 mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
-		 RUNS, STEPS, SIMULATIONS, AGENTLOOP, Agent, BINDINGS, DEBUG):-
+		 RUNS, Steps, Simulations, AGENTLOOP, Agent, BINDINGS, DEBUG):-
 
     %
     %  simulation engine ...
@@ -469,6 +469,7 @@ mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
     %      at this point as an engine - each execution of engine makes number_of_simulations(NOS) simulations
     %
 
+    assert(virtual_mode(true)),
     set_debugs(DEBUG),
     open_engine_file(Agent, AGENTLOOP, RUNS),
     set_late_bindings(BINDINGS),
@@ -496,17 +497,12 @@ mcts_frag_engine(Program, INTENTIONFRESH, EVENTFRESH, Path, Expanded,
 
     take_snapshot(Program2),
     save_all_instances_state(Virtual_Agent, mcts_save),
-    frag_simulate_program(Program2, STEPS, Expanded, SIMULATIONS).
+    frag_simulate_program(Program2, Steps, Simulations, [], Expanded).
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%
-%
-%	End of engine code
-%
-%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Monte-Carlo Tree Search
+%===============================================================================
 
 
 number_of_top_level_events(Number):-
@@ -514,7 +510,7 @@ number_of_top_level_events(Number):-
           event(_ , Event_Type, Event_Atom, null, Context,
                                                    active, History),
           Top_Level_Goals),
-    length(Top_Level_Goals, Number).
+    length(Top_Level_Goals, Number).                                          
 
 number_of_top_level_events(0).
 
@@ -547,9 +543,27 @@ mcts_compute_reward(Awerage, GoalsTotal, GoalsAchieved, Reward):-
     print_debug('R:',mctsdbg),println_debug(Reward,mctsdbg).
 
 
+mcts_simulation(Program, Expansions, Simulations):-
+    mcts_model_init,
+    number_of_top_level_goals(Goals_Total),
+    mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations).
 
 
-mcts_expansion_loop( _, 0, _, _).
+
+%!  mcts_expansion_loop(+Program, +Expansions, +Max_Reward, 
+%                       +Simulations) is det
+%   Creates a goal - plan tree, or expands when there is already some, using 
+%   the MCTS method. For a given FRAg, the program performs the specified 
+%   number of expansions - this is the 'budget' for one update of this decision 
+%   model, and performs the specified number of simulations for each expansion. 
+%   The maximum reward, fe. the number of goals, is also given to calculate the
+%   rewards.
+%  @arg
+%  @arg
+%  @arg
+%  @arg
+
+mcts_expansion_loop( _, 0, _, _). % no expansions left
 
 
 mcts_expansion_loop(Program, EXPANSIONS, GOALSTOTAL, SIMULATIONS):-
@@ -571,15 +585,15 @@ mcts_expansion_loop(Program, EXPANSIONS, GOALSTOTAL, SIMULATIONS):-
                                    EXPANDED, EXPANSIONS, SIMULATIONSTEPS,
                                    SIMULATIONS, AGENTLOOP, Agent, BINDINGS,
                                    DEBUG),
-                  ENGINE),
+                  Engine),
 
     println_debug('[MCTS] Engine next', mctsdbg),
     println_debug(Program, mctsdbg),
-    engine_next(ENGINE, runResult(RESULTS, 0, EXPANDED, GOALSREMAIN)),
+    engine_next(Engine, runResult(RESULTS, 0, EXPANDED, GOALSREMAIN)),
     println_debug('[MCTS] Engine finished', mctsdbg),
 
 
-    engine_destroy(ENGINE),
+    engine_destroy(Engine),
     member(leaf_node(LEAF), Path),
 
     sumlist(RESULTS, SUMLIST),
@@ -616,18 +630,9 @@ mcts_expansion_loop(Program, EXPANSIONS, GOALSTOTAL, SIMULATIONS):-
 
 
 
-mcts_simulation(Program, Expansions, Simulations):-
-    mcts_model_init,
-    number_of_top_level_goals(Goals_Total),
-    mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations).
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       Work with model
-
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    Clauses used in agent control loop
+%===============================================================================
 
 print_mcts_model(Debug):-
     println_debug('MODEL', Debug),
@@ -640,8 +645,6 @@ print_mcts_model(Debug):-
     println_debug('Best path is:', Debug),
     mcts_print_path(Path, Debug),
     println_debug('', Debug).
-
-
 
 
 update_model(mcts_reasoning):-
@@ -714,11 +717,17 @@ get_plan_for_goal(_, _, no_plan, _).
 
 
 
-get_intention(mcts_reasoning,Intentions,intention(INTIDX,CONTENT,active)):-
+%!  get_intention(mcts_reasoning, +Intentions, -Intention) is det
+%  @arg Intentions: list of actual agent's Intentions, all active and blocked
+%  @arg Intention: selected one of the actione intentions from Intentions 
+%    intention(Intention_ID, Content, active)
+
+get_intention(mcts_reasoning, Intentions, 
+              intention(Intention_ID, Content, active)):-
     print_debug('[INTER] ++++++  GET INTENTION:', interdbg),
-    recomended_path(_ ,[model_act_node(INTIDX,_,_)]),
-    println_debug(model_act_node(INTIDX,_,_), interdbg),
-    member(intention(INTIDX,CONTENT,active),Intentions).
+    recomended_path(_ ,[model_act_node(Intention_ID,_,_)]),
+    println_debug(model_act_node(IIntention_ID, _, _), interdbg),
+    member(intention(Intention_ID, Content, active),Intentions).
 
 
 
@@ -745,6 +754,18 @@ get_model_act(Model_Act, Substitution):-
 
 get_model_act(Model_Act, Substitution):-
     recomended_path( _, [model_act_node( _, del(Model_Act), [Substitution])]).
+
+
+
+%!  get_substitution(random_reasoning, +Action, 
+                     +Context, +Vars, -Context_Out) is det
+%   CAN decisioning in early bindings mode selects substitution randomly.
+%   This clause is to select one of the set of substitutions and reduces it to 
+%   just the variables from Vars.
+%  @arv Action: action the agent is about to execute
+%  @arg Context_In: actual context of the agent
+%  @arg Vars: the variables for which a decision is to be made
+%  @arg Context_Out: output context for the Action 
 
 
 get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
@@ -778,12 +799,13 @@ get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
 
 
 
-% get_plan(mcts_reasoning,RAPLANS,plan(ID,PTYPE,PTRIGEVENT,PCONDITIONS,PBODY,PCONTEXT)):-
-
-get_plan2(Means, Plan_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context]):-
-    member([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context], Means).
-
-get_plan2(_,_,[]).
+%!  get_plan(mcts_reasoning, +Event, +Means, -Intended_Means) is det
+%   Depending on how the model (tree) created in the simulations looks like, it
+%   selects the means for the event from the listed means according to 
+%   the best evaluation.
+%  @arg Event:
+%  @arg Means:
+%  @arg Intended_Means:
 
 
 get_plan(mcts_reasoning, Event, Means, Intended_Means):-
@@ -805,17 +827,16 @@ get_plan(mcts_reasoning, Event, Means, Intended_Means):-
 get_plan(mcts_reasoning,_,_,[]).
 
 
+get_plan2(Means, Plan_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context]):-
+    member([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context], Means).
 
-%
-%	INIT
-%
+get_plan2(_,_,[]).
 
-set_mcts_parameters(Expansions, Simulations):-
-    retractall(mcts_expansions( _ )),
-    retractall(mcts_number_of_simulations( _ )),
-    assert(mcts_expansions(Expansions)),
-    assert(mcts_number_of_simulations(Simulations)).
 
+
+%!  init_reasoning(mcts_reasoning) is det
+%   initializes reasoning according to parameters, sets whether the agent works 
+%   in late or early bindings, the number of expansions and simulations 
 
 init_reasoning(mcts_reasoning):-
     % tohle lze vytahnout z agentniho lb pred spustenim mcts vlakna
@@ -824,6 +845,12 @@ init_reasoning(mcts_reasoning):-
     assert(simulate_late_bindings(Bindings)),
     mcts_default_expansions(Expansions),
     mcts_default_number_of_simulations(Simulations),
-    set_mcts_parameters(Expansions, Simulations),
+    retractall(mcts_expansions( _ )),
+    retractall(mcts_number_of_simulations( _ )),
+    assert(mcts_expansions(Expansions)),
+    assert(mcts_number_of_simulations(Simulations)),
     mcts_model_init.
+
+    
+
 

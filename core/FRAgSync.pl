@@ -51,7 +51,7 @@ add_agent_list(Agent):-
    assert(running_agents([Agent|L])).
 
 retract_agent_list(Agent):-
-   running_agents(L),
+   running_agents(Agents),
    retract(running_agents(Agents)),
    delete(Agents, Agent, Agents2),
    assert(running_agents(Agents2)).
@@ -83,7 +83,7 @@ step_finished([]):-
 
 
 % some agents are still running previous loop step
-step_finished( L ).
+step_finished( _ ).
 
 
 

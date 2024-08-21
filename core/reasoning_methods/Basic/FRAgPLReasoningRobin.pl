@@ -41,13 +41,13 @@ get_intention(robin_reasoning, [ _ | Intentions], Intention_Out):-
 
 
 
-%!  get_substitution(random_reasoning, _, Context, Vars, Context_Out) is det
+%!  get_substitution(random_reasoning, _, +Context, +Vars, -Context_Out) is det
 %   CAN decisioning in early bindings mode selects substitution randomly.
 %   This clause is to select one of the set of substitutions and reduces it to 
 %   just the variables from Vars.
-%  @arg Context_In: input context
+%  @arg Context_In: actual context of the agent
 %  @arg Vars: the variables for which a decision is to be made
-%  @arg Context_Out: output context
+%  @arg Context_Out: output context with Var(Context_Out)=Vars
 
 get_substitution(robin_reasoning, _, Context_In, Vars, Context_Out):-
     random_member(Substitution, Context_In),
@@ -55,26 +55,23 @@ get_substitution(robin_reasoning, _, Context_In, Vars, Context_Out):-
 
 
 
-% is used when PlanId= UsedPlanID and context / usedcontext?
-% pokud se PlanId a UsedPlanID lisi, pak Indended Means neni pokryt/pouzit
-% jak ukazat, ze v jednom kontextu je neco, co nepokryl druhy kontext??
-% Var kontextu je stejna mnozina v obou pripadech
-% Pokud kontext Intended means obsahuje neco, co neni v Used, pak ok
-
-
-
+%!  get_plan(robin_reasoning, +Event, +Means, -Intended_Means) is det
+%   From the listed means for the Event randomly selects one that has not yet 
+%   been used for the event. If none exists, it resets the record of means 
+%   used for the event and selects one
+%  @arg Event:
+%  @arg Means:
+%  @arg Intended_Means:
 
 get_plan(robin_reasoning, Event, [[Plan, Context] | Means], 
 					[Plan2, Context_Out]):-
 
-    late_bindings(Bindings),
-
-    Event = event( _ , _ , _ , _ , _ , _ , Used_Means),
-    reduce_context(Used_Means, [Plan, Context], Context2),
+    Event = event( _ , _ , _ , _ , _ , _ , History),
+    reduce_context(History, [Plan, Context], Context2),
     format(atom(String), "~n[ROBINDBG] Original context was ~w
 [......] used were ~w
 [......] unused substitutions ~w", 
-		[[Plan, Context], Used_Means, Context2]),
+		[[Plan, Context], History, Context2]),
     println_debug(String, candbg),
     get_plan2(robin_reasoning, Event, [Plan, Context2], 
 				Means, [Plan2, Context_Out]),
@@ -83,16 +80,16 @@ get_plan(robin_reasoning, Event, [[Plan, Context] | Means],
     valid_context(Context_Out). 
 
 
-reduce_context([] , [Plan, Context], Context).
+reduce_context([] , [ _, Context], Context).
 
 % some used to check
 
 reduce_context([used_plan(Plan_ID, Trigger, Conditions, Context)| Used], 
 		[plan(Plan_ID, _, Trigger, Conditions, _), Context_In], 
  		Context_Out):-
-% Context2 = Context_In - Context, from FRAgPLFRAg file
+% Context2 is Context_In - Context, from FRAgPLFRAg file
     substract_subsubstitions(Context_In, Context, Context2),
-    reduce_context(Used, [Plan, Context2], Context_Out).
+    reduce_context(Used, [ _ , Context2], Context_Out).
 
 
 reduce_context([ _ | Used] , [Plan, Context_In], Context_Out):-
@@ -109,7 +106,7 @@ get_plan2(robin_reasoning, Event, [Plan, [] ], Means, Intended_Means):-
     println_debug(String, candbg),
     get_plan(robin_reasoning, Event, Means, Intended_Means).
 
-get_plan2(robin_reasoning, Event, Intended_Means, _, Intended_Means):-
+get_plan2(robin_reasoning, _, Intended_Means, _, Intended_Means):-
     format(atom(String), "~n[ROBINDBG] Check OK, ~w ", [Intended_Means]),
     println_debug(String, candbg).
 

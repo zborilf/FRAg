@@ -2,7 +2,6 @@
 :-module(env_utils,
     [
         register_environment /1,
-%        register_clone /2,   
         clone_environment /2,
 	environment_registered /2,
         situate_agent_environment /2,

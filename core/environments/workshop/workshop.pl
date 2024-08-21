@@ -98,7 +98,7 @@ init_beliefs(Agents):-
     env_utils:add_facts_agent(workshop, Agent, [distance_travelled(Agent, 0)]),
     env_utils:add_beliefs(Agent, [location(Location)]),
     env_utils:add_facts_beliefs(workshop, Agent, [episode(1)]),
-    env_utils:add_facts_beliefs(workshop, Agent, [reward(Agent, 0)]).
+    env_utils:add_facts_beliefs(workshop, Agent, [stats_(Agent, reward(0))]).
 
 
 %  !workshop(set_parameters, Parameters) is det
@@ -253,14 +253,16 @@ workshop(act, Agent, go(Location), true):-
 			 	 [location(Agent, Location2)]),
     env_utils:add_facts_agent(workshop, Agent, [location(Agent, Location)]),
     env_utils:delete_beliefs(Agent, [location(Location2)]),
-    env_utils:add_beliefs(Agent, [location(Location)]),
-    env_utils:query_environment(workshop, Agent, 
+    env_utils:add_beliefs(Agent, [location(Location)]).
+/*    env_utils:query_environment(workshop, Agent, 
 				distance_travelled(Agent, Distance)),
+
     env_utils:delete_facts_agent(workshop, Agent,
 			      [distance_travelled(Agent, Distance2)]),
     Distance2 is Distance + 1,
     env_utils:add_facts_agent(workshop, Agent,
 			      [distance_travelled(Agent, Distance2)]).
+*/
 
 workshop(act, Agent, go(Location), false):-
     env_utils:query_environment(workshop, Agent, location(Agent, Location2)),
@@ -361,7 +363,7 @@ workshop(act, Agent, submit, true):-
     !,
     env_utils:query_environment(workshop, Agent, task(Machine, Material)),
     !,
-    env_utils:query_environment(workshop, Agent, reward(Agent, Reward)),
+    env_utils:query_environment(workshop, Agent, stats_(Agent, reward(Reward))),
  
     env_utils:delete_facts_agent(workshop, Agent, 
 				   [carry(Agent, product( _, _))]),
@@ -369,14 +371,14 @@ workshop(act, Agent, submit, true):-
     env_utils:delete_beliefs(Agent, [carry(product( _, _))]),
     
     env_utils:delete_facts_beliefs(workshop, Agent, 
-				   [reward(Agent, _)]),
+				   [stats_(Agent, reward( _ ))]),
     env_utils:delete_facts_beliefs(workshop, Agent, 
 				   [task(Machine, Material)]),
     Reward2 is Reward + 10,
     format("Task completed, ~w delivered by ~w~n", [product(Machine, Material), 
                                                   Agent]), 
     env_utils:add_facts_beliefs(workshop, Agent, 
-                                   [reward(Agent, Reward2)]).
+                                   [stats_(Agent, reward(Reward2))]).
 
 
 

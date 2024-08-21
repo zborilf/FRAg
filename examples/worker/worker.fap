@@ -67,7 +67,7 @@ plan(ach, complete_tasks, [not(carry( _ )), location(construction),
 
 plan(ach, complete_tasks, [],
 	[
-		act(printfg("Zrejme zadny task k dispozici")),
+		act(printfg("Probably no task to do")),
 		ach(complete_tasks)
 	]
    ).

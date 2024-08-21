@@ -11,7 +11,7 @@
 
 /**
 @Author Frantisek Zboril jr.
-@version 0.5 (2023) 
+@version 0.9 (2024) 
 */
 
 
@@ -134,7 +134,7 @@ card_shop(set_parameters, []).
 
 card_shop(set_parameters, [(Key, Value)| Attributes]):-
     set_parameter(Key, Value),
-    card_shop(set_attributes, Attributes).
+    card_shop(set_parameters, Attributes).
 
 
 
@@ -176,7 +176,7 @@ set_parameter(episoding, (real_time, Time)):-
     change_params(episode_mode(Time)).
 
 set_parameter( _, _):-
-    format("[ERROR] card shop, wrong parameters").   
+    format("[ERROR] card shop, wrong parameters!~n").   
 
 
 
@@ -218,14 +218,16 @@ generate_products(Number, Mean, Dispersion):-
 
 card_shop(add_agent, Agent):-
     situate_agent_environment(Agent, card_shop),
+    env_utils:add_facts(card_shop, 
+                        [stats_(Agent, [sold([]), buyers(0), sellers(0)])]),
     init_beliefs([Agent]),
     delete_facts_beliefs_all(card_shop, Agent,
-                             [stats_([sold(Sold_By), buyers(Buyers),
+                             [stats_(Agent, [sold(Sold_By), buyers(Buyers),
                                       sellers(Sellers)])]),
 
     append(Sold_By, [sold(Agent, 0)], Sold_By2),
     add_facts_beliefs_all(card_shop, Agent,
-                          [stats_([sold(Sold_By2), buyers(Buyers),
+                          [stats_(Agent, [sold(Sold_By2), buyers(Buyers),
                                    sellers(Sellers)])]).
 
 
@@ -290,13 +292,15 @@ card_shop(remove_state, Instance, State):-
 card_shop(perceive, Agent , Add_List, Delete_List):-
     check_episode(Agent),
     retreive_add_delete(Agent, Add_List, Delete_List),
-    query_environment(card_shop, Agent, stats_([sold(Sold_By),
+    query_environment(card_shop, Agent, stats_(Agent, [sold(Sold_By),
                                                   buyers( _ ), sellers( _ )])),
     delete_facts_beliefs_all(card_shop, Agent,
-                             [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
+                             [stats_(Agent, 
+                                     [sold(Sold_By), buyers( _ ), 
+                                      sellers( _ )])]),
     sellers(S),
     buyers(B),
-    add_facts_beliefs_all(card_shop, Agent, [stats_([sold(Sold_By),
+    add_facts_beliefs_all(card_shop, Agent, [stats_(Agent, [sold(Sold_By),
                                                buyers(B), sellers(S)])]).
 
 
@@ -496,10 +500,11 @@ card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
 
     add_facts_beliefs_all(card_shop, Brooker, [has(Buyer, What),
                                                sold(Seller, What)]),
-    query_environment(card_shop, Brooker, stats_([sold(Sold_By), buyers(B),
-                                                 sellers(S)])),
+    query_environment(card_shop, Brooker, 
+                      stats_(Brooker, [sold(Sold_By), buyers(B), sellers(S)])),
     delete_facts_beliefs_all(card_shop, Brooker,
-                             [stats_([sold(Sold_By), buyers( _ ), sellers( _ )])]),
+                             [stats_(Brooker, 
+                                     [sold(Sold_By), buyers( _ ), sellers( _ )])]),
     delete_facts_beliefs_all(card_shop, Brooker,
                              [buyer(Buyer, What, _)]),
     delete_facts_beliefs_all(card_shop, Brooker,
@@ -509,8 +514,9 @@ card_shop(act, Brooker, sell(Seller, Buyer, What), true):-
                                             deadline(buyer, Buyer, _)]),
 
     add_trade(Sold_By, Brooker, Sold_By2),
-    add_facts_beliefs_all(card_shop, Brooker, [stats_([sold(Sold_By2), buyers(B),
-                                               sellers(S)])]).
+    add_facts_beliefs_all(card_shop, Brooker, 
+                          [stats_(Brooker, [sold(Sold_By2), buyers(B), 
+                                            sellers(S)])]).
 
 
 
@@ -552,7 +558,6 @@ card_shop(act, _, _, fail).
     env_utils:register_environment(card_shop),
     findall(product(What, Price), product(What, Price), Facts),
     episode(Episode),
-    env_utils:add_facts(card_shop, [stats_([sold([]), buyers(0), sellers(0)])]),
     env_utils:add_facts(card_shop, Facts),
     env_utils:add_facts(card_shop, [episode(Episode)]).
 

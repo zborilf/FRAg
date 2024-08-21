@@ -163,7 +163,7 @@ print_workshop_state(Agent):-
     print_list(Carries),
 
 
-    env_utils:findall_environment(workshop, Agent, reward(_, _), 
+    env_utils:findall_environment(workshop, Agent, stats_(_, reward( _ )), 
 				  Rewards),
     print_list(Rewards),
     env_utils:findall_environment(workshop, Agent, distance_travelled(_, _), 

@@ -16,7 +16,7 @@ set_environment(card_shop, [(closing, 750), (s_lambda, 0.1), (b_lambda, 0.1),
 
 
 load("paul","../examples/trader/trader",1,[(debug, systemdbg), (debug, reasoningdbg)]).
-% load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
+load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
 
 
 % load("paul","../examples/trader/trader",1,[(debug, systemdbg)]).

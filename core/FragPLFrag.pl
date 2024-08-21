@@ -631,7 +631,7 @@ query( _, _, []).
 
 
 
-%!  substract_subsupstitions(+Substitutions1, +Substitutions2, 
+%!  substract_subsubstitions(+Substitutions1, +Substitutions2, 
 %                     -Substitutions_Out) is det
 %   Removes every substitution from Substitutions1 that is a subset of some
 %   substitution from Substitutions2
