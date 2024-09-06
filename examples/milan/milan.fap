@@ -8,6 +8,8 @@ fact(b(5,5)).
 
 goal(ach,go,[[]]).
 
+goal(ach,go2,[[]]).
+
 plan(ach, go, [b(3,3)],
     [
          test(b(1,5)),
@@ -18,12 +20,19 @@ plan(ach, go, [b(3,3)],
     ]).
 
 plan(ach, go, [b(2,X)],			
-	[
-		act(printfg("Plan1 ~w",[X]))
-	]).
+    [
+	act(printfg("Plan1 ~w",[X]))
+    ]).
 
 plan(ach, go, [a(Y),not(b(Y,5))],			
-	[
-		test(c(y)),
-		act(printfg("Plan2 ~w",[Y]))
-	]).
+    [
+	test(c(y)),
+	act(printfg("Plan2 ~w",[Y]))
+    ]).
+
+
+plan(ach, go2, [],
+    [
+	add(b(2,2))
+    ]).
+

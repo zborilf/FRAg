@@ -1,0 +1,16 @@
+
+
+
+
+set_agents([(bindings, early), (reasoning, mcts_reasoning), 
+		(reasoning_params, mcts_params(70,40,20))]).
+
+
+
+load("marek","../examples/marek/marek",1,[(debug, reasoningdbg), 
+		(debug, mctsdbg_path), 
+		(debug, mctsdbg), 
+		(debug, interdbg), (debug, systemdbg)]).
+
+			   
+			  

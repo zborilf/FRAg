@@ -540,7 +540,7 @@ decide_context(Atom, Context, Variables, Context2):-
                      Context2),
     loop_number(Loop),
     format(atom(String),
-           "~n[RSNDBG] GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
+           "GET DECISION [~w / ~w] ->~n[......] FOR ~w ~w
 [......] DECISION -> ~w~n",
 		   [Loop, Substitution_Selection, Atom, Context, Context2]),
 	print_debug(String, reasoningdbg).

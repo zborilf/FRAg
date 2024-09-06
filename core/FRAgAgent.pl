@@ -207,28 +207,41 @@ is_debug(_, false).
 
 print_debug(Content, Debug):-
     agent_debug(Debug),
-    write(Content).
+    extend_debug_content(Content, Debug, Debug_Content),
+    write(Debug_Content).
 
 print_debug(_, _).
 
+
  % 'format' print / no sense fot new line version
 
-print_debug(String, Data, Debug):-
+print_debug(Content, Data, Debug):-
     agent_debug(Debug),
-    format(String, Data).
+    extend_debug_content(Content, Debug, Debug_Content),
+    format(Debug_Content, Data).
 
 print_debug(_, _, _).
-
-
 
 println_debug(Content, Debug):-
     agent_debug(Debug),
     !,
-    write(Content),
+    extend_debug_content(Content, Debug, Debug_Content),
+    write(Debug_Content),
     nl.
 
 println_debug(_, _).
 
+extend_debug_content(Content, Debug, Debug_Content):-
+    agent_debug_caption(Debug, Caption),
+    concat(Caption, Content, Debug_Content).
+
+agent_debug_caption(interdbg, "[INTER] ").
+agent_debug_caption(systemdbg, "[SYSTEM] ").
+agent_debug_caption(reasoningdbg, "[REASON] ").
+agent_debug_caption(mctsdbg, "[MCTS] ").
+agent_debug_caption(actdbg, "[ACT] ").
+agent_debug_caption(error, "[ERROR] ").
+agent_debug_caption( _, "[OTHERS] ").
 
 
 print_list_state([],S,S).
@@ -311,7 +324,7 @@ print_beliefs(Label, Belief):-
 print_agent_state(Debug):-
     loop_number(Loop),
     thread_self(Agent),
-    format(atom(String1),":: vvvvvvvvvvvvvvvvvvvvvvvvvv~n",[]),
+    format(atom(String1),"~n:: vvvvvvvvvvvvvvvvvvvvvvvvvv~n",[]),
     format(atom(String2),":: Name:~w~n", [Agent]),
     format(atom(String3),":: LOOP ~w~n", [Loop]),
     concat(String1, String2, String4),
@@ -329,7 +342,7 @@ print_state( _ ):-
     agent_debug(no_debug).
 
 print_state(Message):-
-    println_debug('', reasoningdbg),
+%    println_debug('', reasoningdbg),
     println_debug(Message, reasoningdbg),
     print_agent_state(reasoningdbg).
 
@@ -339,9 +352,9 @@ print_state(_).
 
 write_stats(String):-
     open('stats.pl', append, Stats_File),
-%    thread_self(Agent),
-%    write(Stats_File, String),
-%    writeln(Stats_File,'.'),
+    thread_self(Agent),
+    write(Stats_File, String),
+    writeln(Stats_File,'.'),
     agents_stats(Stats_File),
     close(Stats_File).
 
@@ -503,19 +516,20 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
 
 %   Performing the test goal
 
-execute( _, plan(Event_Type, Event_Atom, Conditions, Context, [test(Goal)| Acts]),
+execute( _, plan(Event_Type, Event_Atom, Conditions, Context, 
+                 [test(Goal)| Acts]),
 	    plan(Event_Type, Event_Atom, Conditions, Context_New, Acts),
-            Result):-
+                 Result):-
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Execiuting query ~w",
-		          [Loop_Number, test(Goal, Context)]),
+    format(atom(String), "[~w] Execiuting query ~w", [Loop_Number, 
+						      test(Goal, Context)]),
     println_debug(String, actdbg),
 
 %   'query' clause is defined in FRAgPLFrag.pl
     query(Goal, Context, Context2),
     simulate_early_bindings(Goal, Context2, Context_New, true),
-    format(atom(String2), "[ACTING (~w)] Test goal RESULT: ~w",
-		          [Loop_Number, Context2]),
+    format(atom(String2), "[~w] Test goal RESULT: ~w", [Loop_Number, 
+							Context2]),
     println_debug(String2, actdbg),
 
 %   If the resulting context is nonempty, the test goal is successful. Otherwise,
@@ -531,7 +545,7 @@ execute(Intention_ID,
         true)
     :-
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Introducting achievement goal ~w",
+    format(atom(String), "[~w] Introducting achievement goal ~w",
 		          [Loop_Number, ach(Goal, Context)]),
     println_debug(String, actdbg),
 
@@ -579,7 +593,7 @@ execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context,
     :-
     functor(Relation, Operator, _),
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Execiuting relation check  ~w",
+    format(atom(String), "[~w] Execiuting relation check  ~w",
 		          [Loop_Number, rel(Relation)]),
     println_debug(String, actdbg),
 
@@ -601,7 +615,7 @@ execute(_ ,plan(Event_Type, Event_Atom, Conditions, Context,
     decisioning(Action, Context, Context_Out, true),
     !,
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Execiuting in environment ~w act ~w",
+    format(atom(String), "[~w] Execiuting in environment ~w act ~w",
 		          [Loop_Number, Environment, Action]),
     println_debug(String, actdbg),
     execute_environment(Environment, Action, Restult).
@@ -616,7 +630,7 @@ execute(_ , plan(Event_Type, Event_Atom, Conditions, Context, [act(Action)|
     !,
     % execute action in 'basic' FRAg environment
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Execiuting in environment basic act ~w",
+    format(atom(String), "[~w] Execiuting in environment basic act ~w",
 		    [Loop_Number, Action]),
     println_debug(String, actdbg),
     execute_environment(basic, Action, Result).
@@ -628,7 +642,7 @@ execute(_ ,
         plan(Event_Type ,Goal_Atom, Conditions, Context, Acts),
         false):-
  	loop_number(Loop_Number),
-	format(atom(String), "[ACTING (~w)] Plan execution FAILED", 
+	format(atom(String), "[~w] Plan execution FAILED", 
 			      [Loop_Number]),
     	println_debug(String, actdbg).
 
@@ -778,7 +792,7 @@ extend_intention(Intention_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions
 %   (this clause should never be reached, but for sure)
 
 extend_intention(Intention_ID, Plan_Stack, Status):-
-    format(atom(String),"[ERROR] Lost intention ~w",
+    format(atom(String),"Lost intention ~w",
            [intention(Intention_ID, n, Plan_Stack, Status)]),
     println_debug(String, error).
 
@@ -872,7 +886,6 @@ try_refresh_event( _).
 
 
 
-
 %    UPDATE INTENTION
 %===============================================================================
 
@@ -896,7 +909,7 @@ try_refresh_event( _).
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
     format(atom(String),
-           "[RSNDBG] Update intention: INTENTION BLOCKED",[]),
+           "Update intention: INTENTION BLOCKED",[]),
     println_debug(String, reasoningdbg).
 
 % Top-level plan succeeded - there is only one plan in intention's plan
@@ -908,7 +921,7 @@ update_intention(intention(Intention_ID, [plan(_, _, _, _, _, [])], _),
                  true)
     :-
     format(atom(String),
-           "[RSNDBG] Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
+           "Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
     println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, _)),
     try_retract_event(Intention_ID).
@@ -928,7 +941,7 @@ update_intention(intention(Indention_ID,
                  _ )
     :-
     format(atom(String),
-           "[RSNDBG] Update intention: SUBPLAN SUCCEEDED",[]),
+           "Update intention: SUBPLAN SUCCEEDED",[]),
     println_debug(String, reasoningdbg),
     intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
@@ -949,9 +962,9 @@ update_intention(intention(Indention_ID,
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
     loop_number(Loop_Number),
     format(atom(String),
-           "[RSNDBG (~w)] Update intention: SUBPLAN FAILED",[Loop_Number]),
+           "[~w] Update intention: SUBPLAN FAILED",[Loop_Number]),
     println_debug(String, reasoningdbg), 
-%    format(atom(String2), "[ACTINGa (~w)] Update intention: ACTION FAILED", 
+%    format(atom(String2), "[~w] Update intention: ACTION FAILED", 
 %                           [Loop_Number]),
 %    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
@@ -974,10 +987,10 @@ update_intention(intention(Intention_ID,
                            [plan( _, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
     loop_number(Loop_Number),
-    format(atom(String), "[RSNDBG (~w)] Update intention: SUBPLAN FAILED", 
+    format(atom(String), "[~w] Update intention: SUBPLAN FAILED", 
                           [Loop_Number]), 
     println_debug(String, reasoningdbg),
-%   format(atom(String2), "[ACTINGb (~w)] Update intention: ACTION FAILED", 
+%   format(atom(String2), "[~w] Update intention: ACTION FAILED", 
 %			   [Loop_Number]),
 %    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
@@ -996,7 +1009,7 @@ update_intention(intention(Intention_ID,
 
 update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
     loop_number(Loop_Number),
-    format(atom(String), "[ACTING (~w)] Acting result: ACTION SUCCEEDED", 
+    format(atom(String), "[~w] Acting result: ACTION SUCCEEDED", 
 			  [Loop_Number]),
     println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
@@ -1313,7 +1326,7 @@ reasoning2([Event | Events]):-
 reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                  Context, active, History)):-
     get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
-    format(atom(String5), "~n[INTER] POSSIBLE MEANS: ~w", [Means]),
+    format(atom(String5), "Possible means: ~w", [Means]),
     println_debug(String5, interdbg),
     
     reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
@@ -1361,7 +1374,7 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 
 reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, _):-
-    format(atom(String), "~n[INTER] NO MEANS FOR THE EVENT", []),
+    format(atom(String), "No means for the event", []),
     println_debug(String, interdbg),
     update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                            Context, active, History),
@@ -1392,41 +1405,44 @@ loop(-1, -1).
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
     format(atom(String1),
-"~n
-[RSNDBG] =====================================================================
-[RSNDBG] ========================== Loop ~w started ==========================
-[RSNDBG] =====================================================================
+"
+=====================================================================
+========================== Loop ~w started ==========================
+=====================================================================
 ~n",
           [Loop_Number]),
     println_debug(String1, reasoningdbg),
 
-    format(atom(String2), "~n[RSNDBG] STATE IN LOOP ~w~n", [Loop_Number]),
+    format(atom(String2), "STATE IN LOOP ~w~n", [Loop_Number]),
     print_state(String2),
 
     late_bindings(Bindings),    
-    format(atom(String3), "~n[INTER] Bindings ~w~n", [Bindings]),
+    format(atom(String3), "Bindings ~w~n", [Bindings]),
     println_debug(String3, interdbg),
 
+    format(atom(String4), "SN ~w", [Loop_Number]),
+    println_debug(String4, interdbg),
     sensing,
     !,
 
+    format(atom(String5), "UM ~w", [Loop_Number]),
+    println_debug(String5, interdbg),
     update_models,
     !,
 
-    format(atom(String4), "[INTER] RE ~w", [Loop_Number]),
-    println_debug(String4, interdbg),
-
+    format(atom(String6), "RE ~w", [Loop_Number]),
+    println_debug(String6, interdbg),
     reasoning,
     !,
 
-    format(atom(String5), "[INTER] EX ~w", [Loop_Number]),
-    println_debug(String5, interdbg),
+    format(atom(String7), "EX ~w", [Loop_Number]),
+    println_debug(String7, interdbg),
           
     acting,
     !,
 
-    format(atom(String6), "[INTER] FIN ~w", [Loop_Number]),
-    println_debug(String6, interdbg),
+    format(atom(String8), "FIN ~w", [Loop_Number]),
+    println_debug(String8, interdbg),
     println_debug("loop_finished", interdbg),
     increment_loop,
     Steps2 is Steps-1,
@@ -1517,7 +1533,7 @@ increment_loop:-
 finished:-
     thread_self(Agent),
     loop_number(Steps),
-    format(atom(String), "~n[SYSDBG] Agent ~w finished in ~w steps. ~n",
+    format(atom(String), "Agent ~w finished in ~w steps. ~n",
            [Agent, Steps]),
     println_debug(String, systemdbg).
 
@@ -1665,7 +1681,9 @@ load_program(Filename, Clauses):-
     close(Stream, [force(true)]).
 
 load_program(Filename, []):-
-    format("[FRAG] Agent file ~w cannot be opened.~n", [Filename]),
+    format(atom(String),"Agent file ~w cannot be opened~n",
+           [Filename]),
+    println_debug(String, error),
     !,
     fail.
 
@@ -1806,7 +1824,7 @@ set_default_environment(Environment):-
     assert(default_environment(Environment)).
 
 set_default_environment(Environment):-
-    format(atom(String),"[ERROR] Environment '~w' does not exists~n",
+    format(atom(String),"Environment '~w' does not exists~n",
            [Environment]),
     println_debug(String, error).
 
@@ -1874,7 +1892,7 @@ is_default_late_bindings:-
 set_environment(Environment):-
     thread_self(Agent),
     fRAgAgentInterface:situate_agent(Agent, Environment),
-    format(atom(String), "[SYSDBG] Agent ~w is situated to environment ~w ~n",
+    format(atom(String), "Agent ~w is situated to environment ~w ~n",
            [Agent, Environment]),
     println_debug(String, systemdbg).
 
@@ -1912,7 +1930,7 @@ fa_set_reasoning:-
     !.
 
 fa_set_reasoning:-
-    format(atom(STRING),"[ERROR] Unspecified default reasoning mehods~n", []),
+    format(atom(STRING),"Unspecified default reasoning mehods~n", []),
     println_debug(STRING, error),
     !,
     fail.
@@ -1927,7 +1945,7 @@ fa_init_reasoning:-
     init_reasoning(Substitution_Selection).
 
 fa_init_reasoning:-
-    format(atom(STRING),"[ERROR] Reasoning methods initialization failed~n",
+    format(atom(STRING),"Reasoning methods initialization failed~n",
            []),
     println_debug(STRING, error),
     !,
@@ -1943,7 +1961,7 @@ fa_init_environments:-
 
 fa_init_environments:-
     thread_self(Agent),
-    format(atom(STRINGS), "[SYSDBG] No environment for agent ~w~n", [Agent]),
+    format(atom(STRINGS), "No environment for agent ~w~n", [Agent]),
     println_debug(STRINGS, systemdbg).
 
 
@@ -1955,7 +1973,7 @@ fa_init_environments2([Environment| Environments]):-
     fa_init_environments2(Environments).
 
 fa_init_environments2([Environment| Environments]):-
-    format(atom(STRING),"[ERROR] Environment '~w' initialization failed~n",
+    format(atom(STRING),"Environment '~w' initialization failed~n",
            [Environment]),
     println_debug(STRING, error),
     fa_init_environments2(Environments).
@@ -1977,7 +1995,7 @@ fa_init_run:-
     assert(event_fresh(1)).
 
 fa_init_run:-
-    format(atom(String),"[ERROR] Bindings method missing~n", []),
+    format(atom(String),"Bindings method missing~n", []),
     println_debug(String, error),
     !,
     fail.                              
@@ -2004,7 +2022,7 @@ fa_init_set_attrs(environment, Environment):-
 fa_init_set_attrs(environment, Environment):-
     thread_self(Agent),
     format(atom(String),
-           "[ERROR] Failed assignment of envrironment ~w to agent ~w",
+           "Failed assignment of envrironment ~w to agent ~w",
            [Environment, Agent]),
     println_debug(String, error).
 
@@ -2021,7 +2039,7 @@ fa_init_set_attrs(bindings, early):-
     set_late_bindings(false).
 
 fa_init_set_attrs(Key, Value):-
-    format(atom(String), "[ERROR] wrong attributes (~w:~w)~n", [Key, Value]),
+    format(atom(String), "Wrong attributes (~w:~w)~n", [Key, Value]),
     println_debug(String, error).
 
 
@@ -2053,7 +2071,7 @@ fa_init_agent(Filename, Attributes):-
 fa_init_agent( _, _):-
     go_sync(-1, _),		% born dead
     thread_self(Agent),
-    format(atom(String), "[FATAL ERROR] Agent ~w initialization failed~n",
+    format(atom(String), "Agent ~w initialization failed~n",
            [Agent]),
     println_debug(String, error),
     fa_finalize_com,

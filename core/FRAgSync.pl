@@ -62,8 +62,8 @@ agent_salutes(Agent):-
   (with_mutex(Mutex, (
    	running_agents(Running_Agents),
    	delete(Running_Agents, Agent, Running_Agents2),
-	writeln(Running_Agents),
-	writeln(Running_Agents2),
+%	writeln(Running_Agents),
+%	writeln(Running_Agents2),
    	retract(running_agents( _ )),
    	assert(running_agents(Running_Agents2)),
    	step_finished(Running_Agents2)
@@ -78,7 +78,6 @@ step_finished([]):-
    b_step(Step),
    Step2 is Step+1,
    retractall(b_step( _ )),
-   format("========== Jedem kolo c. [~w]~n",[Step2]),
    assert(b_step(Step2)).
 
 

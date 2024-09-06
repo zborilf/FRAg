@@ -50,11 +50,12 @@ model_print_node_children([NodeChild|T], SfxStr, Debug):-
 
 model_print_node(Node_ID, Sufix_String, Debug):-
     tree_node(Node_ID, Act, Children, Visits, Score),
-    print_debug(Sufix_String, Debug),
-    println_debug(tree_node(Node_ID, Act, Children,
-                            Visits, Score), Debug),
-    format(atom(Sufix_String2),"~w - ",[Sufix_String]),
-    model_print_node_children(Children,Sufix_String2, Debug).
+%    print_debug(Sufix_String, Debug),
+    format(atom(Tree_NodeS), "~w~w", [Sufix_String, tree_node(Node_ID, Act, 
+				      Children, Visits, Score)]),
+    println_debug(Tree_NodeS, Debug),
+    format(atom(Sufix_String2), "~w - ", [Sufix_String]),
+    model_print_node_children(Children, Sufix_String2, Debug).
 
 
 mcts_print_model(Debug):-
@@ -90,10 +91,8 @@ generate_children(Start_ID, End_ID, [Start_ID| Indexes]):-
 
 
 set_children(Node_ID, Start_ID, End_ID):-
-    print_debug('generate children ', mctsdbg),
-    print_debug(Start_ID, mctsdbg),
-    print_debug(',', mctsdbg),
-    println_debug(End_ID, mctsdbg),
+    format(atom(ChildrenS), "Generate children ~w , ~w", [Start_ID, End_ID]),
+    println_debug(ChildrenS, mctsdbg),
     generate_children(Start_ID, End_ID, Children_IDs),
     retract(tree_node(Node_ID, Act, _, Visits, Score)),
     assert(tree_node(Node_ID, Act, Children_IDs, Visits, Score)).
@@ -170,10 +169,11 @@ mcts_increment_path([node(ID),_|T], Reward):-
 mcts_print_path([], _).
 
 mcts_print_path([Node_ID, Node| Path], Debug):-
-    print_debug(' - ', mctsdbg_path),
-    print_debug(Node_ID, Debug),
-    print_debug(':', mctsdbg_path),
-    println_debug(Node, Debug),
+    format(atom(PathS)," - ~w : ~w", [Node_ID, Node]),
+%    print_debug(' - ', mctsdbg_path),
+%    print_debug(Node_ID, Debug),
+%    print_debug(':', mctsdbg_path),
+    println_debug(PathS, Debug),
     mcts_print_path(Path, Debug).
 
 
