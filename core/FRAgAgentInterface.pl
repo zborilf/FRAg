@@ -54,7 +54,6 @@ and environments
 
 
 
-
 is_exclusive_action(Environment, Action):-
     functor(Action, Term, Arity),
     exclusive_action(Environment, Term, Arity).

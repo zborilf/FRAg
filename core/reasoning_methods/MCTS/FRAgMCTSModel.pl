@@ -39,6 +39,37 @@ set_root_node(Root):-
 
 
 
+mcts_print_model(Debug):-
+%   bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
+    root_node(Root),
+    model_print_node(Root,' - ', Debug).
+
+mcts_print_model( _ ).
+
+
+model_print_node(Node_ID, Sufix_String, Debug):-
+    tree_node(Node_ID, Act, Children, Visits, Score),
+%    print_debug(Sufix_String, Debug),
+%   format(atom(Tree_NodeS), "~w~w", [Sufix_String, tree_node(Node_ID, Act, 
+%				      Children, Visits, Score)]),
+%    ValueX2 is div(Score, Visits),
+
+   count_reward_value(Value, Score, Visits),
+   format(atom(Tree_NodeS), "~w(~w)[~3f/~w:~3f] ~w", 
+                              [Sufix_String, Node_ID, Score, Visits, Value,
+			       Act]),
+    println_debug(Tree_NodeS, Debug),
+    format(atom(Sufix_String2), "~w - ", [Sufix_String]),
+    model_print_node_children(Children, Sufix_String2, Debug).
+
+
+count_reward_value(0, Score, 0).
+
+count_reward_value(Value, Score, Visits):-
+    Value is Score / Visits.
+
+
+
 model_print_node_children(not_expanded, _, _).
 
 model_print_node_children([], _, _).
@@ -48,22 +79,6 @@ model_print_node_children([NodeChild|T], SfxStr, Debug):-
     model_print_node_children(T,SfxStr, Debug).
 
 
-model_print_node(Node_ID, Sufix_String, Debug):-
-    tree_node(Node_ID, Act, Children, Visits, Score),
-%    print_debug(Sufix_String, Debug),
-    format(atom(Tree_NodeS), "~w~w", [Sufix_String, tree_node(Node_ID, Act, 
-				      Children, Visits, Score)]),
-    println_debug(Tree_NodeS, Debug),
-    format(atom(Sufix_String2), "~w - ", [Sufix_String]),
-    model_print_node_children(Children, Sufix_String2, Debug).
-
-
-mcts_print_model(Debug):-
-%   bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
-    root_node(Root),
-    model_print_node(Root,' - ', Debug).
-
-mcts_print_model.
 
 
 

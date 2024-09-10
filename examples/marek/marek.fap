@@ -2,36 +2,21 @@ fact(a(4)).
 fact(a(5)).
 fact(a(6)).
 
+fact(a(1,1)).
+fact(a(3,3)).
+fact(a(5,2)).
+fact(a(4,4)).
+
+
 fact(b(1,5)).
 fact(b(3,3)).
 fact(b(5,5)).
 
 goal(ach,go,[[]]).
 
-goal(ach,go2,[[]]).
-
-goal(ach,go3,[[]]).
-
-plan(ach, go, [b(3,3)],
+plan(ach, go, [a(X,Y)],
     [
-         add(b(2,2)),
-         test(b(1,5))
+         act(printfg(hw(X,Y))),
+         test(b(X,Y)),
+	 act(reward(2))
     ]).
-
-plan(ach, go2, [b(2,_)],			
-    [
-	add(b(1,5)),
-	add(a(1))
-    ]).
-
-plan(ach, go3, [],			
-    [
-	test(a(1)),
-	add(b(2))
-    ]).
-                 
-plan(ach, go3, [b(2,2)],
-    [
-	test(b(1,5))
-    ]).
-

@@ -10,29 +10,43 @@ goal(ach,go,[[]]).
 
 goal(ach,go2,[[]]).
 
-plan(ach, go, [b(3,3)],
+
+
+plan(ach, go, [b(3,3), not(b(2,2))],
     [
          test(b(1,5)),
 	 add(b(2,2)),
-	 ach(go),
+%	 ach(go),
         % act(sleep(0.2)),
-         act(printfg("test prosel"))
+         act(printfg('test prosel')),
+ 	 act(reward(0.5))
     ]).
 
-plan(ach, go, [b(2,X)],			
+plan(ach, go, [b(2,_)],			
     [
-	act(printfg("Plan1 ~w",[X]))
+	act(printfg('Plan1')),
+        act(reward(0.5))
     ]).
 
-plan(ach, go, [a(Y),not(b(Y,5))],			
+
+plan(ach, go, [a(Y), not(b(Y,5))],			
     [
 	test(c(y)),
-	act(printfg("Plan2 ~w",[Y]))
+	act(printfg('Plan2')),
+        act(reward(0.5))
     ]).
 
 
 plan(ach, go2, [],
     [
-	add(b(2,2))
+	add(b(4,7)),
+	act(reward(0.5))
+    ]).
+
+
+plan(ach, go2, [],
+    [
+	add(b(2,2)),
+	act(reward(0.5))
     ]).
 

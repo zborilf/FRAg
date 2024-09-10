@@ -66,6 +66,9 @@ This module contains code for thread clauses declarations for individual agents
 %   FRAg operations for relations and assignments
 :-include('FRAgPLRelations.pl').
 
+%   print, debug info, etc.
+:-include('FRAgTerminal.pl').
+
 :- use_module(library(thread)).
 
 %   shared data among threads (agents etc.)
@@ -74,6 +77,8 @@ This module contains code for thread clauses declarations for individual agents
 %   interface to environments
 :-use_module('FRAgAgentInterface').
   
+
+
 
 timeout(200).
 
@@ -191,162 +196,6 @@ load_environment(Filename):-
 get_default_environments(Environments):-
     fRAgAgentInterface:get_all_environments(Environments).
 
-
-%===============================================================================
-%                                                                              |
-%    DEBUG supporting clauses                                                  |
-%                                                                              |
-%===============================================================================
-
-is_debug(Debug, true):-
-    agent_debug(Debug).
-
-is_debug(_, false).
-
-
-
-print_debug(Content, Debug):-
-    agent_debug(Debug),
-    extend_debug_content(Content, Debug, Debug_Content),
-    write(Debug_Content).
-
-print_debug(_, _).
-
-
- % 'format' print / no sense fot new line version
-
-print_debug(Content, Data, Debug):-
-    agent_debug(Debug),
-    extend_debug_content(Content, Debug, Debug_Content),
-    format(Debug_Content, Data).
-
-print_debug(_, _, _).
-
-println_debug(Content, Debug):-
-    agent_debug(Debug),
-    !,
-    extend_debug_content(Content, Debug, Debug_Content),
-    write(Debug_Content),
-    nl.
-
-println_debug(_, _).
-
-extend_debug_content(Content, Debug, Debug_Content):-
-    agent_debug_caption(Debug, Caption),
-    concat(Caption, Content, Debug_Content).
-
-agent_debug_caption(interdbg, "[INTER] ").
-agent_debug_caption(systemdbg, "[SYSTEM] ").
-agent_debug_caption(reasoningdbg, "[REASON] ").
-agent_debug_caption(mctsdbg, "[MCTS] ").
-agent_debug_caption(actdbg, "[ACT] ").
-agent_debug_caption(error, "[ERROR] ").
-agent_debug_caption( _, "[OTHERS] ").
-
-
-print_list_state([],S,S).
-
-print_list_state([H|T], S, String_Out):-
-    term_string(H, HS),
-    concat(S, HS, S2),
-    concat(S2, ";\n", S3),
-    print_list_state(T, S3, String_Out).
-
-
-
-print_plans([], String, String).
-
-print_plans([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body)|
-             Plans], String_In, String_Out):-
-    format(atom(String1), "   plan(~w, ~w, ~w, ~w ~w ~n       ~w)~n ",
-           [Plan_ID, Event_Type, Event_Atom, Conditions, Context, Body]),
-    concat(String_In, String1, String2),
-    print_plans(Plans, String2, String_Out).
-
-
-
-print_intention([], String, String).
-
-print_intention([intention(Intention_ID, Plan_Stack, Status)| Intentions],
-                String_In, String_Out):-
-    concat(String_In, "intention:", String1),
-    concat(String1, Intention_ID, String2),
-    concat(String2, "\n", String3),
-    print_plans(Plan_Stack, String3, String4),
-    term_string(Status, String5),
-    concat(String4, String5 , String6),
-    concat(String6, "\n", String7),
-    print_intention(Intentions, String7, String_Out).
-
-
-
-print_intentions(String_In, String_Out):-
-    bagof(intention(Intention_ID, Plan_Stack, Status),
-          intention(Intention_ID, Plan_Stack, Status), Intentions),
-    concat(String_In, ":: INTENTIONS {\n", String1),
-    % print_list_state(INTENTIONS, STRING2, STRINGINTENTIONS),
-    print_intention(Intentions, String1, String2),
-    concat(String2, "}\n", String_Out).
-
-
-
-print_intentions(String, String_Intention):-
-    concat(String,":: INTENTIONS: No intentions\n",String_Intention).
-
-
-
-print_goals(String, String_Goal):-
-    bagof(event(Event_ID, Type, Atom, Parent_Intention, Context, Status,
-                History),
-          event(Event_ID, Type, Atom, Parent_Intention, Context, Status,
-                History),
-          Events),
-    concat(String,":: EVENTS {\n", String2),
-    print_list_state(Events, String2, String3),
-    concat(String3, "}\n", String_Goal).
-
-print_goals(String, String_Goal):-
-    concat(String, ":: EVENTS: No events\n", String_Goal).
-
-
-
-print_beliefs(String_In ,String_Beliefs):-
-    bagof(fact(Belief), fact(Belief), Beliefs),
-    concat(String_In,":: BELIEFS {\n", String1),
-    print_list_state(Beliefs, String1, String_Facts),
-    concat(String_Facts, "}\n", String_Beliefs).
-
-print_beliefs(Label, Belief):-
-    concat(Label, ":: BELIEFS: No beliefs\n", Belief).
-
-
-
-print_agent_state(Debug):-
-    loop_number(Loop),
-    thread_self(Agent),
-    format(atom(String1),"~n:: vvvvvvvvvvvvvvvvvvvvvvvvvv~n",[]),
-    format(atom(String2),":: Name:~w~n", [Agent]),
-    format(atom(String3),":: LOOP ~w~n", [Loop]),
-    concat(String1, String2, String4),
-    concat(String4 ,String3, String5),
-    print_intentions(String5, String6),
-    print_goals(String6, String7),
-    print_beliefs(String7, String8),
-    format(atom(String9),":: ^^^^^^^^^^^^^^^^^^^^^^^^^^~n",[]),
-    concat(String8, String9, String10),
-    print_debug(String10, Debug).
-
-
-
-print_state( _ ):-
-    agent_debug(no_debug).
-
-print_state(Message):-
-%    println_debug('', reasoningdbg),
-    println_debug(Message, reasoningdbg),
-    print_agent_state(reasoningdbg).
-
-print_state(_).
 
 
 
@@ -527,7 +376,8 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context,
 
 %   'query' clause is defined in FRAgPLFrag.pl
     query(Goal, Context, Context2),
-    simulate_early_bindings(Goal, Context2, Context_New, true),
+    late_bindings(Bindings),
+    simulate_early_bindings(Goal, Context2, Context_New, Bindings, true),
     format(atom(String2), "[~w] Test goal RESULT: ~w", [Loop_Number, 
 							Context2]),
     println_debug(String2, actdbg),
@@ -535,7 +385,6 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context,
 %   If the resulting context is nonempty, the test goal is successful. Otherwise,
 %   it is unsuccessful.
     nonempty_context(Context_New, Result).
-
 
 %   Performing the achievement goal
 
@@ -866,7 +715,10 @@ try_retract_event(Intention_ID):-
     findall(Event_ID, event(Event_ID, _, _, _, _, Intention_ID, _),
             Event_IDs),
     max_list(Event_IDs, Event_ID_Max),
-    retract(event(Event_ID_Max, _, _, _, _, _, _)).
+    retract(event(Event_ID_Max, Type, Atom, Intention, Context, _, History)).
+%    loop_number(Loop_Number),
+%    assert(event(Event_ID_Max, Type, Atom, Intention, Context, 
+%                  reached(Loop_Number), History)).
 
 try_retract_event( _).
 
@@ -898,9 +750,24 @@ try_refresh_event( _).
 %   plan that was not the last act. If the intent is blocked, no change
 %   occurs.
 %  @arg Intention: intention identifier
-%  @arg Result:
+%  @arg Result: false, if previous ste failed, true when it succeed, or 
+%   a number when it succeed and got reward
 %  @tbd navazat na pravidla z clanku
 %
+
+
+%  Act succeeded and producet reward. Save reward info and do this agent 
+%  with result 'true'
+
+update_intention(Intention, reward(Reward)):-
+writeln(xaxa),
+    format(atom(String),
+           "Update intention: REWARD OBTAINED ~w",[Reward]),
+    println_debug(String, reasoningdbg),
+    loop_number(Loop_Number),
+    assert(fact(reward(Loop_Number, Reward))),
+    update_intention(Intention, true).
+
 
 % Intention is blocked, it means that an achievement goal for this
 % intention has just been executed. It remains blocked until this goal
@@ -911,6 +778,7 @@ update_intention(intention(Intention_ID, _, _), true):-
     format(atom(String),
            "Update intention: INTENTION BLOCKED",[]),
     println_debug(String, reasoningdbg).
+
 
 % Top-level plan succeeded - there is only one plan in intention's plan
 % stack and its body is empty. Removes the intention and the event that
@@ -925,6 +793,7 @@ update_intention(intention(Intention_ID, [plan(_, _, _, _, _, [])], _),
     println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, _)),
     try_retract_event(Intention_ID).
+
 
 % Subplan succeeded - plan on top of the plan stack has empty body.
 % Takes the context to a higher level. Dale removes the act of
@@ -954,6 +823,7 @@ update_intention(intention(Indention_ID,
                                      Conditions, Context3, Acts)| Plans],
                                 Status),
                       true).
+
 
 % Top-level plan failed. Removes the intention and if it is possible to
 % remove event (in the case that the event is 'ach' type), it will
@@ -994,9 +864,7 @@ update_intention(intention(Intention_ID,
 %			   [Loop_Number]),
 %    println_debug(String2, actdbg),
     retract(intention(Intention_ID, _, Status)),
-
     try_refresh_event(Intention_ID),
-
     assertz(intention(Intention_ID, Plans, blocked)).
 
 /*    retract(event( _, Event_Type, Event_Atom, _, _, Intention_ID, _)),
@@ -1069,8 +937,8 @@ get_relevant_applicable_plans(Event_Type, Event_Atom, Event_Context, Means_Out)
     findall(plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
 	  plan(Plan_ID, Event_Type, Event_Atom, Context_Conditions, Body),
           Means1),
-    check_relevant_applicable_plans(Event_Atom, Event_Context, Means1, Means_Out).
-%    check_early_reasoning(Means2, Means_Out).
+    check_relevant_applicable_plans(Event_Atom, Event_Context, Means1, Means2),
+    check_early_reasoning(Means2, Means_Out).
 
 % this clause should not be reached (and should be deleted)
 
@@ -1170,8 +1038,9 @@ check_applicable(Context, [Relation| T], Context_Out):-
 
 check_applicable(Context, [Context_Condition| Context_Conditions],
                  Context_Out):-
-% 'query' clause is defined in FRAgPLFrag.pl
-    query(Context_Condition, Context, Context2),
+% 'query' clause is defined in FRAgPLFrag.pl, here it is allways late
+% then for every specification is returned one plan
+    query(Context_Condition, Context, Context2, true),
     !,
     check_applicable(Context2, Context_Conditions, Context_Out).
 
@@ -1265,6 +1134,7 @@ acting:-
                    | Plans],
                  Plan2, Result),
     put_back_plan(Plan_ID, Result),
+write(    update_intention(intention(Intention_ID, Plan2,Status), Result)),
     update_intention(intention(Intention_ID, Plan2,Status), Result),
 % if Result is an atom, then a joint action was executed and it should
 % be removed from all intention where it is the actual act for execution
@@ -1276,8 +1146,9 @@ acting.  % no intention in agent's
 %!  put_back_plan(Plan_ID, Status) is multi
 %   If Staus is 'false' then plan with Plan_ID is asserted at the
 %   end of database.
-%  @arg Plan_ID: 
-%  @arg Status:
+%  @arg Plan_ID: plan identifier 
+%  @arg Status: false -> plan failed, put it in the back of plan base, else do 
+%   nothing
 
 put_back_plan(Plan_ID, false):-
     %   printfg("Giving the plan to the end of PB",[IDX]),
@@ -1287,33 +1158,33 @@ put_back_plan(Plan_ID, false):-
 put_back_plan(_,_).     % akce planu byla OK, nedavame nakonec
 
 
-%!  reasoning is det
+%!  deliberation is det
 %   Processes all events simultaneously. For each event a means is searched.
 %   If found, the corresponding intention is created or expanded
 
-reasoning:-
+deliberation:-
     findall(event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
                   History),
             event(Event_ID, Type, Atom, Parnt_Intention, Context, active,
                   History),
             Events),
-   reasoning2(Events).
+    deliberation2(Events).
 
 % no events to process
 
-reasoning.
+deliberation.
 
 
-%!  reasoning2(+Events) is det
+%!  deliberation2(+Events) is det
 %   Process event by event from Events
 %  @arg Events:
 
-reasoning2([]).
+deliberation2([]).
 
-reasoning2([Event | Events]):-
+deliberation2([Event | Events]):-
     retract(Event),
-    reasoning3(Event),
-    reasoning2(Events).
+    deliberation3(Event),
+    deliberation2(Events).
 
 
 %!  reasoning3(+Event) is det
@@ -1323,23 +1194,23 @@ reasoning2([Event | Events]):-
 %     event(+Event_ID, +Type, +Atom, +Parent_Intention, +Context, +Status,
 %           +History)
 
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+deliberation3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                  Context, active, History)):-
     get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
     format(atom(String5), "Possible means: ~w", [Means]),
     println_debug(String5, interdbg),
     
-    reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+    deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, Means).
 
-reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
+deliberation3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
                  active, History)):-
     update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                            Context, active, History),
                  false, _).
 
 
-%!  reasoning4(+Event_ID, +Event_Type, +Event_Atom, +Parent_Intention,
+%!  deliberation4(+Event_ID, +Event_Type, +Event_Atom, +Parent_Intention,
 %              +Context +History, -Means) is nondet
 %   For event structure (Event_ID .. History) in the case that some
 %   means are proposed (from reasoning3 clause) actual plan
@@ -1357,7 +1228,7 @@ reasoning3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention, Context,
 
 % means found, intention is extended (or created)
 
-reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, Means):-
     get_intended_means(Means, event(Event_ID, Event_Type, Event_Atom,
                                     Parent_Intention, Context, active,
@@ -1372,7 +1243,7 @@ reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 
 % no means found, update event (put it back)
 
-reasoning4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
+deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, _):-
     format(atom(String), "No means for the event", []),
     println_debug(String, interdbg),
@@ -1420,30 +1291,29 @@ loop(Steps, Steps_Left):-
     format(atom(String3), "Bindings ~w~n", [Bindings]),
     println_debug(String3, interdbg),
 
-    format(atom(String4), "SN ~w", [Loop_Number]),
+    format(atom(String4), "~n===~n<< LOOP ~w: SENSING >>~n===", [Loop_Number]),
     println_debug(String4, interdbg),
     sensing,
     !,
 
-    format(atom(String5), "UM ~w", [Loop_Number]),
+    format(atom(String5), "~n===~n<< LOOP ~w: MODEL UPDATE>>~n===", [Loop_Number]),
     println_debug(String5, interdbg),
     update_models,
     !,
 
-    format(atom(String6), "RE ~w", [Loop_Number]),
+    format(atom(String6), "~n===~n<< LOOP ~w: DELIBERATION >>~n===", [Loop_Number]),
     println_debug(String6, interdbg),
-    reasoning,
+    deliberation,
     !,
 
-    format(atom(String7), "EX ~w", [Loop_Number]),
+    format(atom(String7), "~n===~n<< LOOP ~w: ACTING >>~n===", [Loop_Number]),
     println_debug(String7, interdbg),
           
     acting,
     !,
 
-    format(atom(String8), "FIN ~w", [Loop_Number]),
+    format(atom(String8), "~n===~n<< LOOP ~w: FINISHED >>~n===", [Loop_Number]),
     println_debug(String8, interdbg),
-    println_debug("loop_finished", interdbg),
     increment_loop,
     Steps2 is Steps-1,
 

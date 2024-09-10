@@ -576,29 +576,39 @@ do_apply(true, Context):-
 %	Queries
 %
 
-%!  simulate_early_bindings(+Atom, +Context_In, -Context_Out, +Apply) is nondet
+%!  simulate_early_bindings(+Atom, +Context_In, -Context_Out, 
+%			    +Late, +Apply) is nondet
 %   If Context_In is non-empty and the early binding strategy is active, it 
 %   decides how the free variables in the Atom will be bound. It selects one
 %   of the substrings from Context_In and modifies the context on Context_Out
 %   to respect the chosen bindings.
 %  @arg Atom: input Atom
 %  @arg Context_In: input Context
+%  @arg Late: true / false -> early / late bindings
 %  @arg Context_Out: output Context
 %  @arg Apply: apply substituions, instantiate variables
 
-simulate_early_bindings( _, [], []).
+% simulate_early_bindings( _, [], []).
 
 %   late bindings are set, so do not simulate early bindings
-simulate_early_bindings( _, Context, Context, _):-
-    late_bindings(true).
+
+simulate_early_bindings( _, Context, Context, true, _).
+
 
 %   already failed
-simulate_early_bindings( _, [], [], _).
+simulate_early_bindings( _, [], [], _, _).
 
 
-simulate_early_bindings(Act_Atom, Context_In, Context_Out, Apply):-
+simulate_early_bindings(Act_Atom, Context_In, Context_Out, false, Apply):-
     decisioning(Act_Atom, Context_In, Context_Out, Apply).
 
+
+
+% with no explicit bindings setting 
+
+query(Query, Context, Context_Out):-
+   late_bindings(Bindings),
+   query(Query, Context, Context_Out, Bindings).
 
 
 %!  query(+Query, +Context, -Context_Out).
@@ -609,25 +619,25 @@ simulate_early_bindings(Act_Atom, Context_In, Context_Out, Apply):-
 
 %  negative literal
 
-query(not(Query), Context, Context_Out):-
-    query(Query, Context, Context1),
+query(not(Query), Context, Context_Out, Bindings):-
+    query(Query, Context, Context1, Bindings),
 %  remove all supersets of some element from Context1 
     substract_subsubstitions(Context, Context1, Context_Out).
 
-query(not( _ ), Context, Context).   % query to QUERY failed (no answer)
+query(not( _ ), Context, Context, _).   % query to QUERY failed (no answer)
 
 
 %  positive literal
 
-query(Query, Context, Context_Out):-
+query(Query, Context, Context_Out, Bindings):-
     bagof(fact(Query), fact(Query), Answers),
 % get list of subsitutions for fact(Query) and Answers
     broad_unification(fact(Query), Answers, Context2),
 % in the case of early bindings, chose on subsitution from Context2
     restriction(Context, Context2, Context3),
-    simulate_early_bindings(Query, Context3, Context_Out, false).
+    simulate_early_bindings(Query, Context3, Context_Out, Bindings, false).
 
-query( _, _, []).
+query( _, _, [], _).
 
 
 

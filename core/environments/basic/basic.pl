@@ -8,6 +8,8 @@ FragPL, basic environment / ... internal actions
 @licence
 */
 
+:-dynamic reward /3.
+
 
 % environment(basic).			% zde by mely byt standardni akce, komunikace ...
 
@@ -19,11 +21,13 @@ action(basic, me, 1).
 
 action(basic, population, 1).
 
+action(basic, reward, 1).
 
 % 	
 %   	FRAg internal actions
 %   	
 
+action(basic, reward, 1).
 action(basic, send,2).
 action(basic, bcast,1). 
 action(basic, sendfg,2). 		% sendFrag ?
@@ -101,10 +105,11 @@ me(X):-
     thread_self(X).
 
 
-sendfg(Receiver,Payload):-
-    thread_self(ME),
+
+sendfg(Receiver, Payload):-
+    thread_self(Me),
     printfg("Sending message ~w~n",[Receiver]),
-    thread_send_message(Receiver,message(ME,inform,pld(Payload))),
+    thread_send_message(Receiver,message(Me, inform,pld(Payload))),
     printfg("Send succeed ~n").
 
 sendfg(_,_):-
@@ -127,7 +132,7 @@ bcast(Payload):-
     bagof(Agent, fRAgBlackboard:agent(Agent) , Agents),
     bcast2(Agents, Payload).
 		
-bcast(_).
+bcast( _ ).
 
 
 %
@@ -146,6 +151,12 @@ jprintfg(String):-
 % basic(act, _, Act, true):-
 %    is_exclusive_action(basic, Act),
 %    Act.
+
+% reward act must produce Reward as output
+
+basic(act, _, reward(Reward), reward(Reward)).
+
+% silent acts
 
 basic(act, _, silently_(printfg( _ )), true).
 

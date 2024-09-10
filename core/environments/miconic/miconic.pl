@@ -187,7 +187,7 @@ miconic10(act, Agent, go(Destination), true):-
 miconic10(act, Agent, silently_(go(Destination)), Result):-
     miconic10(act, Agent, go(Destination), Result).
 
-miconic10(act, _, _, fail).
+miconic10(act, _, _, flse).
 
 /*
 	Kopie prostredi pro specifikovane agenty

@@ -46,7 +46,7 @@ mcts_simulation_steps(100).
 reasoning_method(mcts_reasoning).
 
 
-discount(0.95).
+discount(0.91).
 
 % actual path found by last mcts execution, first is reasoning prefix,
 % then action?
@@ -347,10 +347,10 @@ rewards_achieved(Rewards_Sum):-
     bagof(r(Loop, Reward), fact(reward(Loop, Reward)), Rewards),
 %    writeln(Rewards).
     format(atom(RewardS),"Rewards in this run: ~w",[Rewards]),
-    println_debug(RewardS, mctsdbg),    
-    discount(Discount),                          
-    sum_rewards_list(Discount, Rewards, Rewards_Sum), 
-    format(atom(RewardSS),"Rewards sum (with discounts): ~w",[Rewards_Sum]),
+    println_debug(RewardS, mctsdbg),    writeln(a),
+    discount(Discount),                          writeln(b),
+    sum_rewards_list(Discount, Rewards, Rewards_Sum), writeln(c),
+    format(atom(RewardSS),"Rewards sum (with discounts): ~w",[Rewards_Sum]),writeln(d),
     println_debug(RewardSS, mctsdbg).
     	
 
@@ -368,11 +368,16 @@ sum_rewards_list(Discount, [Reward| Rewards], Rewards_Sum):-
 
 % Reward*Discount^Loop
 compute_reward(Discount, r(Loop, Reward), Reward_Value):-
-    Loop>0,
     Gamma is Discount ** Loop,
     Reward_Value is Reward * Gamma.
 
-compute_reward( _, _, 0).
+poisson(Lambda, X, Y):-
+%  (Lambda^X * exp(-Lambda)) / X!
+    factorial(X, XF),
+    LX is Lambda ** X,
+    EL is exp(-Lambda),
+    Y is (LX*EL) / XF.
+
 
 
 %    Simulations - rollouts
@@ -616,27 +621,27 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
 
     sumlist(Results, Sumlist),
     length(Results, Length),
-    Reward is Sumlist/Length,
-%    Goals_Achieved is Max_Reward - Goals_Remain,
+    Average is Sumlist/Length,
+    Goals_Achieved is Max_Reward - Goals_Remain,
 
     format(atom(ResultsS), 'Result is: ~w', [Results]),
     println_debug(ResultsS, mctsdbg),
     format(atom(ExpandedS), 'Expanded ~w', [Expanded]),
     println_debug(ExpandedS, mctsdbg),
-    format(atom(RewardS), 'Reward: ~w', [Average]),
-    println_debug(RewardS, mctsdbg),
-%    format(atom(Max_RewardS), 'Goals total: ~w', [Max_Reward]),
-%    println_debug(Max_RewardS, mctsdbg),
-%    format(atom(Goals_RemainS), 'Goals remain: ~w', [Goals_Remain]),
-%    println_debug(Goals_RemainS, mctsdbg),
+    format(atom(AverageS), 'Average: ~w', [Average]),
+    println_debug(AverageS, mctsdbg),
+    format(atom(Max_RewardS), 'Goals total: ~w', [Max_Reward]),
+    println_debug(Max_RewardS, mctsdbg),
+    format(atom(Goals_RemainS), 'Goals remain: ~w', [Goals_Remain]),
+    println_debug(Goals_RemainS, mctsdbg),
 
-%    mcts_compute_reward(Average, Max_Reward, Goals_Achieved, Reward), % TODO, toto je provizorni
+    mcts_compute_reward(Average, Max_Reward, Goals_Achieved, Reward), % TODO, toto je provizorni
 %    println_debug(mcts_compute_reward(Average, Max_Reward, Goals_Achieved,
 %                                      Reward),
 %                  mctsdbg),
 
-%    format(atom(RewardS), "[MCTS] Reward: ~w", [Reward]),
-%    println_debug(RewardS, mctsdbg),
+    format(atom(RewardS), "[MCTS] Reward: ~w", [Reward]),
+    println_debug(RewardS, mctsdbg),
     mcts_print_model(mctsdbg),
     mcts_increment_path(Path, Reward),
     mcts_expand_node(Leaf, Expanded),
@@ -682,7 +687,6 @@ number_of_top_level_events(0).
 
 % TODO, just provisory reward computation based on number of Top-Level-Goals
 
-/*
 mcts_compute_reward(_ , 0, _, 0).
 
 mcts_compute_reward(_ , _, 0, 0).
@@ -694,7 +698,7 @@ mcts_compute_reward(Awerage, Goals_Total, Goals_Achieved, Reward):-
     Reward is ((1/(Awerage/3+1))*(Goals_Achieved/Goals_Total)),
     print_debug('R:', mctsdbg),
     println_debug(Reward, mctsdbg).
-*/
+
 
 
 %    Clauses exported for agent control loop (reasoning method interface)
