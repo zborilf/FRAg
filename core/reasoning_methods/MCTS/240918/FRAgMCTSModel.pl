@@ -59,13 +59,10 @@ model_print_node(Node_ID, Sufix_String, Debug):-
 %    ValueX2 is div(Score, Visits),
 
    count_reward_value(Value, Score, Visits),
-   format(atom(Tree_NodeS), "~w(~w)[~3f/~w:~3f] ~w", 
+   format(atom(Tree_NodeS), "~w(~w)[~3f/~w:~3f] ~w~n..children:~w", 
                               [Sufix_String, Node_ID, Score, Visits, Value,
-			       Act]),
+			       Act, Children]),
     println_debug(Tree_NodeS, Debug),
-%   format(atom(Tree_NodeCh), "4~wchildren:~w", 
-%                              [Sufix_String, Children]),
-%    println_debug(Tree_NodeCh, Debug),
     format(atom(Sufix_String2), "~w - ", [Sufix_String]),
     model_print_node_children(Children, Sufix_String2, Debug).
 
@@ -266,8 +263,8 @@ select_best_child2( _, Child1, Child2, Child, false):-
     select_best_child3(Success1, Child1, Success2, Child2, Child).
 
 select_best_child2(Parent, Child1, Child2, Child, true):-
-    ucb(Parent, Child1, UCB1), 
-    ucb(Parent, Child2, UCB2), !,
+    ucb(Parent, Child1, UCB1), writeln(sbch23b),
+    ucb(Parent, Child2, UCB2), writeln(sbch23c),!,
     select_best_child3(UCB1, Child1, UCB2, Child2, Child).
 
 select_best_child3(Value1, Child1, Value2, _, Child1):-

@@ -598,6 +598,8 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     late_bindings(Bindings),
     % in FragMCTSModel.pl, second term is UCB (true) just score (false)
 
+   mcts_print_model(mctsdbg),
+
     mcts_get_best_ucb_path(Path, true),
     intention_fresh(Intention_Fresh),
     event_fresh(Event_Fresh),

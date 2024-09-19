@@ -597,7 +597,6 @@ mcts_expansion_loop( _, 0, _, _). % no expansions left
 mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     late_bindings(Bindings),
     % in FragMCTSModel.pl, second term is UCB (true) just score (false)
-
     mcts_get_best_ucb_path(Path, true),
     intention_fresh(Intention_Fresh),
     event_fresh(Event_Fresh),
@@ -619,9 +618,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
 
     format(atom(ProgramS), 'Engine program: ~w', [Program]),
     println_debug(ProgramS, mctsdbg),
-
-
-     engine_next(Engine, runResult(Results, 0, Expanded, Goals_Remain)),
+    engine_next(Engine, runResult(Results, 0, Expanded, Goals_Remain)),
 
     println_debug('Engine finished', mctsdbg),
     engine_destroy(Engine),
@@ -634,7 +631,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     println_debug(ResultsS, mctsdbg),
     format(atom(ExpandedS), 'Expanded ~w', [Expanded]),
     println_debug(ExpandedS, mctsdbg),
-    format(atom(RewardS), 'Reward: ~w', [Reward]),
+    format(atom(RewardS), 'Reward: ~w', [Average]),
     println_debug(RewardS, mctsdbg),
 %    format(atom(Max_RewardS), 'Goals total: ~w', [Max_Reward]),
 %    println_debug(Max_RewardS, mctsdbg),

@@ -38,13 +38,9 @@ set_root_node(Root):-
     assert(root_node(Root)).
 
 
-mcts_print_all:-
-   bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
-   writeln(L).
-
 
 mcts_print_model(Debug):-
- % bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
+%   bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
     root_node(Root),
     model_print_node(Root,' - ', Debug).
 
@@ -63,9 +59,6 @@ model_print_node(Node_ID, Sufix_String, Debug):-
                               [Sufix_String, Node_ID, Score, Visits, Value,
 			       Act]),
     println_debug(Tree_NodeS, Debug),
-%   format(atom(Tree_NodeCh), "4~wchildren:~w", 
-%                              [Sufix_String, Children]),
-%    println_debug(Tree_NodeCh, Debug),
     format(atom(Sufix_String2), "~w - ", [Sufix_String]),
     model_print_node_children(Children, Sufix_String2, Debug).
 
@@ -211,18 +204,17 @@ mcts_print_path([Node_ID, Node| Path], Debug):-
 
 mcts_get_best_ucb_path(Path, UCB):-    
    root_node(Root),
-   !,
    mcts_get_best_ucb_path(Root, Path, UCB).
-
-mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
-    tree_node(ID, Action, not_expanded, _, _).
 
 mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
     tree_node(ID, Action, [], _, _).
 
+mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
+    tree_node(ID, Action, not_expanded, _, _).
+
 mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
-    tree_node(ID, Action, Children, _, _),                 
-    select_best_child(ID, Children, Best_Child, UCB),      
+    tree_node(ID, Action, Children, _, _),
+    select_best_child(ID, Children, Best_Child, UCB),
     mcts_get_best_ucb_path(Best_Child, Path, UCB).
 
 
@@ -230,30 +222,18 @@ mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
 %     UCB = true  ... depends on UCB   (for making MCTS model)
 %     UCB = false ... depends on score (for extraction of the best path of the model)
 
-select_best_child( _, [Child| _], Child, _):-
-    tree_node(Child, _, not_expanded, _, _).
-
-
 select_best_child(Parent, [Child| Children] , Best_Child, UCB):-
     select_best_child(Parent, Children, Best_Child2, UCB),
     select_best_child2(Parent, Child, Best_Child2, Best_Child, UCB).
 
 
-select_best_child(_, [Child], Child, _).
+select_best_child3(Value1, Child1, Value2, _, Child1):-
+    Value1 > Value2.
 
-
-
+select_best_child3( _, _, _, Child2, Child2).
 
 
 %  select_best_child2(Parent, Child1, Child2, Child, false) ?? TODO
-
-/*
-select_best_child2(_ , Child, _, Child, _):-
- writeln(sbch21a),
- writeln(Child),
-    tree_node(Child, _, not_expanded, _, _),
- writeln(sbch21b).
-*/
 
 select_best_child2(_ , _, Child, Child, _):-
     tree_node(Child, _, not_expanded, _, _).
@@ -266,19 +246,18 @@ select_best_child2( _, Child1, Child2, Child, false):-
     select_best_child3(Success1, Child1, Success2, Child2, Child).
 
 select_best_child2(Parent, Child1, Child2, Child, true):-
-    ucb(Parent, Child1, UCB1), 
-    ucb(Parent, Child2, UCB2), !,
+    ucb(Parent, Child1, UCB1),
+    ucb(Parent, Child2, UCB2),!,
     select_best_child3(UCB1, Child1, UCB2, Child2, Child).
-
-select_best_child3(Value1, Child1, Value2, _, Child1):-
-    Value1 > Value2.
-
-select_best_child3( _, _, _, Child2, Child2).
-
-
 
 
   % select_best_child(Parent, List of children, Child, UCB)
+
+select_best_child(_, [Child], Child, _).
+
+select_best_child( _, [Child| _], Child, _):-
+    tree_node(Child, _, not_expanded, _, _).
+
 
 
 

@@ -1,7 +1,7 @@
 
 
 set_agents([(bindings, late), (reasoning, mcts_reasoning), 
-		(reasoning_params, mcts_params(50,20,30))]).
+		(reasoning_params, mcts_params(50,2,30))]).
 
 
 
