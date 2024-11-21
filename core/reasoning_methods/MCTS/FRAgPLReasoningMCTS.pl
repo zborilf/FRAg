@@ -16,8 +16,6 @@ actions, plans and substitutions based on Monte Carlo Tree Search simulations.
 
 % This module is loaded / included in the FRAgAgent file
 
-% :-thread_local tree_node/5.				% id node, action, children, visited, points
-
 %  :- use_module('FRAgMCTSModel').
 
 
@@ -84,7 +82,7 @@ set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
 %
 % Reasoning redefined here ... gets all options for all the goals
 %
-%
+% 
 
 get_decisions(PUS, Variables, Decisions):-
     shorting_pus(PUS, Variables, Decisions).
@@ -229,14 +227,15 @@ model_expand_deliberations([]).   % in the case there is no goal
 
 model_expand_deliberations2([], []).
 
-model_expand_deliberations2([event(EVENTINDEX, Type, Predicate,Intention,
-                             Context,State, HISTORY)| TEVENTS], Deliberations)
+model_expand_deliberations2([event(Event_ID, Type, Predicate,Intention,
+                                   Context, State, History)| TEVENTS], 
+                            Deliberations)
     :-
     get_relevant_applicable_plans(Type, Predicate, Context, RAPlans),
     format(atom(RAPlansS), "Expand RA, RAPlans: ~w", [RAPlans]),
     println_debug(RAPlansS, mctsdbg),
-    model_expand_deliberations3(event(EVENTINDEX, Type, Predicate, Intention,
-                                Context, State, HISTORY), RAPlans, 
+    model_expand_deliberations3(event(Event_IT, Type, Predicate, Intention,
+                                Context, State, History), RAPlans, 
                                 RAPlans_elements),
     model_expand_deliberations2(TEVENTS, RAT),
     append(RAPlans_elements, RAT, Deliberations).
@@ -331,9 +330,6 @@ silence_plan([H|T],[H|T2]):-
 
 
 
-
-
-
 %===============================================================================
 %                                                                              |
 %    MCTS Engine - one expansion, rollouts, backup                             |
@@ -375,9 +371,9 @@ compute_reward(Discount, r(Loop, Reward), Reward_Value):-
 compute_reward( _, _, 0).
 
 
+
 %    Simulations - rollouts
 %==============================================================================
-
 
 
 frag_simulate_program(Program, Steps, 0, Results, Expanded):-
@@ -412,17 +408,13 @@ frag_simulate_program(Program, Steps, Simulations, Results, Expanded):-
     format(atom(ProgramS), "Program to simulate: ~w", [Program]),
     println_debug(ProgramS, mctsdbg),
     loop(Steps, Steps_Left),
-
     rewards_achieved(Rewards), 
-
     Steps_Done is Steps - Steps_Left,
     !,
     garbage_all,
     Simulations2 is Simulations - 1,
     frag_simulate_program(Program, Steps, Simulations2, [Rewards| Results],
-                           Expanded).
-
-
+                          Expanded).
 
 
 garbage_all:-
@@ -444,6 +436,7 @@ open_engine_file(Agent, Agent_Loop, 0):-
     tell(Filename).
 
 
+
 open_engine_file(Agent, Agent_Loop, Runs):-
     agent_debug(mctsdbg),
  %   current_module(fRAg, FRAg_Path),
@@ -457,6 +450,7 @@ open_engine_file(Agent, Agent_Loop, Runs):-
     tell(Filename).
 
 open_engine_file( _, _, _).
+
 
 
 try_make_directory(Directory):-
@@ -492,7 +486,7 @@ set_debugs(false).
 %                        original agent, which doesn't matter because the 
 %			 agent overwrites these possibly used identifiers
 %  @arg Event_Fresh: as in the previous case, but for events
-%  @arg Expanded: ??? the engine performs one level nodes expansion
+%  @arg Expanded: nodes to be expanded in this step - actions and chosen plans
 
 
 mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
@@ -544,16 +538,26 @@ force_execute_model_path([]).
 force_execute_model_path([_,  model_act_node( _, no_action, _) | Nodes]):-
     force_execute_model_path(Nodes).
 
-force_execute_model_path([_,  model_act_node(Intention, Act, Context)
+force_execute_model_path([node(Node_ID),  
+			  model_act_node(Intention, Act, Context)
                             | Nodes]):-
     % in FRAgAgent.pl
-    force_execution(model_act_node(Intention, Act, Context)),
+    force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
     force_execute_model_path(Nodes).
 
-force_execute_model_path([_,  model_reasoning_node(Goal, Plan_Number, Context)
+force_execute_model_path([node(Node_ID),  
+			  model_reasoning_node(Goal, Plan_Number, Context)
                             | Nodes]):-
-    force_reasoning(model_reasoning_node(Goal, Plan_Number, Context)),
+    force_reasoning(Node_ID, model_reasoning_node(Goal, Plan_Number, Context)),
     force_execute_model_path(Nodes).
+
+force_execute_model_path([leaf_node(Node_ID), 
+                          model_act_node(Intention, Act, Context)]):-
+    force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward).
+
+force_execute_model_path([leaf_node(Node_ID),  
+                          model_reasoning_node(Goal, Plan_Number, Context)]):-
+    force_reasoning(Node_ID, model_reasoning_node(Goal, Plan_Number, Context)).
 
 
 
@@ -598,7 +602,8 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     late_bindings(Bindings),
     % in FragMCTSModel.pl, second term is UCB (true) just score (false)
 
-    mcts_get_best_ucb_path(Path, true),
+    mcts_get_best_ucb_path(Path, true), 
+
     intention_fresh(Intention_Fresh),
     event_fresh(Event_Fresh),
     mcts_simulation_steps(Simulation_Steps),
@@ -621,8 +626,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     println_debug(ProgramS, mctsdbg),
 
 
-     engine_next(Engine, runResult(Results, 0, Expanded, Goals_Remain)),
-
+    engine_next(Engine, runResult(Results, 0, Expanded, Goals_Remain)),
     println_debug('Engine finished', mctsdbg),
     engine_destroy(Engine),
     member(leaf_node(Leaf), Path),
@@ -733,7 +737,7 @@ update_model(mcts_reasoning):-
 % Number of simulations per expansion
     mcts_number_of_simulations(Simulations),      
     mcts_simulation(Silent_Program, Expansions, Simulations),
-  writeln(lll),  print_mcts_model(mctsdbg_path),            
+    print_mcts_model(mctsdbg_path),            
     mcts_get_best_ucb_path(Path, false),     
 % REASONING: 'reasoning node' prefix of PATH, ACT is the first ACT in PATH
     mcts_divide_path(Path, Reasoning, Act),
@@ -819,7 +823,7 @@ get_model_act(Model_Act, Substitution):-
 
 get_model_act(Model_Act, Substitution):-
     recomended_path( _, [model_act_node( _, test(Model_Act), [Substitution])]).
-
+                        
 get_model_act(Model_Act, Substitution):-
     recomended_path( _, [model_act_node( _, add(Model_Act), [Substitution])]).
 

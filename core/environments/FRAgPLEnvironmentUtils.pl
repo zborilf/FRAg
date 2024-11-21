@@ -508,7 +508,7 @@ try_retract_env(Clone_Fact):-
     format("[ERROR] retracting ~w failed~n", [Clone_Fact]).
 
 
-
+                        
 %!  delete_facts_beliefs(+Environment, +Agent, +Beliefs) is det
 %   Delete the beliefs to the Environment or its clone where Agent is
 %   and also process agent's add/delete lists. If belief to be deleted is in add

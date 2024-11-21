@@ -1,10 +1,10 @@
-                                                   
+
 
 %
 %  children - 1,list of nodes 2, empty list (final state) 3, non_expanded
 %       action model_reasoning_node(goal / wei , plan number, pus) or
 % model_act_node(intention, action, decision) - intention is neccessary
-% for exclusive actions tree_node(id node, action, children, reward, visited,
+% for exclusive actions tree_node(id node, action, children, visited,
 % points)
 %
 
@@ -25,10 +25,7 @@
 
 
 :-thread_local fresh_node_index/1.
-
-% tree_nod(Node_ID, Act, Children, Node_Reward, Visits, Score).
-:-thread_local tree_node/6.
-
+:-thread_local tree_node/5.
 :-thread_local root_node/1.
 
 
@@ -42,11 +39,12 @@ set_root_node(Root):-
 
 
 mcts_print_all:-
-   bagof(tree_node(A,B,C, Reward, D,E),tree_node(A,B,C, Reward, D,E),L),
+   bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
    writeln(L).
 
 
 mcts_print_model(Debug):-
+ % bagof(tree_node(A,B,C,D,E),tree_node(A,B,C,D,E),L),
     root_node(Root),
     model_print_node(Root,' - ', Debug).
 
@@ -54,18 +52,18 @@ mcts_print_model( _ ).
 
 
 model_print_node(Node_ID, Sufix_String, Debug):-
-    tree_node(Node_ID, Act, Children, Reward, Visits, Score),
+    tree_node(Node_ID, Act, Children, Visits, Score),
 %    print_debug(Sufix_String, Debug),
-%   format(atom(Tree_NodeS), "~w~w", [Sufix_String, tree_node(Node_ID, Act,
+%   format(atom(Tree_NodeS), "~w~w", [Sufix_String, tree_node(Node_ID, Act, 
 %				      Children, Visits, Score)]),
 %    ValueX2 is div(Score, Visits),
 
    count_reward_value(Value, Score, Visits),
-   format(atom(Tree_NodeS), "~w(~w)[~3f/~w:~3f/REW:~w] ~w",
-                              [Sufix_String, Node_ID, Score, Visits,  
-				Value, Reward, Act]),
+   format(atom(Tree_NodeS), "~w(~w)[~3f/~w:~3f] ~w", 
+                              [Sufix_String, Node_ID, Score, Visits, Value,
+			       Act]),
     println_debug(Tree_NodeS, Debug),
-%   format(atom(Tree_NodeCh), "4~wchildren:~w",
+%   format(atom(Tree_NodeCh), "4~wchildren:~w", 
 %                              [Sufix_String, Children]),
 %    println_debug(Tree_NodeCh, Debug),
     format(atom(Sufix_String2), "~w - ", [Sufix_String]),
@@ -121,14 +119,14 @@ set_children(Node_ID, Start_ID, End_ID):-
     format(atom(ChildrenS), "Generate children ~w , ~w", [Start_ID, End_ID]),
     println_debug(ChildrenS, mctsdbg),
     generate_children(Start_ID, End_ID, Children_IDs),
-    retract(tree_node(Node_ID, Act, _, Reward, Visits, Score)),
-    assert(tree_node(Node_ID, Act, Children_IDs, 1, Visits, Score)).
+    retract(tree_node(Node_ID, Act, _, Visits, Score)),
+    assert(tree_node(Node_ID, Act, Children_IDs, Visits, Score)).
 
 expand_node2([]).
 
 expand_node2([Element| Elements]):-
     get_fresh_node_id(ID),
-    assert(tree_node(ID, Element, not_expanded, 0, 0, 0)),
+    assert(tree_node(ID, Element, not_expanded, 0, 0)),
     expand_node2(Elements).
 
 
@@ -150,25 +148,20 @@ mcts_expand_node(Node_ID, Elements):-
 % true, pokud je  not_expanded
 
 expand_candidate(Parent_ID, Parent_ID):-
-    tree_node(Parent_ID, _, not_expanded, _, _, _).
+    tree_node(Parent_ID, _, not_expanded, _, _).
 
 
 
-%! ucb(+Parent_ID, +Child_ID, -UCB) is det
-% for a list of children (4th term in tree_node) finds out their 
-% ucb's -> binded to UctList
+% for list of children (4th term in tree_node) finds out their ucb's -> binded
+% to UctList
 % wi/ni + sqrt(2)*sqrt((ln Ni) / ni)
 % wi - wins of the node, ni - runs over the node, Ni runs over parent's node
 % (after ith step)
-%@arg Parent_ID:
-%@arg Child_ID:
-%@arg UCB:
 
 ucb(Parent_ID, Child_ID, UCB):-
-    tree_node(Parent_ID, _, _, Reward, Parent_Visits, _),
-    tree_node(Child_ID, _, _, Reward, Child_Visits, Child_Score),
-    UCB is (Child_Score/Child_Visits) + 
-               sqrt(2*(log(Parent_Visits)/Child_Visits)).
+    tree_node(Parent_ID, _, _, Parent_Visits, _),
+    tree_node(Child_ID, _, _, Child_Visits, Child_Score),
+    UCB is (Child_Score/Child_Visits)+sqrt(2*(log(Parent_Visits)/Child_Visits)).
 
 
 
@@ -178,30 +171,26 @@ ucb(Parent_ID, Child_ID, UCB):-
 % TODO asi by stacil na vstupu jen INDEX, zbytek se vytahne v retractu
 
 
-increment_node(tree_node(Index, Act, Children, Reward, Visits, Score), 
-			 Increment):-
-    retract(tree_node(Index, Act, Children, Reward, Visits, Score)),
+increment_node(tree_node(Index, Act, Children, Visits, Score), Reward):-
+    retract(tree_node(Index, Act, Children, Visits, Score)),
     Visits2 is Visits + 1,
-    Score2 is Score + Increment,
-    assert(tree_node(Index, Act, Children, Reward, Visits2, Score2)).
+    Score2 is Score + Reward,
+    assert(tree_node(Index, Act, Children, Visits2, Score2)).
 
 
 
-mcts_increment_path([leaf_node(ID),_], Increment):-
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-   increment_node(tree_node(ID, Act, Children, Reward, Visits,  Score), 
-		  Increment).
+mcts_increment_path([leaf_node(ID),_], Reward):-
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits,  Score), Reward).
 
-mcts_increment_path([node(ID),_], Increment):-      % The last one
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-    increment_node(tree_node(ID, Act, Children, Reward, Visits, Score),
-		   Increment).
+mcts_increment_path([node(ID),_], Reward):-      % Success????, dostane se to sem vubec?
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits, Score), Reward).
 
-mcts_increment_path([node(ID),_|T], Increment):-
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-    increment_node(tree_node(ID, Act, Children, Reward, Visits, Score), 
-		   Increment),
-    mcts_increment_path(T, Increment).
+mcts_increment_path([node(ID),_|T], Reward):-
+    tree_node(ID, Action, Children, Visits, Score),
+    increment_node(tree_node(ID, Action, Children, Visits, Score), Reward),
+    mcts_increment_path(T, Reward).
 
 
 
@@ -219,25 +208,24 @@ mcts_print_path([Node_ID, Node| Path], Debug):-
 
 %!  mcts_get_best_ucb_path(-Path, +UCB) is det
 %@arg Path: best path due to criteria below
-%@arg UCB: if true, the criterion is the UCB value, false - the criterion is
-%           the exploitation rating of the node
+%@arg UCB: if true, the criterion is the UCB value, false - the criterion is 
+%           the exploitation rating of the node 
 
-mcts_get_best_ucb_path(Path, UCB):-
+mcts_get_best_ucb_path(Path, UCB):-    
    root_node(Root),
    !,
    mcts_get_best_ucb_path(Root, Path, UCB).
 
 mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
-    tree_node(ID, Action, not_expanded, Reward, _, _).
+    tree_node(ID, Action, not_expanded, _, _).
 
 mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
-    tree_node(ID, Action, [], Reward, _, _).
+    tree_node(ID, Action, [], _, _).
 
 mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
-    tree_node(ID, Action, Children, Reward, _, _),
-    select_best_child(ID, Children, Best_Child, UCB),
+    tree_node(ID, Action, Children, _, _),                 
+    select_best_child(ID, Children, Best_Child, UCB),      
     mcts_get_best_ucb_path(Best_Child, Path, UCB).
-
 
 
 % best child of the node
@@ -245,7 +233,7 @@ mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
 %     UCB = false ... depends on score (for extraction of the best path of the model)
 
 select_best_child( _, [Child| _], Child, _):-
-    tree_node(Child, _, not_expanded, Reward, _, _).
+    tree_node(Child, _, not_expanded, _, _).
 
 
 select_best_child(Parent, [Child| Children] , Best_Child, UCB):-
@@ -268,17 +256,17 @@ select_best_child2(_ , Child, _, Child, _):-
 */
 
 select_best_child2(_ , _, Child, Child, _):-
-    tree_node(Child, _, not_expanded, _, _, _).
+    tree_node(Child, _, not_expanded, _, _).
 
 select_best_child2( _, Child1, Child2, Child, false):-
-    tree_node(Child1, _, _, Reward, Visits1, Score1),
-    tree_node(Child2, _, _, Reward, Visits2, Score2),
+    tree_node(Child1, _, _, Visits1, Score1),
+    tree_node(Child2, _, _, Visits2, Score2),
     Success1 is Score1 / Visits1,
     Success2 is Score2 / Visits2,
     select_best_child3(Success1, Child1, Success2, Child2, Child).
 
 select_best_child2(Parent, Child1, Child2, Child, true):-
-    ucb(Parent, Child1, UCB1),
+    ucb(Parent, Child1, UCB1), 
     ucb(Parent, Child2, UCB2), !,
     select_best_child3(UCB1, Child1, UCB2, Child2, Child).
 
@@ -311,7 +299,7 @@ select_best_child3( _, _, _, Child2, Child2).
 
 
 divide_path2([_,model_reasoning_node(Event, Plan, Context)| Path],
-             [model_reasoning_node(Event, Plan, Context)| Reasoning_Nodes],
+             [model_reasoning_node(Event, Plan, Context)| Reasoning_Nodes], 
              Act):-
     divide_path2(Path, Reasoning_Nodes, Act).
 
@@ -330,17 +318,16 @@ mcts_divide_path([_,_| Path], Reasoning_Nodes, Act_Node):-
 
 % model_init:-
 %   fresh_node_index(_),
-%   tree_node(root, _, _, _, _, _).
+%   tree_node(root, _, _, _, _).
 
 
 
 mcts_model_init:-
     retractall(fresh_node_index(_)),
-    retractall(tree_node( _, _, _, _, _, _)),
+    retractall(tree_node(_,_,_,_,_)),
     assert(root_node(root)),
     assert(fresh_node_index(1)),
-    assert(tree_node(root, model_act_node(no_intention, no_action, [[]]),
-                     not_expanded, 2, 0, 0)).
+    assert(tree_node(root, model_act_node(no_intention, no_action, [[]]), 
+                     not_expanded, 0, 0)).
 
 
-                                        

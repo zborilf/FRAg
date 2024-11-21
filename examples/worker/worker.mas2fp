@@ -23,18 +23,18 @@ set_environment(workshop,
 			      resource(stone, 0.15),
 			      resource(glass, 0.25)]),
 	
-		 (resources_max, 500),
+		 (resources_max, 50),
 		 (tasks_rate, 0.6),
-		 (tasks_max, 500)]
+		 (tasks_max, 50)]
                ).
 
 
 set_agents([ 
              (control, terminate(timeout, 1000)),
-%             (bindings, late),
-             (reasoning, random_reasoning),
-%            (debug reasoningdbg),
-             (environment, workshop)]
+             (bindings, late),
+%             (reasoning, mcts_reasoning),
+	     (reasoning, robin_reasoning),
+	     (environment, workshop)]
      ).		
 
 
@@ -45,11 +45,11 @@ set_agents([
 
 
 
-load("workerCL","../examples/worker/worker",1,[(bindings, late), (reasoning, robin_reasoning), (debug, actdbg)]).
+load("workerCL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg), (debug, reasoningdbg), (debug, mctsdpg_path)]).
 
-load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)]).
+% load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)]).
 
-load("workerL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg)]).
+% load("workerL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg)]).
 
-load("workerE","../examples/worker/worker",1,[(bindings, early), (debug, actdbg)]).
+% load("workerE","../examples/worker/worker",1,[(bindings, early), (debug, actdbg)]).
 

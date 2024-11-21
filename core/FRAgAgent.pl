@@ -23,8 +23,8 @@
 	set_early_bindings /0,
 	is_late_bindings /0,
 	is_default_late_bindings /0,
-	force_reasoning /1,
-	force_execution /1,
+	force_reasoning /2,
+	force_execution /3,
 	take_snapshot /1
     ]
   ).
@@ -760,7 +760,6 @@ try_refresh_event( _).
 %  with result 'true'
 
 update_intention(Intention, reward(Reward)):-
-writeln(xaxa),
     format(atom(String),
            "Update intention: REWARD OBTAINED ~w",[Reward]),
     println_debug(String, reasoningdbg),
@@ -1134,7 +1133,6 @@ acting:-
                    | Plans],
                  Plan2, Result),
     put_back_plan(Plan_ID, Result),
-write(    update_intention(intention(Intention_ID, Plan2,Status), Result)),
     update_intention(intention(Intention_ID, Plan2,Status), Result),
 % if Result is an atom, then a joint action was executed and it should
 % be removed from all intention where it is the actual act for execution
@@ -1422,7 +1420,8 @@ finished:-
 %   FRAgMCTSModel.pl as model_reasoning_node(WEI, Plan_ID,
 %   Context)
 
-force_reasoning(model_reasoning_node(
+force_reasoning(Node_ID, 
+		model_reasoning_node(
                     event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
                           Event_Context, active, History),
                     Plan,
@@ -1439,20 +1438,22 @@ force_reasoning(model_reasoning_node(
                  [Plan, Plan_Context]).
 
 
-%!  force_execution(+Model_Act_Node) is multi
+%!  force_execution(+Model_Act_Node, -Reward) is multi
 %   Performs Act. This Act's instance given by Decision.
 %  @arg Model_Act_Node: act node of look-ahead model, defined in
 %   FRAgMCTSModel.pl as model_act_node(Intention_ID, Act, Decision)
+%  @arg Reward: Action reward, if any
 
 % sub-plan finished, just update intention
 
-force_execution(model_act_node(Intention_ID, true, _)):-
+force_execution(Node_ID, model_act_node(Intention_ID, true, _), 0):-
     intention(Intention_ID, Plan_Stack, Status),
     update_intention(intention(Intention_ID, Plan_Stack, Status), _).
 
+
 % perform the act
 
-force_execution(model_act_node(Intention_ID, Act, Decision)):-
+force_execution(Node_ID, model_act_node(Intention_ID, Act, Decision), Reward):-
     retract(intention(Intention_ID,
                       [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context,
                             [Plan_Act| Plan_Acts])| Plans],
@@ -1473,13 +1474,20 @@ force_execution(model_act_node(Intention_ID, Act, Decision)):-
                  [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context2,
                        [Plan_Act| Plan_Acts])| Plans], P2,
                  Result),
+    format("Forcuju exekuci akce a result je ~w~n",[Result]),
+    check_reward(Result, Reward),
     update_intention(intention(Intention_ID, P2, Status), Result),
     update_intentions(Result).
 
+
 % in the case acing failed
 
-force_execution(model_act_node( _, _, _)).
+force_execution(_, model_act_node( _, _, _)).
 
+
+check_reward(reward(Reward), Reward).
+
+check_reward( _, 0).
 
 
 %===============================================================================

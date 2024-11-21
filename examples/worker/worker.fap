@@ -80,7 +80,8 @@ plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
 		test(product(Machine, Material, _)),
 		act(workshop, pick(Machine, Material)),
 		act(workshop, go(construction)),
-		act(workshop, submit)
+		act(workshop, submit),
+		act(reward(1))
 	]
     ).
 
