@@ -1474,7 +1474,7 @@ force_execution(Node_ID, model_act_node(Intention_ID, Act, Decision), Reward):-
                  [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context2,
                        [Plan_Act| Plan_Acts])| Plans], P2,
                  Result),
-    format("Forcuju exekuci akce a result je ~w~n",[Result]),
+    
     check_reward(Result, Reward),
     update_intention(intention(Intention_ID, P2, Status), Result),
     update_intentions(Result).

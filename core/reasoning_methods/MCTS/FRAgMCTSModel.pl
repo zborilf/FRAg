@@ -24,9 +24,10 @@
 %  ).
 
 
+
 :-thread_local fresh_node_index/1.
 
-% tree_nod(Node_ID, Act, Children, Node_Reward, Visits, Score).
+% tree_node(Node_ID, Act, Children, Node_Reward, Visits, Score).
 :-thread_local tree_node/6.
 
 :-thread_local root_node/1.
@@ -99,6 +100,7 @@ get_fresh_node_id(Index):-
 
 
 
+
 %!  generate_children(+Index_starts, +Index_ends, -Children) is det
 %   vytvori seznam indexu od Index_starts do Index_ends,
 %  @arg Index_starts: integer
@@ -109,7 +111,6 @@ generate_children(Index, Index, []).
 generate_children(Start_ID, End_ID, [Start_ID| Indexes]):-
     Start_ID2 is Start_ID +1,
     generate_children(Start_ID2, End_ID, Indexes).
-
 
 
 %!  set_children(+Node_index: ke kteremu uzlu se pripojuji decka, +Index_starts, Index_Ends) is det
@@ -165,8 +166,8 @@ expand_candidate(Parent_ID, Parent_ID):-
 %@arg UCB:
 
 ucb(Parent_ID, Child_ID, UCB):-
-    tree_node(Parent_ID, _, _, Reward, Parent_Visits, _),
-    tree_node(Child_ID, _, _, Reward, Child_Visits, Child_Score),
+    tree_node(Parent_ID, _, _, Reward1, Parent_Visits, _),
+    tree_node(Child_ID, _, _, Reward2, Child_Visits, Child_Score),
     UCB is (Child_Score/Child_Visits) + 
                sqrt(2*(log(Parent_Visits)/Child_Visits)).
 
@@ -178,30 +179,59 @@ ucb(Parent_ID, Child_ID, UCB):-
 % TODO asi by stacil na vstupu jen INDEX, zbytek se vytahne v retractu
 
 
-increment_node(tree_node(Index, Act, Children, Reward, Visits, Score), 
-			 Increment):-
-    retract(tree_node(Index, Act, Children, Reward, Visits, Score)),
+increment_node(tree_node(Node_ID, Act, Children, _, Visits, Value), 
+			 Reward, Value2):-
+ % TD Learning: V(st) = (1-alpha)*V(st) + alpha*(Rewardt' + gamma*(V(st'))
+    mcts_gamma(Gamma),
+    mcts_alpha(Alpha),
+    retract(tree_node(Node_ID, Act, Children, _, Visits, Value)),
     Visits2 is Visits + 1,
-    Score2 is Score + Increment,
-    assert(tree_node(Index, Act, Children, Reward, Visits2, Score2)).
+    Value3 is ((1-Alpha)*Value + Alpha*(Reward + Gamma*Value2)),
+    format("Node ~w upgradet from value ~w to value ~w, next value was ~w and reward ~w alpha:~w, gamma:~w~n",
+		[Node_ID, Value, Value3, Value2, Reward, Alpha, Gamma]),
+    assert(tree_node(Node_ID, Act, Children, Reward, Visits2, Value3)).
 
 
 
-mcts_increment_path([leaf_node(ID),_], Increment):-
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-   increment_node(tree_node(ID, Act, Children, Reward, Visits,  Score), 
-		  Increment).
+mcts_propagate_results([leaf_node(ID), _], [], Value2):-      % The last one
+ writeln(pra),
+   tree_node(ID, Act, Children, Reward, Visits, Value),
+   increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
+		   0, Value2).
 
-mcts_increment_path([node(ID),_], Increment):-      % The last one
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-    increment_node(tree_node(ID, Act, Children, Reward, Visits, Score),
-		   Increment).
 
-mcts_increment_path([node(ID),_|T], Increment):-
-    tree_node(ID, Act, Children, Reward, Visits, Score),
-    increment_node(tree_node(ID, Act, Children, Reward, Visits, Score), 
-		   Increment),
-    mcts_increment_path(T, Increment).
+
+mcts_propagate_results([leaf_node(ID), _], [Reward], Value2):-      % The last one
+ writeln(prb),
+   tree_node(ID, Act, Children, Reward, Visits, Value),
+   increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
+		   Reward, Value2).
+
+
+mcts_propagate_results([node(ID), _], [], Value2):-      % The last one
+ writeln(prc),
+   tree_node(ID, Act, Children, Reward, Visits, Value),
+   increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
+		   0, Value2).
+
+
+mcts_propagate_results([leaf_node(ID), _ | Nodes], [Reward | Rewards], Value2):-
+ writeln(prd),
+   tree_node(ID, Act, Children, _, Visits, Value),
+   increment_node(tree_node(ID, Act, Children, _, Visits,  Value), 
+		  Reward, Value2),
+   tree_node(ID, _, _, _, _, Value3),
+   mcts_propagate_results(Nodes, Rewards, Value3).
+
+
+
+mcts_propagate_results([node(ID), _| Nodes], [Reward | Rewards], Value2):-
+ format("Proresults ~w~nRewards ~w~n",[[node(ID)|Nodes], [Reward|Rewards]]),
+    tree_node(ID, Act, Children, _, Visits, Value),
+    increment_node(tree_node(ID, Act, Children, _, Visits, Value), 
+		   Reward, Value2),
+    tree_node(ID, _, _, _, _, Value3),
+    mcts_propagate_results(Nodes, Rewards, Value3).
 
 
 
@@ -223,9 +253,9 @@ mcts_print_path([Node_ID, Node| Path], Debug):-
 %           the exploitation rating of the node
 
 mcts_get_best_ucb_path(Path, UCB):-
-   root_node(Root),
-   !,
-   mcts_get_best_ucb_path(Root, Path, UCB).
+    root_node(Root),
+    !,
+    mcts_get_best_ucb_path(Root, Path, UCB).
 
 mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
     tree_node(ID, Action, not_expanded, Reward, _, _).
@@ -235,7 +265,9 @@ mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
 
 mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
     tree_node(ID, Action, Children, Reward, _, _),
+    writeln(bupda),
     select_best_child(ID, Children, Best_Child, UCB),
+    writeln(bupdb),
     mcts_get_best_ucb_path(Best_Child, Path, UCB).
 
 
@@ -251,8 +283,7 @@ select_best_child( _, [Child| _], Child, _):-
 select_best_child(Parent, [Child| Children] , Best_Child, UCB):-
     select_best_child(Parent, Children, Best_Child2, UCB),
     select_best_child2(Parent, Child, Best_Child2, Best_Child, UCB).
-
-
+ 
 select_best_child(_, [Child], Child, _).
 
 
@@ -271,16 +302,16 @@ select_best_child2(_ , _, Child, Child, _):-
     tree_node(Child, _, not_expanded, _, _, _).
 
 select_best_child2( _, Child1, Child2, Child, false):-
-    tree_node(Child1, _, _, Reward, Visits1, Score1),
-    tree_node(Child2, _, _, Reward, Visits2, Score2),
+    tree_node(Child1, _, _, Reward1, Visits1, Score1),
+    tree_node(Child2, _, _, Reward2, Visits2, Score2),
     Success1 is Score1 / Visits1,
     Success2 is Score2 / Visits2,
     select_best_child3(Success1, Child1, Success2, Child2, Child).
 
 select_best_child2(Parent, Child1, Child2, Child, true):-
-    ucb(Parent, Child1, UCB1),
-    ucb(Parent, Child2, UCB2), !,
-    select_best_child3(UCB1, Child1, UCB2, Child2, Child).
+   ucb(Parent, Child1, UCB1),
+   ucb(Parent, Child2, UCB2), !,
+   select_best_child3(UCB1, Child1, UCB2, Child2, Child).
 
 select_best_child3(Value1, Child1, Value2, _, Child1):-
     Value1 > Value2.

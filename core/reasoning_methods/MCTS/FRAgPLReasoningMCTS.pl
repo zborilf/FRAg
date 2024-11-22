@@ -1,4 +1,4 @@
-
+                                                             
 
 /**
 
@@ -17,7 +17,6 @@ actions, plans and substitutions based on Monte Carlo Tree Search simulations.
 % This module is loaded / included in the FRAgAgent file
 
 %  :- use_module('FRAgMCTSModel').
-
 
 :-dynamic simulate_late_bindings/1.		% should do the tree for early bindings (expand individual reasonings and tests?)
 :-dynamic mcts_default_expansions/1.
@@ -44,7 +43,8 @@ mcts_simulation_steps(100).
 reasoning_method(mcts_reasoning).
 
 
-discount(0.95).
+mcts_gamma(1).
+mcts_alpha(0.25).
 
 % actual path found by last mcts execution, first is reasoning prefix,
 % then action?
@@ -344,7 +344,7 @@ rewards_achieved(Rewards_Sum):-
 %    writeln(Rewards).
     format(atom(RewardS),"Rewards in this run: ~w",[Rewards]),
     println_debug(RewardS, mctsdbg),    
-    discount(Discount),                          
+    mcts_gamma(Discount),                          
     sum_rewards_list(Discount, Rewards, Rewards_Sum), 
     format(atom(RewardSS),"Rewards sum (with discounts): ~w",[Rewards_Sum]),
     println_debug(RewardSS, mctsdbg).
@@ -376,26 +376,29 @@ compute_reward( _, _, 0).
 %==============================================================================
 
 
-frag_simulate_program(Program, Steps, 0, Results, Expanded):-
+mcts_rollouts(Program, Steps, 0, Results, Rewards_Path, Expanded):-
     number_of_top_level_goals(Goals_Remain),
     format(atom(ResultsS), "~w", 
                 [runResult(Results, 0, Expanded, Goals_Remain)]),
-    print_debug(ResultsS, mctsdbg),
+    println_debug(ResultsS, mctsdbg),
     thread_self(Virtual_Agent),
     remove_clones(Virtual_Agent),
     close_engine_file,				% close stream
-    engine_yield(runResult(Results, 0, Expanded, Goals_Remain)),
+    engine_yield(runResult(results(Rewards_Path, Results), 0, Expanded, 
+		 Goals_Remain)),
     !,
 
 	% ENGINE RESTARTS HERE!
 
     garbage_collect_atoms,
     mcts_number_of_simulations(Simulations),
-    frag_simulate_program(Program, Steps, Simulations, [], Expanded).
+    mcts_rollouts(Program, Steps, Simulations, [], Rewards_Path, 
+			  Expanded).
 
 
 
-frag_simulate_program(Program, Steps, Simulations, Results, Expanded):-
+mcts_rollouts(Program, Steps, Simulations, Results, Rewards_Path, 
+	              Expanded):-
     retractall(loop_number( _ )), % init run
     assert(loop_number(1)),
     clear_agent,
@@ -413,8 +416,8 @@ frag_simulate_program(Program, Steps, Simulations, Results, Expanded):-
     !,
     garbage_all,
     Simulations2 is Simulations - 1,
-    frag_simulate_program(Program, Steps, Simulations2, [Rewards| Results],
-                          Expanded).
+    mcts_rollouts(Program, Steps, Simulations2, [Rewards| Results],
+                          Rewards_Path, Expanded).
 
 
 garbage_all:-
@@ -423,6 +426,12 @@ garbage_all:-
     garbage_collect_clauses,
     trim_stacks.
 
+
+open_file(Filename):-
+    append(Filename).
+
+open_file(Filenam):-
+    tell(Filename).
 
 
 open_engine_file(Agent, Agent_Loop, 0):-
@@ -433,7 +442,7 @@ open_engine_file(Agent, Agent_Loop, 0):-
     try_make_directory(DirectoryS),
     format(atom(Filename),"~w/__mcts_engine_l~w.mcts", [DirectoryS, 	
 							Agent_Loop]),
-    tell(Filename).
+    open_file(Filename).
 
 
 
@@ -517,48 +526,62 @@ mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
     mcts_print_path(Path, mctsdbg),
     print_state('MCTS BEFORE FORCE PATH'),
 % executes program in Path
-    force_execute_model_path(Path),			
+    force_execute_model_path(Path, Rewards_Path),			
     print_state('MCTS AFTER FORCE'),
     model_expand_actions(Expanded_Acts),
     model_expand_deliberations(Expanded_Plans),
     append(Expanded_Acts, Expanded_Plans, Expanded),
-    format(atom(ExpandedS), "Expanded nodes: ~w", [Expanded]),
+    format(atom(ExpandedS), "Expanded nodes: ~w ~n Rewards on path ~w~n", 
+	   [Expanded, Rewards_Path]),
     println_debug(ExpandedS, mctsdbg),
 
     take_snapshot(Program2),
     save_all_instances_state(Virtual_Agent, mcts_save),
-    frag_simulate_program(Program2, Steps, Simulations, [], Expanded).   % Why Expanded? TODO
+
+    mcts_rollouts(Program2, Steps, Simulations, [], Rewards_Path, 
+			  Expanded).   % Why Expanded? TODO
 
 
+%! force_execute_model_path ... druhy term rewardy pri exekuci
 
-force_execute_model_path([_, success]).
+force_execute_model_path([_, success], [0]).
 
-force_execute_model_path([]).
+force_execute_model_path([], []).
 
-force_execute_model_path([_,  model_act_node( _, no_action, _) | Nodes]):-
-    force_execute_model_path(Nodes).
+force_execute_model_path([_,  model_act_node( _, no_action, _) | Nodes], 
+			 Rewards_Path):-
+    force_execute_model_path(Nodes, Rewards_Path).
 
 force_execute_model_path([node(Node_ID),  
 			  model_act_node(Intention, Act, Context)
-                            | Nodes]):-
+                            | Nodes], [Reward | Rewards_Path]):-
     % in FRAgAgent.pl
     force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
-    force_execute_model_path(Nodes).
+    force_execute_model_path(Nodes, Rewards_Path).
 
 force_execute_model_path([node(Node_ID),  
 			  model_reasoning_node(Goal, Plan_Number, Context)
-                            | Nodes]):-
+                            | Nodes], [0 | Rewards_Path]):-
     force_reasoning(Node_ID, model_reasoning_node(Goal, Plan_Number, Context)),
-    force_execute_model_path(Nodes).
+    force_execute_model_path(Nodes, Rewards_Path).  
 
 force_execute_model_path([leaf_node(Node_ID), 
-                          model_act_node(Intention, Act, Context)]):-
+                          model_act_node(Intention, Act, Context)],
+			 [Reward]):-
     force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward).
 
 force_execute_model_path([leaf_node(Node_ID),  
-                          model_reasoning_node(Goal, Plan_Number, Context)]):-
+                          model_reasoning_node(Goal, Plan_Number, Context)], 
+			 [0]):-
     force_reasoning(Node_ID, model_reasoning_node(Goal, Plan_Number, Context)).
 
+
+
+%===============================================================================
+%                                                                              |
+%    MCTS Algorithm - non-thread (performing steps 3.4) part here              |
+%                                                                              |
+%===============================================================================
 
 
 %    The Goal-Plan tree construction starts here
@@ -578,6 +601,7 @@ force_execute_model_path([leaf_node(Node_ID),
 mcts_simulation(Program, Expansions, Simulations):-
     mcts_model_init,
     number_of_top_level_goals(Goals_Total),
+    writeln(mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations)),
     mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations).
 
 
@@ -595,15 +619,18 @@ mcts_simulation(Program, Expansions, Simulations):-
 %  @arg Max_Reward: real or estimated maximum reward an agnt can reach
 %  @arg Simulations: number of random runs for each expansion
 
-mcts_expansion_loop( _, 0, _, _). % no expansions left
+mcts_expansion_loop( _, 0, _, _).
+ % no expansions left
 
 
 mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     late_bindings(Bindings),
     % in FragMCTSModel.pl, second term is UCB (true) just score (false)
 
+% Phase 1, Selection
+ writeln(exp(Expansions)),
     mcts_get_best_ucb_path(Path, true), 
-
+ writeln(hotovo),
     intention_fresh(Intention_Fresh),
     event_fresh(Event_Fresh),
     mcts_simulation_steps(Simulation_Steps),
@@ -612,9 +639,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     open_engine_file(Agent, Agent_Loop, 0),
     format(atom(PathS), "Path is ~w",[Path]),
     println_debug(PathS, mctsdbg),
-
     is_debug(mctsdbg, Debug),
-
     engine_create(run_result(_ ,_),
 		  mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path,
                                    Expanded, Expansions, Simulation_Steps,
@@ -624,42 +649,60 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
 
     format(atom(ProgramS), 'Engine program: ~w', [Program]),
     println_debug(ProgramS, mctsdbg),
+% Phase 2+3, Expansion and Roll-outs
+
+    engine_next(Engine, runResult(results(Rewards_Path, Results), 0, Expanded,
+	        Goals_Remain)),
 
 
-    engine_next(Engine, runResult(Results, 0, Expanded, Goals_Remain)),
     println_debug('Engine finished', mctsdbg),
     engine_destroy(Engine),
     member(leaf_node(Leaf), Path),
     sumlist(Results, Sumlist),
     length(Results, Length),
     Reward is Sumlist/Length,
-%    Goals_Achieved is Max_Reward - Goals_Remain,
-    format(atom(ResultsS), 'Result is: ~w', [Results]),
+    format(atom(ResultsS), 'Rewards are: ~w::~w', [Rewards_Path, Reward]),
     println_debug(ResultsS, mctsdbg),
     format(atom(ExpandedS), 'Expanded ~w', [Expanded]),
     println_debug(ExpandedS, mctsdbg),
     format(atom(RewardS), 'Reward: ~w', [Reward]),
     println_debug(RewardS, mctsdbg),
-%    format(atom(Max_RewardS), 'Goals total: ~w', [Max_Reward]),
-%    println_debug(Max_RewardS, mctsdbg),
-%    format(atom(Goals_RemainS), 'Goals remain: ~w', [Goals_Remain]),
-%    println_debug(Goals_RemainS, mctsdbg),
 
-%    mcts_compute_reward(Average, Max_Reward, Goals_Achieved, Reward), % TODO, toto je provizorni
-%    println_debug(mcts_compute_reward(Average, Max_Reward, Goals_Achieved,
-%                                      Reward),
-%                  mctsdbg),
-
-%    format(atom(RewardS), "[MCTS] Reward: ~w", [Reward]),
-%    println_debug(RewardS, mctsdbg),
     mcts_print_model(mctsdbg),
-    mcts_increment_path(Path, Reward),
-    mcts_expand_node(Leaf, Expanded),
+% Phase 4, Backpropagation
+
+writeln(ra),
+    reverse_tl(Path, PathR),
+writeln(rb),
+    reverse(Rewards_Path, Rewards_PathR),
+writeln(rc),
+writeln(    mcts_propagate_results(Path, Rewards_Path, Reward)),
+writeln(    mcts_propagate_results(PathR, Rewards_PathR, Reward)),
+    mcts_propagate_results(PathR, Rewards_PathR, Reward), 
+writeln(rd),
+    mcts_expand_node(Leaf, Expanded), 
     Expansions2 is Expansions - 1,
     format(atom(ExpansionsS),"Expansions: ~w", [Expansions2]),
     println_debug(ExpansionsS,  mctsdbg),
     close_engine_file,	
+    writeln(mcts_expansion_loop(Expansions2)),
     mcts_expansion_loop(Program, Expansions2, Max_Reward, Simulations).
+                                                                                    
+
+%! reverse_twol(+List, -List) is det
+%  olny top level elements pairs reversion
+
+reverse_tl([], []).
+
+reverse_tl([H, H2| T], L):-
+    reverse_tl(T, L2),
+    append(L2, [H, H2], L).
+
+reverse([], []).
+
+reverse([H | T], L):-
+    reverse(T, L2),
+    append(L2, [H], L).
 
 
 
@@ -736,13 +779,15 @@ update_model(mcts_reasoning):-
     mcts_expansions(Expansions),                        
 % Number of simulations per expansion
     mcts_number_of_simulations(Simulations),      
+
+% SIMULATIONS (MCTS ALGORITHM)STARTS HERE
     mcts_simulation(Silent_Program, Expansions, Simulations),
+
     print_mcts_model(mctsdbg_path),            
     mcts_get_best_ucb_path(Path, false),     
 % REASONING: 'reasoning node' prefix of PATH, ACT is the first ACT in PATH
     mcts_divide_path(Path, Reasoning, Act),
 
-%    print_list_debug(Path, mctsdbg),
 
     format(atom(ReportS),"Reasoning prefix:~w
 [MCTS] First action:~w",[Reasoning, Act]),
