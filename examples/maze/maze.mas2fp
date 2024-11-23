@@ -1,0 +1,17 @@
+
+
+set_agents([(bindings, early), (reasoning, mcts_reasoning), 
+               % (reasoning, random_reasoning),
+		(reasoning_params, mcts_params(30,20,30))]). 
+			% params - expansions, rollouts, maxsteps in rollout
+
+
+set_agents([(control, terminate(timeout, 80))]).
+
+load("maze","../examples/maze/maze",1,[(debug, reasoningdbg), 
+		(debug, mctsdbg_path), 
+		(debug, mctsdbg), (debug, actdbg),
+		(debug, interdbg), (debug, systemdbg)]).
+
+			   
+			  

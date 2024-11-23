@@ -45,6 +45,7 @@ reasoning_method(mcts_reasoning).
 
 mcts_gamma(1).
 mcts_alpha(0.25).
+mcts_max_reward(3).
 
 % actual path found by last mcts execution, first is reasoning prefix,
 % then action?
@@ -440,7 +441,7 @@ open_engine_file(Agent, Agent_Loop, 0):-
   %  file_directory_name(FRAg_Path, Directory),
     format(atom(DirectoryS), "logs/~w", [Agent]),
     try_make_directory(DirectoryS),
-    format(atom(Filename),"~w/__mcts_engine_l~w.mcts", [DirectoryS, 	
+    format(atom(Filename),"~w/__mcts_engine_stp~w.mcts", [DirectoryS, 	
 							Agent_Loop]),
     open_file(Filename).
 
@@ -454,7 +455,7 @@ open_engine_file(Agent, Agent_Loop, Runs):-
 %    format(atom(DirectoryS), "~w/logs/~w/~w", [Directory, Agent, Agent_Loop]),
     format(atom(DirectoryS), "logs/~w", [Agent]),
     try_make_directory(DirectoryS),
-    format(atom(Filename),"~w/_mcts_engine_l~w-run~w.mcts", [DirectoryS,
+    format(atom(Filename),"~w/_mcts_engine_stp~w-exp~w.mcts", [DirectoryS,
 						             Agent_Loop, Runs]),
     tell(Filename).
 
@@ -601,7 +602,6 @@ force_execute_model_path([leaf_node(Node_ID),
 mcts_simulation(Program, Expansions, Simulations):-
     mcts_model_init,
     number_of_top_level_goals(Goals_Total),
-    writeln(mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations)),
     mcts_expansion_loop(Program, Expansions, Goals_Total, Simulations).
 
 
@@ -628,9 +628,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     % in FragMCTSModel.pl, second term is UCB (true) just score (false)
 
 % Phase 1, Selection
- writeln(exp(Expansions)),
     mcts_get_best_ucb_path(Path, true), 
- writeln(hotovo),
     intention_fresh(Intention_Fresh),
     event_fresh(Event_Fresh),
     mcts_simulation_steps(Simulation_Steps),

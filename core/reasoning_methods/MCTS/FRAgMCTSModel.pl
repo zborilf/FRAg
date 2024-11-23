@@ -163,13 +163,14 @@ expand_candidate(Parent_ID, Parent_ID):-
 % (after ith step)
 %@arg Parent_ID:
 %@arg Child_ID:
-%@arg UCB:
+%@arg UCB: Upper Confidence Bound
 
 ucb(Parent_ID, Child_ID, UCB):-
+    mcts_max_reward(Max_Reward),
     tree_node(Parent_ID, _, _, Reward1, Parent_Visits, _),
-    tree_node(Child_ID, _, _, Reward2, Child_Visits, Child_Score),
-    UCB is (Child_Score/Child_Visits) + 
-               sqrt(2*(log(Parent_Visits)/Child_Visits)).
+    tree_node(Child_ID, _, _, Reward2, Child_Visits, Child_Value),
+ %   UCB is (Child_Value/Child_Visits) + 
+    UCB is Child_Value / Max_Reward + sqrt(2*(log(Parent_Visits)/Child_Visits)).
 
 
 
@@ -202,21 +203,18 @@ mcts_propagate_results([leaf_node(ID), _], [], Value2):-      % The last one
 
 
 mcts_propagate_results([leaf_node(ID), _], [Reward], Value2):-      % The last one
- writeln(prb),
    tree_node(ID, Act, Children, Reward, Visits, Value),
    increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
 		   Reward, Value2).
 
 
 mcts_propagate_results([node(ID), _], [], Value2):-      % The last one
- writeln(prc),
    tree_node(ID, Act, Children, Reward, Visits, Value),
    increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
 		   0, Value2).
 
 
 mcts_propagate_results([leaf_node(ID), _ | Nodes], [Reward | Rewards], Value2):-
- writeln(prd),
    tree_node(ID, Act, Children, _, Visits, Value),
    increment_node(tree_node(ID, Act, Children, _, Visits,  Value), 
 		  Reward, Value2),
@@ -265,9 +263,7 @@ mcts_get_best_ucb_path(ID, [leaf_node(ID), Action], _):-
 
 mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
     tree_node(ID, Action, Children, Reward, _, _),
-    writeln(bupda),
     select_best_child(ID, Children, Best_Child, UCB),
-    writeln(bupdb),
     mcts_get_best_ucb_path(Best_Child, Path, UCB).
 
 
@@ -304,14 +300,15 @@ select_best_child2(_ , _, Child, Child, _):-
 select_best_child2( _, Child1, Child2, Child, false):-
     tree_node(Child1, _, _, Reward1, Visits1, Score1),
     tree_node(Child2, _, _, Reward2, Visits2, Score2),
-    Success1 is Score1 / Visits1,
-    Success2 is Score2 / Visits2,
+    Success1 is Score1, % / Visits1,
+    Success2 is Score2, % / Visits2,
     select_best_child3(Success1, Child1, Success2, Child2, Child).
 
 select_best_child2(Parent, Child1, Child2, Child, true):-
    ucb(Parent, Child1, UCB1),
    ucb(Parent, Child2, UCB2), !,
    select_best_child3(UCB1, Child1, UCB2, Child2, Child).
+
 
 select_best_child3(Value1, Child1, Value2, _, Child1):-
     Value1 > Value2.
