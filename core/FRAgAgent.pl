@@ -25,6 +25,7 @@
 	is_default_late_bindings /0,
 	force_reasoning /2,
 	force_execution /3,
+	force_perceiving /0,
 	take_snapshot /1
     ]
   ).
@@ -761,7 +762,7 @@ try_refresh_event( _).
 
 update_intention(Intention, reward(Reward)):-
     format(atom(String),
-           "Update intention: REWARD OBTAINED ~w",[Reward]),
+           'Update intention: REWARD OBTAINED ~w',[Reward]),
     println_debug(String, reasoningdbg),
     loop_number(Loop_Number),
     assert(fact(reward(Loop_Number, Reward))),
@@ -775,7 +776,7 @@ update_intention(Intention, reward(Reward)):-
 update_intention(intention(Intention_ID, _, _), true):-
     intention(Intention_ID, _, blocked),
     format(atom(String),
-           "Update intention: INTENTION BLOCKED",[]),
+           'Update intention: INTENTION BLOCKED',[]),
     println_debug(String, reasoningdbg).
 
 
@@ -788,7 +789,7 @@ update_intention(intention(Intention_ID, [plan(_, _, _, _, _, [])], _),
                  true)
     :-
     format(atom(String),
-           "Update intention: TOP LEVEL PLAN SUCCEEDED",[]),
+           'Update intention: TOP LEVEL PLAN SUCCEEDED',[]),
     println_debug(String, reasoningdbg),
     retract(intention(Intention_ID, _, _)),
     try_retract_event(Intention_ID).
@@ -809,7 +810,7 @@ update_intention(intention(Indention_ID,
                  _ )
     :-
     format(atom(String),
-           "Update intention: SUBPLAN SUCCEEDED",[]),
+           'Update intention: SUBPLAN SUCCEEDED',[]),
     println_debug(String, reasoningdbg),
     intersection(Event_Atom, Context, Goal, Context2, Context3),
     retract(intention(Indention_ID, [ _, _| Plans], Status)),
@@ -831,7 +832,7 @@ update_intention(intention(Indention_ID,
 update_intention(intention(Intention_ID, [ _ ], Status), false):-
     loop_number(Loop_Number),
     format(atom(String),
-           "[~w] Update intention: SUBPLAN FAILED",[Loop_Number]),
+           '[~w] Update intention: SUBPLAN FAILED',[Loop_Number]),
     println_debug(String, reasoningdbg), 
 %    format(atom(String2), "[~w] Update intention: ACTION FAILED", 
 %                           [Loop_Number]),
@@ -856,7 +857,7 @@ update_intention(intention(Intention_ID,
                            [plan( _, Event_Type, Event_Atom, _, _, _)| Plans],
                            Status), false):-
     loop_number(Loop_Number),
-    format(atom(String), "[~w] Update intention: SUBPLAN FAILED", 
+    format(atom(String), '[~w] Update intention: SUBPLAN FAILED', 
                           [Loop_Number]), 
     println_debug(String, reasoningdbg),
 %   format(atom(String2), "[~w] Update intention: ACTION FAILED", 
@@ -876,7 +877,7 @@ update_intention(intention(Intention_ID,
 
 update_intention(intention(Intention_ID, Plan_Stack, Status), _):-
     loop_number(Loop_Number),
-    format(atom(String), "[~w] Acting result: ACTION SUCCEEDED", 
+    format(atom(String), '[~w] Acting result: ACTION SUCCEEDED', 
 			  [Loop_Number]),
     println_debug(String, actdbg),
     retract(intention(Intention_ID, _, Status)),
@@ -1195,7 +1196,7 @@ deliberation2([Event | Events]):-
 deliberation3(event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                  Context, active, History)):-
     get_relevant_applicable_plans(Event_Type, Event_Atom, Context, Means),
-    format(atom(String5), "Possible means: ~w", [Means]),
+    format(atom(String5), 'Possible means: ~w', [Means]),
     println_debug(String5, interdbg),
     
     deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
@@ -1243,7 +1244,7 @@ deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
 
 deliberation4(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                        Context, History, _):-
-    format(atom(String), "No means for the event", []),
+    format(atom(String), 'No means for the event', []),
     println_debug(String, interdbg),
     update_event(-1, event(Event_ID, Event_Type, Event_Atom, Parent_Intention,
                            Context, active, History),
@@ -1273,44 +1274,42 @@ loop(-1, -1).
 
 loop(Steps, Steps_Left):-
     loop_number(Loop_Number),
-    format(atom(String1),
-"
+    format(atom(String1),'
 =====================================================================
 ========================== Loop ~w started ==========================
 =====================================================================
-~n",
-          [Loop_Number]),
+~n',[Loop_Number]),
     println_debug(String1, reasoningdbg),
 
-    format(atom(String2), "STATE IN LOOP ~w~n", [Loop_Number]),
+    format(atom(String2), 'STATE IN LOOP ~w~n', [Loop_Number]),
     print_state(String2),
 
     late_bindings(Bindings),    
-    format(atom(String3), "Bindings ~w~n", [Bindings]),
+    format(atom(String3), 'Bindings ~w~n', [Bindings]),
     println_debug(String3, interdbg),
 
-    format(atom(String4), "~n===~n<< LOOP ~w: SENSING >>~n===", [Loop_Number]),
+    format(atom(String4), '~n===~n<< LOOP ~w: SENSING >>~n===', [Loop_Number]),
     println_debug(String4, interdbg),
     sensing,
     !,
 
-    format(atom(String5), "~n===~n<< LOOP ~w: MODEL UPDATE>>~n===", [Loop_Number]),
+    format(atom(String5), '~n===~n<< LOOP ~w: MODEL UPDATE>>~n===', [Loop_Number]),
     println_debug(String5, interdbg),
     update_models,
     !,
 
-    format(atom(String6), "~n===~n<< LOOP ~w: DELIBERATION >>~n===", [Loop_Number]),
+    format(atom(String6), '~n===~n<< LOOP ~w: DELIBERATION >>~n===', [Loop_Number]),
     println_debug(String6, interdbg),
     deliberation,
     !,
 
-    format(atom(String7), "~n===~n<< LOOP ~w: ACTING >>~n===", [Loop_Number]),
+    format(atom(String7), '~n===~n<< LOOP ~w: ACTING >>~n===', [Loop_Number]),
     println_debug(String7, interdbg),
           
     acting,
     !,
 
-    format(atom(String8), "~n===~n<< LOOP ~w: FINISHED >>~n===", [Loop_Number]),
+    format(atom(String8), '~n===~n<< LOOP ~w: FINISHED >>~n===', [Loop_Number]),
     println_debug(String8, interdbg),
     increment_loop,
     Steps2 is Steps-1,
@@ -1401,7 +1400,7 @@ increment_loop:-
 finished:-
     thread_self(Agent),
     loop_number(Steps),
-    format(atom(String), "Agent ~w finished in ~w steps. ~n",
+    format(atom(String), 'Agent ~w finished in ~w steps. ~n',
            [Agent, Steps]),
     println_debug(String, systemdbg).
 
@@ -1413,6 +1412,11 @@ finished:-
 %                                                                              |
 %===============================================================================
 
+
+%!  force_percieving 
+
+force_perceiving:-
+    sensing.
 
 %!  force_reasoning(+Model_Reasoning_Node) is det
 %   Forces adaption of plan with Plan_ID in Context for specified WEI
@@ -1559,7 +1563,7 @@ load_program(Filename, Clauses):-
     close(Stream, [force(true)]).
 
 load_program(Filename, []):-
-    format(atom(String),"Agent file ~w cannot be opened~n",
+    format(atom(String),'Agent file ~w cannot be opened~n',
            [Filename]),
     println_debug(String, error),
     !,
@@ -1657,7 +1661,7 @@ go_sync(Steps, I):-
 
 fa_init_com(Filename):-
     thread_self(Agent),
-    format(atom(Filename2), "~w_~w.out", [Filename, Agent]),
+    format(atom(Filename2), '~w_~w.out', [Filename, Agent]),
     tell(Filename2),
     assert(agent_debug(1)),
     !.
@@ -1770,7 +1774,7 @@ is_default_late_bindings:-
 set_environment(Environment):-
     thread_self(Agent),
     fRAgAgentInterface:situate_agent(Agent, Environment),
-    format(atom(String), "Agent ~w is situated to environment ~w ~n",
+    format(atom(String), 'Agent ~w is situated to environment ~w ~n',
            [Agent, Environment]),
     println_debug(String, systemdbg).
 

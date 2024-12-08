@@ -3,68 +3,40 @@
 
 
 
-goal(ach,go,[[]]).
 
-fact(position(a)).
-fact(road(a,b)).
-fact(road(a,e)).
-fact(road(b,c)).
-fact(road(b,f)).
-fact(road(c,d)).
-fact(road(c,g)).
-fact(road(d,h)).
-fact(road(e,f)).
-fact(road(e,i)).
-fact(road(f,g)).
-fact(road(f,j)).
-fact(road(g,h)).
-fact(road(g,k)).
-fact(road(h,l)).
-fact(road(i,j)).
-fact(road(i,m)).
-fact(road(j,k)).
-fact(road(j,n)).
-fact(road(k,l)).
-fact(road(k,o)).
-fact(road(l,p)).
-fact(road(m,n)).
-fact(road(n,o)).
-fact(road(o,p)).
+goal(ach,go([]),[[]]).
+
+fact(reward_at(h)).
+fact(reward_at(o)).
+fact(reward_at(v)).
+fact(reward_at(ac)).
+fact(reward_at(aj)).
+
+plan(ach, go([]), [],
+	[
+	 test(reward_at(Reward)),
+	 ach(go(Reward))
+	]
+    ).
 
 
-fact(finish(p)).
-
-fact(rwd(a, 0.1)).
-fact(rwd(b, 0.25)).
-fact(rwd(c, 0.1)).
-fact(rwd(d, 0.2)).
-fact(rwd(e, 0.15)).
-fact(rwd(f, 0.45)).
-fact(rwd(g, 0.35)).
-fact(rwd(h, 0.3)).
-fact(rwd(i, 0.25)).
-fact(rwd(j, 0.22)).
-fact(rwd(k, 0.37)).
-fact(rwd(l, 0.4)).
-fact(rwd(m, 0.5)).
-fact(rwd(n, 0.2)).
-fact(rwd(o, 0.1)).
-fact(rwd(p, 0.3)).
+plan(del, reward_at(X), [],
+	[
+	 test(reward_at(Reward)),
+	 ach(go(Reward))
+	]
+    ).
 
 
-plan(ach, go, [position(X), finish(X)],
-	[]
+plan(ach, go(Treasure), [direction(Treasure, Direction)],
+	[
+	 act(simple_maze, go(Direction)),
+	 ach(go(Treasure))]
    ).
 
-plan(ach, go, [position(X), road(X, Y), rwd(Y, R)],
-	[del(position(X)),
-	 add(position(Y)),
-         act(reward(R)),
-	 ach(go)]
-   ).
-
-
-
-
-
+plan(ach, go(Treasure), [my_position(Treasure)], 
+	[
+    	  del(reward_at(Treasure))
+	]).
+                         
 

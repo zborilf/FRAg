@@ -525,10 +525,10 @@ mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
     assert(event_fresh(Event_Fresh)),
     println_debug('+++++ PATH +++++', mctsdbg),
     mcts_print_path(Path, mctsdbg),
-    print_state('MCTS BEFORE FORCE PATH'),
+    print_state('VVVVVVVVVV MCTS BEFORE FORCE PATH VVVVVVVVVV'),
 % executes program in Path
     force_execute_model_path(Path, Rewards_Path),			
-    print_state('MCTS AFTER FORCE'),
+    print_state('VVVVVVVVVV MCTS AFTER FORCE VVVVVVVVVV'),
     model_expand_actions(Expanded_Acts),
     model_expand_deliberations(Expanded_Plans),
     append(Expanded_Acts, Expanded_Plans, Expanded),
@@ -558,6 +558,8 @@ force_execute_model_path([node(Node_ID),
                             | Nodes], [Reward | Rewards_Path]):-
     % in FRAgAgent.pl
     force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
+  writeln(reward(Reward)),
+    force_perceiving,
     force_execute_model_path(Nodes, Rewards_Path).
 
 force_execute_model_path([node(Node_ID),  
@@ -569,7 +571,9 @@ force_execute_model_path([node(Node_ID),
 force_execute_model_path([leaf_node(Node_ID), 
                           model_act_node(Intention, Act, Context)],
 			 [Reward]):-
-    force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward).
+    force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
+  writeln(reward(Reward)),
+    force_perceiving.
 
 force_execute_model_path([leaf_node(Node_ID),  
                           model_reasoning_node(Goal, Plan_Number, Context)], 
@@ -669,21 +673,15 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     mcts_print_model(mctsdbg),
 % Phase 4, Backpropagation
 
-writeln(ra),
     reverse_tl(Path, PathR),
-writeln(rb),
     reverse(Rewards_Path, Rewards_PathR),
-writeln(rc),
-writeln(    mcts_propagate_results(Path, Rewards_Path, Reward)),
-writeln(    mcts_propagate_results(PathR, Rewards_PathR, Reward)),
+% writeln(    mcts_propagate_results(PathR, Rewards_PathR, Reward)),
     mcts_propagate_results(PathR, Rewards_PathR, Reward), 
-writeln(rd),
     mcts_expand_node(Leaf, Expanded), 
     Expansions2 is Expansions - 1,
     format(atom(ExpansionsS),"Expansions: ~w", [Expansions2]),
     println_debug(ExpansionsS,  mctsdbg),
     close_engine_file,	
-    writeln(mcts_expansion_loop(Expansions2)),
     mcts_expansion_loop(Program, Expansions2, Max_Reward, Simulations).
                                                                                     
 

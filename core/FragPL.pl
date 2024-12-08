@@ -473,8 +473,8 @@ main_frag:-
     nl,
     version(Version),
     format(
-"FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
-Brno University of Technology ~n~n",
+'FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
+Brno University of Technology ~n~n',
 	   [Version]),
     frag('fraginit'),
     !,
@@ -482,8 +482,8 @@ Brno University of Technology ~n~n",
     get_frag_attributes(reasonings, [Intention_Selection, Plan_Selection,
 	                Substitution_selection]),
     get_default_environments(Environments),
-    format("-> Bindings: ~w~n-> Intention selection: ~w ~n-> Plan selection: ~w
--> Substitution selection: ~w ~n-> Environments: ~w ~n~n",
+    format('-> Bindings: ~w~n-> Intention selection: ~w ~n-> Plan selection: ~w
+-> Substitution selection: ~w ~n-> Environments: ~w ~n~n',
 	   [Bindings, Intention_Selection, Plan_Selection,
             Substitution_selection, Environments]).
 

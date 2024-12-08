@@ -52,3 +52,4 @@ plan(ach,transport(Passenger, Floor),[boarded(PASSENGER, Floor),
 	ach(transport(Passenger, Floor))
     ]).
 
+

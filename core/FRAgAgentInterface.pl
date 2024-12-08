@@ -150,7 +150,8 @@ situate_agent2(Agent, Environment):-
     assert(agent_environment(Agent, Environment, Environment)),
     Situate_Agent=..[Environment, add_agent, Agent],
     !,
-    Situate_Agent.
+ writeln(Situate_Agent),
+    Situate_Agent,writeln(hotovo).
 
 situate_agent2(Agent, Environment):-
     format("[IFC] Agent ~w cannot be situated in environment ~w~n",
@@ -174,8 +175,8 @@ situate_agent(Agent, Environment, Clone):-
 
 situate_agent2(Agent, Environment, Clone):-
     agent_environment(Agent, Environment, _),
-    format("[IFC] Agent ~w cannot be situated in clone ~w of environment ~w,
-            it is already situated in an instance of the environment~n",
+    format('[IFC] Agent ~w cannot be situated in clone ~w of environment ~w,
+            it is already situated in an instance of the environment~n',
             [Agent, Clone, Environment]),
     !,
     fail.
@@ -348,11 +349,10 @@ agent_acts( _, _, _, false).
 
 
 agent_acts2(Agent, Environment, Act, Result):-
-    Act_In_Environment =.. [Environment, act, Agent, Act, Result],
-
-    clause(Act_In_Environment, _),			% does it exist?
-    Act_In_Environment.
-
+   Act_In_Environment_T =.. [Environment, act, Agent, Act, _],
+   Act_In_Environment =.. [Environment, act, Agent, Act, Result],
+   clause(Act_In_Environment_T, _),			% does it exist?
+   Act_In_Environment.
 
 
 %!  reset_clone(+Environments, +Clone)

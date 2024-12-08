@@ -32,8 +32,9 @@ set_environment(workshop,
 set_agents([ 
              (control, terminate(timeout, 1000)),
              (bindings, late),
-%             (reasoning, mcts_reasoning),
-	     (reasoning, robin_reasoning),
+             (reasoning, mcts_reasoning),
+	     (reasoning_params, mcts_params(50,20,30)),
+%	     (reasoning, robin_reasoning),
 	     (environment, workshop)]
      ).		
 
@@ -45,7 +46,8 @@ set_agents([
 
 
 
-load("workerCL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg), (debug, reasoningdbg), (debug, mctsdpg_path)]).
+load("workerCL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg), (debug, reasoningdbg), 
+				(debug, mctsdpg_path), (debug, mctsdbg)]).
 
 % load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)]).
 

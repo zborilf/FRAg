@@ -1,6 +1,5 @@
 
 
-
 :-module(miconic10,
     [                
 % two or three arity clauses of the module name
@@ -10,6 +9,7 @@
 	miconic10 / 4
     ]
 ).	
+
 
 /** <module>  Miconic10 Environment for FRAg 
 
@@ -118,16 +118,24 @@ miconic10(set_property, Property_List).
     
 exit_lift( _, []).
 
+
 exit_lift(Agent, [boarded(Person, Floor)| Persons]):-
     delete_facts_beliefs(miconic10, Agent, [boarded(Person, Floor)]),
     add_facts_beliefs(miconic10, Agent, [served(Person)]),
-%    format("Vystupuje mi pasazer ~w~n", [Person]),
+    format("Vystupuje mi pasazer ~w~n", [Person]),
     exit_lift(Agent, Persons).
 
 
-process_transported(Agent, Floor):-
+process_transported(Agent, Floor, Result):-
     findall_environment(miconic10, Agent, boarded(_ , Floor), To_Exit),
+    length(To_Exit, Processed),
+    get_result(Processed, Result),
     exit_lift(Agent, To_Exit).
+
+
+get_result(0, true).
+
+get_result(Processed, reward(Processed)).
 
 
     
@@ -163,7 +171,7 @@ miconic10(act, Agent, go(Destination), true):-
 %    format("~w: Nemusim nikad jezdit, uz jsem na poschod¡ ~w, 
 %            celkem najeto ~w~n", [Agent, Destination, Distance]).
 
-miconic10(act, Agent, go(Destination), true):-
+miconic10(act, Agent, go(Destination), Result):-
     position(Destination, _),
     !,    
     query_environment(miconic10, Agent, lift_at(Floor_Actual)),
@@ -181,13 +189,13 @@ miconic10(act, Agent, go(Destination), true):-
     process_waiting(Agent, Destination),
     delete_facts_beliefs_all(miconic10, Agent, [lift_at(Floor_Actual)]),
     add_facts_beliefs_all(miconic10, Agent, [lift_at(Destination)]),
-    process_transported(Agent, Destination).
+    process_transported(Agent, Destination, Result).
 
 
 miconic10(act, Agent, silently_(go(Destination)), Result):-
     miconic10(act, Agent, go(Destination), Result).
 
-miconic10(act, _, _, flse).
+miconic10(act, _, _, false).
 
 /*
 	Kopie prostredi pro specifikovane agenty
