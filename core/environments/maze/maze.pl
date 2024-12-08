@@ -52,10 +52,16 @@ coords(ai,[5,6]).
 coords(aj,[6,6]).
 
 
-item([2,2], gold).
+% item([2,2], gold).
+% item([3,3], gold).
+item([1,3], gold).
+item([2,1], gold).
 item([3,3], gold).
-item([4,4], gold).                                                   
+item([3,5], gold).
+item([1,6], gold).                                                   
 item([5,5], gold).
+item([6,1], gold).
+item([6,5], gold).
 item([6,6], gold).
 
 path([A,B],[C,B]):-C is A+1.
@@ -104,14 +110,16 @@ init_items:-
     add_facts(simple_maze, Items).
 
 
-
-direction([A,B],[C,D],down):- D>B, C>=A, !.
-direction([A,B],[C,B],right):- C>A.
-
+direction([A,B],[C,D],down):- D>B, C>=A.
+direction([A,B],[C,D],right):- C>A, D>=B.
 
                  
 
-
+go(X,Y,Z):-
+   findall(direction(X,Coords,right),(coords(_, X), coords(_, Coords), 
+	    direction(X, Coords, right)), Y),
+   findall(direction(X,Coords2, down),(coords(_, X), coords(_, Coords2), 
+	    direction(X, Coords2, down)), Z).
 
 print_directions:-
    tell('d.pl'),
@@ -202,6 +210,7 @@ simple_maze(act, Agent, go(Direction), false).
  
 get_result(Position, Agent, reward(1)):-
     query_environment(simple_maze, Agent, item(Position, gold)),
+ writeln(dostavam_odmenu(Position)),
     delete_facts_beliefs_all(simple_maze, Agent, [item(Position, gold)]),
     coords(Room, Position),
     delete_beliefs_all(Agent, [reward_at(Room)]).
@@ -224,7 +233,6 @@ change_room_percepts(Agent, Position1, Position2):-
 % Silent actions, clones
 
 simple_maze(act, Agent, silently_(go(Direction)), Result):-
- writeln(simple_maze(act, Agent, go(Direction), Result)),
     simple_maze(act, Agent, go(Direction), Result).
                                             
 

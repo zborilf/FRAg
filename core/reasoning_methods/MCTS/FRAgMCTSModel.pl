@@ -195,7 +195,6 @@ increment_node(tree_node(Node_ID, Act, Children, _, Visits, Value),
 
 
 mcts_propagate_results([leaf_node(ID), _], [], Value2):-      % The last one
- writeln(pra),
    tree_node(ID, Act, Children, Reward, Visits, Value),
    increment_node(tree_node(ID, Act, Children, Reward, Visits, Value),
 		   0, Value2).

@@ -216,11 +216,9 @@ findall_facts(_, _, []).
 %  @arg Query: query to Environment or its clone where Agent is situated
 
 query_environment(Environment, Agent, Query):-
- writeln(get_clone_query(Environment, Agent, Query, Clone_Query)),
    get_clone_query(Environment, Agent, Query, Clone_Query),
    !,
-   Clone_Query,
-  writeln(Clone_Query).
+   Clone_Query.
 
 query_environment(Environment, Agent, Query):-
     situated_agent(Agent, Environment, Environment),

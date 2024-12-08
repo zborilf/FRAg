@@ -45,7 +45,7 @@ reasoning_method(mcts_reasoning).
 
 mcts_gamma(1).
 mcts_alpha(0.25).
-mcts_max_reward(3).
+mcts_max_reward(7).
 
 % actual path found by last mcts execution, first is reasoning prefix,
 % then action?
@@ -203,9 +203,16 @@ model_expand_actions(Actions):-
           intention(Intention_ID, Plan_Stack, Status), Intentions),
     model_expand_actions2(Intentions, Actions),
     format(atom(String),"[MCTS] Expanded actions: ~w",[Actions]),
-    println_debug(String, mctsdbg).
-
+    println_debug(String, mctsdbg),
+  writeln("==========================================================="),
+    temp_pa(Actions).
+ 
 model_expand_actions([]).   % in the case there is no intention
+
+temp_pa([]).
+temp_pa([H|T]):-
+ writeln(H),
+ temp_pa(T).
 
 
 %
@@ -220,6 +227,7 @@ model_expand_deliberations(Deliberations):-
 	  event(Event_ID, Type,Predicate,Intention, Context,active, History),
 	  Events),
     !,
+ writeln(model_expand_deliberations2(Events, Deliberations)),
     model_expand_deliberations2(Events, Deliberations).
 
 model_expand_deliberations([]).   % in the case there is no goal
@@ -342,7 +350,6 @@ silence_plan([H|T],[H|T2]):-
                         
 rewards_achieved(Rewards_Sum):-
     bagof(r(Loop, Reward), fact(reward(Loop, Reward)), Rewards),
-%    writeln(Rewards).
     format(atom(RewardS),"Rewards in this run: ~w",[Rewards]),
     println_debug(RewardS, mctsdbg),    
     mcts_gamma(Discount),                          
@@ -558,7 +565,6 @@ force_execute_model_path([node(Node_ID),
                             | Nodes], [Reward | Rewards_Path]):-
     % in FRAgAgent.pl
     force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
-  writeln(reward(Reward)),
     force_perceiving,
     force_execute_model_path(Nodes, Rewards_Path).
 
@@ -572,7 +578,6 @@ force_execute_model_path([leaf_node(Node_ID),
                           model_act_node(Intention, Act, Context)],
 			 [Reward]):-
     force_execution(Node_ID, model_act_node(Intention, Act, Context), Reward),
-  writeln(reward(Reward)),
     force_perceiving.
 
 force_execute_model_path([leaf_node(Node_ID),  
@@ -675,7 +680,6 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
 
     reverse_tl(Path, PathR),
     reverse(Rewards_Path, Rewards_PathR),
-% writeln(    mcts_propagate_results(PathR, Rewards_PathR, Reward)),
     mcts_propagate_results(PathR, Rewards_PathR, Reward), 
     mcts_expand_node(Leaf, Expanded), 
     Expansions2 is Expansions - 1,
@@ -909,10 +913,27 @@ get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
     format(atom(Model_SubsS), "GS6 Model Act Subs: ~w", [Model_Act]),
     println_debug(Model_SubsS, interdbg),
     %	rename_substitution_vars(MODELCTX,VARS,NCTX),
-    unifiable(Action, Model_Act, Context_Out),
+  writeln(unifiable(Action, Model_Act, Context_Out)),
+    unifiable_s(Action, Model_Act, Context_Out),
     format(atom(Context_OutS), 'GS7 Context Out: ~w', [Context_Out]),
     println_debug(Context_OutS, interdbg).
 
+
+unifiable_s(Act1, Act2, Context):-
+    get_act_content(Act1, Act_Content1),
+    get_act_content(Act2, Act_Content2),
+    unifiable(Act_Content1, Act_Content2, Context).	
+
+
+get_act_content(silently_(Content), Content).
+
+get_act_content(Content, silently_(Content)).
+               
+get_act_content(not(Content), Content).
+
+get_act_content(Content, not(Content)).
+
+get_act_content(Act, Act).
 
 
 %!  get_plan(mcts_reasoning, +Event, +Means, -Intended_Means) is det
@@ -924,27 +945,18 @@ get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
 %  @arg Intended_Means:
 
 
-get_plan(mcts_reasoning, Event, Means, Intended_Means):-
+get_plan(mcts_reasoning, Event, Means, [IM_Plan, IM_Context]):-
     format(atom(PlanS),"[GET PLAN]: Event: ~w~nPossible Means: ~w",
 		        [Event, Means]),
-    println_debug(PlanS, interdbg),!,
-    recomended_path(Reasoning_Nodes, _),
-    format(atom(NodesS), 'Recomended Path ~w:', [Reasoning_Nodes]),
-    println_debug(NodesS, interdbg), !,
-    get_plan_for_goal(Event, Reasoning_Nodes, Means_Index),
-    format(atom(Means_IndexS), 'IM Index: ~w', [Means_Index]),
-    println_debug(Means_IndexS, interdbg), !,
-    get_plan2(Means, Means_Index, Intended_Means),
-    format(atom(Intended_MeansS), 'Chosen plan: ~w', [Intended_Means]),
-    println_debug(Intended_MeansS, interdbg).
+    println_debug(PlanS, interdbg),
+    !,
+    recomended_path([model_reasoning_node(Event, IM_Plan, IM_Context)| _], _),
+    format(atom(NodesS), 'Recomended Plan ~w/~w:', [IM_Plan, IM_Context]),
+    println_debug(NodesS, interdbg).
 
-get_plan(mcts_reasoning,_,_,[]).
+get_plan(mcts_reasoning, _, _, []).
 
 
-get_plan2(Means, Plan_ID, [plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context]):-
-    member([plan(Plan_ID, Event_Type, Event_Atom, Conditions, Body), Context], Means).
-
-get_plan2(_,_,[]).
 
 
 
