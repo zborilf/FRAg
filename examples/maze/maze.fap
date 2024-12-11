@@ -6,14 +6,16 @@
 
 goal(ach,go([]),[[]]).
 
-fact(reward_at(b)).
+fact(reward_at(l)).
 fact(reward_at(f)).
+fact(reward_at(s)).
 fact(reward_at(m)).
 fact(reward_at(o)).
 fact(reward_at(ae)).
 fact(reward_at(aa)).
 fact(reward_at(ad)).
 fact(reward_at(aj)).
+fact(reward_at(ac)).
 
 plan(ach, go([]), [reward_at(Treasure)],
 	[

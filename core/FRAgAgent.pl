@@ -387,12 +387,40 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context,
 %   it is unsuccessful.
     nonempty_context(Context_New, Result).
 
+
+%   Top level goal (external event) declaration
+
+execute(Intention_ID,
+        plan(Event_Type, Goal_Atom, Conditions, Context, [tlg(Goal)| Acts]),
+        plan(Event_Type, Goal_Atom, Conditions, Context, Acts),
+        true)                                                            
+    :-
+    loop_number(Loop_Number),
+    format(atom(String), "[~w] Introducting top level goal ~w",
+		          [Loop_Number, tlg(Goal, Context)]),
+    println_debug(String, actdbg),
+
+ %   variables of the goal declared
+    term_variables(Goal, Goal_Variables),
+
+%   short context of the original level by variables in the goal declared
+%   'shorting' clause is defined in FRAgPLFrag.pl
+    shorting(Goal, Goal2, Context, Goal_Variables, Context_New,_),
+    get_fresh_event_number(Event_ID),
+
+%   create ach event with proper parent intention and context
+    assert(event(Event_ID, ach, Goal2, null, Context_New, active, [])).
+
+
+
+
+
 %   Performing the achievement goal
 
 execute(Intention_ID,
-        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
-        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Plans]),
-        true)
+        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Acts]),
+        plan(Event_Type, Goal_Atom, Conditions, Context, [ach(Goal)| Acts]),
+        true)                                                            
     :-
     loop_number(Loop_Number),
     format(atom(String), "[~w] Introducting achievement goal ~w",

@@ -54,15 +54,16 @@ coords(aj,[6,6]).
 
 % item([2,2], gold).
 % item([3,3], gold).
-item([1,3], gold).
-item([2,1], gold).
-item([3,3], gold).
-item([3,5], gold).
-item([1,6], gold).                                                   
-item([5,5], gold).
-item([6,1], gold).
-item([6,5], gold).
-item([6,6], gold).
+item([1,3], gold, 3).
+item([1,4], gold, 3).
+item([6,2], gold, 2).
+item([3,3], silver, 2).
+item([3,5], bronze, 1).
+item([1,6], gold, 3).                                                   
+item([5,5], silver, 2).
+item([6,1], gold, 3).
+item([6,5], bronze, 1).
+item([6,6], bronze, 1).
 
 path([A,B],[C,B]):-C is A+1.
 path([A,B],[A,C]):-C is B+1.
@@ -106,7 +107,7 @@ init_directions:-
 
 
 init_items:- 
-   findall(item(Position, Item), item(Position, Item), Items),
+   findall(item(Position, Item, Reward), item(Position, Item, Reward), Items),
     add_facts(simple_maze, Items).
 
 
@@ -155,7 +156,7 @@ get_percepts_position(Position, Agent, Percepts):-
    findall(direction(Room, Direction), 
             (dirs(Position, Coords, Direction), coords(Room, Coords)), 
 	    Directions_Percepts),
-    findall_environment(simple_maze, Agent, item(Position, Item), 
+    findall_environment(simple_maze, Agent, item(Position, Item, Reward), 
 			Items),
    append(Directions_Percepts, Items_Percepts, Percepts).
 
@@ -208,10 +209,10 @@ simple_maze(act, Agent, go(Direction), Result):-
 simple_maze(act, Agent, go(Direction), false).
 
  
-get_result(Position, Agent, reward(1)):-
-    query_environment(simple_maze, Agent, item(Position, gold)),
+get_result(Position, Agent, reward(Reward)):-
+    query_environment(simple_maze, Agent, item(Position, Item, Reward)),
  writeln(dostavam_odmenu(Position)),
-    delete_facts_beliefs_all(simple_maze, Agent, [item(Position, gold)]),
+    delete_facts_beliefs_all(simple_maze, Agent, [item(Position, Item, Reward)]),
     coords(Room, Position),
     delete_beliefs_all(Agent, [reward_at(Room)]).
 

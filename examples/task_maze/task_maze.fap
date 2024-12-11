@@ -1,0 +1,56 @@
+
+
+
+
+
+
+goal(ach,go,[[]]).
+
+
+/*
+plan(ach, go([]), [],
+	[
+	 act(task_maze, pick),
+         act(task_maze, go(down)),
+	 act(task_maze, pick),
+	 act(task_maze, go(down)),
+	 act(task_maze, pick),
+         act(task_maze, go(down)),
+	 act(task_maze, pick),
+         act(task_maze, go(down)),
+         act(task_maze, go(down))
+        ]
+    ).
+*/
+
+plan(ach, go, [],
+	[
+	  ach(make_step),
+	  ach(pick_or_not),
+          ach(go)
+	]
+     ).
+
+
+
+plan(ach, make_step, [door(Direction)], 
+	[
+         act(task_maze, go(Direction))
+	]
+    ).                   
+
+
+plan(ach, pick_or_not, [],
+	[
+         act(task_maze, pick)
+	]
+    ).       
+            
+                          
+plan(ach, pick_or_not, [],
+	[
+	]
+    ).                   
+                            
+
+

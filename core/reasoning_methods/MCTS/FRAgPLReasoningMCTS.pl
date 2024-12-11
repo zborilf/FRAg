@@ -45,7 +45,7 @@ reasoning_method(mcts_reasoning).
 
 mcts_gamma(1).
 mcts_alpha(0.25).
-mcts_max_reward(7).
+mcts_max_reward(10).
 
 % actual path found by last mcts execution, first is reasoning prefix,
 % then action?
