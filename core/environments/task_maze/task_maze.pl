@@ -51,9 +51,29 @@ coords(ah,[4,6]).
 coords(ai,[5,6]).
 coords(aj,[6,6]).
 
-task(bronze, gold, silver).
-task(silver, bronze, bronze).
+
+
 task(gold, gold, gold).
+
+task(gold, gold, bronze).
+task(gold, bronze, gold).
+task(bronze, gold, gold).
+
+task(gold, silver, bronze).
+task(gold, bronze, silver).
+% task(silver, gold, bronze).
+% task(silver, bronze, gold).
+% task(bronze, gold, silver).
+% task(bronze, silver, gold).
+
+
+task(bronze, bronze, silver).
+task(bronze, silver, bronze).
+% task(silver, bronze, bronze).
+
+
+
+
 
 % item([2,2], gold).
 % item([3,3], gold).
@@ -171,7 +191,6 @@ assign_items_positions(_, [],[]).
 
 assign_items_positions(Agent, [direction(_, Position2, Direction)| Directions],
 		       [door(Direction, Item)| Doors]):-
- writeln(items_position:query_environment(task_maze, Agent, item(Position2, Item, Price))),
     env_utils:query_environment(task_maze, Agent, item(Position2, Item, Price)),
     assign_items_positions(Agent, Directions, Doors).
 
@@ -210,9 +229,8 @@ task_maze(add_agent, _, _).
 %    Agent percieves
 
 task_maze(perceive, Agent , Add_List, Delete_List):-
-   retreive_add_delete(Agent, Add_List, Delete_List).    
-
-
+   retreive_add_delete(Agent, Add_List, Delete_List).
+ 
 %    Agent acts
                                 
 task_maze(act, Agent, go(Direction), true):- 
@@ -237,8 +255,7 @@ task_maze(act, Agent, pick, Result):-
     env_utils:delete_facts_beliefs(task_maze, Agent, 
                                    [item(Position, Item, Reward)]),
     degrade_item(Item, Item2, Item2_Price),
- writeln(degraded(Position, Item, Item2)),
-   env_utils:add_facts_beliefs(task_maze, Agent, 
+    env_utils:add_facts_beliefs(task_maze, Agent, 
                                    [item(Position, Item2, Item2_Price)]),
   
   % TODO
@@ -303,17 +320,10 @@ check_list_match2(L1, L2):-
 %   and adds to the add list what it sees in the new room
 
 change_room_percepts(Agent, Position1, Position2):-
- writeln(chrp1),
     get_percepts_position(Position1, Agent, Percepts1),
- writeln(chrp2),
-   get_percepts_position(Position2, Agent, Percepts2),
- writeln(delete_beliefs(Agent, Percepts1)),
+    get_percepts_position(Position2, Agent, Percepts2),
     delete_beliefs(Agent, Percepts1),      
- writeln(add_beliefs(Agent, Percepts2)), 
-    add_beliefs(Agent, Percepts2),
- writeln(hotovo).   
-
-
+    add_beliefs(Agent, Percepts2).
 
 % Silent actions, clones
 
@@ -347,8 +357,7 @@ task_maze(save_state, Instance, State):-
 
 
 task_maze(load_state, Instance, State):-
-    load_environment_instance_state(task_maze, Instance, State).
-
+    load_environment_instance_state(task_maze, Instance, State).    
 
 task_maze(remove_state, Instance, State):-
     remove_environment_instance_state(task_maze, Instance, State).

@@ -1,0 +1,59 @@
+
+
+fact(nmb(6)).
+fact(nmb(23)).
+fact(nmb(9)).
+fact(nmb(15)).
+fact(nmb(1)).
+fact(nmb(17)).
+fact(nmb(11)).
+fact(nmb(22)).
+fact(nmb(4)).
+
+
+%  AgentSpeak(L) version
+%  SelectSort
+%
+%  !select(1).
+%  +!select(I):nmb(NMBS)<-
+%		.findall(X,nmb(X),L);
+%               !getmin(NMBS,L,OUT);
+%               +lnmb(I,OUT);
+%		-nmb(OUT);
+%		I2=I+1;
+%		!select(I2).
+%
+%  +!getmin(NMBS,[],NMBS).
+%
+%  +!getmin(NMBS,[H|T],NMBSOUT)<-
+%		NMBS<H;
+%		!getmin(NMBS,T,NMBSTOUT).
+%
+
+goal(ach,select(1),[[]]).
+
+% must be simple reasoning! or a context in the second plan (there is no nmb(NMBS))
+
+plan(ach,select(I),[nmb(NMBS)],			% until there is some (nmb(NMBS))
+	[
+		act(bagof(X,fact(nmb(X)),L)),
+		ach(getmin(NMBS,L,OUT)),
+		add(lnmb(I,OUT)),
+		del(nmb(OUT)),
+		act(I2 is I+1),
+		ach(select(I2))
+	]
+).
+
+plan(ach,select(I),[],[]).
+
+
+plan(ach,getmin(NMBS,[],NMBS),[],[]).
+
+plan(ach,getmin(NMBS,[H|T],OUT),[],
+	[
+		act(NMBS=<H),
+		ach(getmin(NMBS,T,OUT))	
+	]
+).
+                                       

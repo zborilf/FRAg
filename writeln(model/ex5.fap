@@ -1,0 +1,10 @@
+
+
+
+goal(ach,ex3,null,[[]],active).
+goal(ach,ex5,null,[[]],active).
+
+
+plan(ach,ex3,[],[act(writeln(rozeslal_jsem)),ach(ex5),test(a(a)),add(premyslim),add(si),del(si)]).
+
+plan(ach,ex5,[],[act(format("Diky za zpravu!~n",[])),add(a(b)),add(a(a))]).

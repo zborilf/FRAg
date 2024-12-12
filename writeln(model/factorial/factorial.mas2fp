@@ -1,0 +1,4 @@
+set_agents([(bindings, late), (reasoning, mcts_reasoning)]).
+
+load("factorial","../examples/factorial/factorial",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+			   

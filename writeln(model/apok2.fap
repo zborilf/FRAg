@@ -1,0 +1,10 @@
+
+
+
+goal(ach,cil(22),null,[[]],active).
+goal(ach,cil3,null,[[]],active).
+
+plan(ach,cil(X),[],[add(g(111))]).
+plan(ach,cil3,[],[test(gg(A)),act(write(ahoj))]).
+plan(ach,cil3,[g(Z)],[act(write(hotovo))]).
+

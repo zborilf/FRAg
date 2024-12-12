@@ -1,0 +1,10 @@
+
+
+
+set_agents([ 
+             (bindings, lat),
+             (reasoning, robin_reasoning)
+             ]
+     ).		
+
+load("canagent","../examples/can/can",1,[(debug, actdbg)]).

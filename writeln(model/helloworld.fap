@@ -1,0 +1,9 @@
+
+
+
+goal(ach,sayhello,null,[[]],active).
+
+plan(ach,sayhello,[],[
+			act(printfg("Helo World!"))
+		]).
+

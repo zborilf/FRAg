@@ -1,0 +1,49 @@
+
+
+fact(nomssg).
+
+goal(ach,tym,null,[[]],active).
+
+
+plan(ach,tym,[],[
+				act(me(franta1)),
+				act(printfg("Jsem sef\n")),
+				act(bcast(sef(franta1))),
+				act(population(L)),
+				act(printfg("Jsem vedouci\n")),
+				act(delete(L,franta1,[H|T])),
+				add(ritht(H)),
+				act(last(T,LF)),
+				add(left(LF)),
+				act(send(H,team(T))) ]).
+
+
+plan(ach,tym,[],[
+			act(printfg("nejsem_vedouci~n")),ach(wait)
+		]).
+
+plan(ach,wait,[mssg],[
+			act(writeln(hotovo))
+		]).
+
+
+plan(add,message(_,inform,pld(sef(SEF))),[],[	
+						add(mujsef(SEF))
+						]).
+
+plan(add,message(SRC,inform,pld(team([]))),[],[	
+						add(left(SRC)),
+						test(mujsef(SEF)),
+						add(right(SEF)),
+					        del(nomssg),
+						add(mssg)
+						]).
+
+
+plan(add,message(SRC,inform,pld(team([H|T]))),[],[	
+						act(send(H,team(T))),
+						add(left(SRC)),
+						add(right(H)),
+						del(nomssg),
+						add(mssg)
+						]).

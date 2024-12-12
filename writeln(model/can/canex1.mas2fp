@@ -1,0 +1,12 @@
+
+
+
+
+set_agents([ 
+             (bindings, late),
+             (reasoning, robin_reasoning)
+             ]
+     ).		
+
+load("canagent","../examples/can/canex1",1,[(debug, reasoningdbg)]).
+                                          

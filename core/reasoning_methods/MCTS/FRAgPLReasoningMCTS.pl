@@ -204,14 +204,12 @@ model_expand_actions(Actions):-
     model_expand_actions2(Intentions, Actions),
     format(atom(String),"[MCTS] Expanded actions: ~w",[Actions]),
     println_debug(String, mctsdbg),
-  writeln("==========================================================="),
     temp_pa(Actions).
  
 model_expand_actions([]).   % in the case there is no intention
 
 temp_pa([]).
 temp_pa([H|T]):-
- writeln(H),
  temp_pa(T).
 
 
@@ -227,7 +225,6 @@ model_expand_deliberations(Deliberations):-
 	  event(Event_ID, Type,Predicate,Intention, Context,active, History),
 	  Events),
     !,
- writeln(model_expand_deliberations2(Events, Deliberations)),
     model_expand_deliberations2(Events, Deliberations).
 
 model_expand_deliberations([]).   % in the case there is no goal
@@ -545,7 +542,6 @@ mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
 
     take_snapshot(Program2),
     save_all_instances_state(Virtual_Agent, mcts_save),
-
     mcts_rollouts(Program2, Steps, Simulations, [], Rewards_Path, 
 			  Expanded).   % Why Expanded? TODO
 
@@ -913,7 +909,6 @@ get_substitution(mcts_reasoning, Action, Contexts, Vars, Context_Out):-
     format(atom(Model_SubsS), "GS6 Model Act Subs: ~w", [Model_Act]),
     println_debug(Model_SubsS, interdbg),
     %	rename_substitution_vars(MODELCTX,VARS,NCTX),
-  writeln(unifiable(Action, Model_Act, Context_Out)),
     unifiable_s(Action, Model_Act, Context_Out),
     format(atom(Context_OutS), 'GS7 Context Out: ~w', [Context_Out]),
     println_debug(Context_OutS, interdbg).

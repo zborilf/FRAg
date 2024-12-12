@@ -1,0 +1,12 @@
+
+
+
+set_agents([(bindings, late),(reasoning, mcts_reasoning),
+				(reasoning_params, mcts_params(20,3,10))]).
+
+% load("vaclav","examples/vaclav/vaclav",1,[(debug, systemdbg), (debug, reasoningdbg)]).
+
+load("vaclav","../examples/vaclav/vaclav", 2, [(debug, systemdbg), (debug, mctsdbg)]).
+
+			   
+			  

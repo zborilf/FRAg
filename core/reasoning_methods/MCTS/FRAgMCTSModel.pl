@@ -43,9 +43,7 @@ set_root_node(Root):-
 
 
 mcts_print_all:-
-   bagof(tree_node(A,B,C, Reward, D,E),tree_node(A,B,C, Reward, D,E),L),
-   writeln(L).
-
+   bagof(tree_node(A,B,C, Reward, D,E),tree_node(A,B,C, Reward, D,E),L).
 
 mcts_print_model(Debug):-
     root_node(Root),

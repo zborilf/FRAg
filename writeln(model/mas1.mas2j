@@ -1,0 +1,9 @@
+
+/*
+ * AGS project (based on gold-miners example)
+ */
+
+MAS miners {
+    infrastructure: Centralised
+	agents:	franta ex1.asl;
+ }

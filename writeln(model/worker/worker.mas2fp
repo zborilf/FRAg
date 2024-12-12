@@ -1,0 +1,57 @@
+                                                                                            
+
+include_environment("/environments/workshop/workshop.pl").
+
+
+set_environment(workshop, 
+/*
+		[(resources_rates, [resource(wood, 0.03), 
+			      resource(plastic, 0.01),
+			      resource(metal, 0.02),
+			      resource(stone, 0.025),
+			      resource(glass, 0.015)]),
+
+		[(resources_rates, [resource(wood, 0.06), 
+			      resource(plastic, 0.02),
+			      resource(metal, 0.04),
+			      resource(stone, 0.05),
+			      resource(glass, 0.03)]),
+*/
+		[(resources_rates, [resource(wood, 0.2), 
+			      resource(plastic, 0.075),
+			      resource(metal, 0.15),
+			      resource(stone, 0.15),
+			      resource(glass, 0.25)]),
+	
+		 (resources_max, 50),
+		 (tasks_rate, 0.6),
+		 (tasks_max, 50)]
+               ).
+
+
+set_agents([ 
+             (control, terminate(timeout, 1000)),
+             (bindings, late),
+             (reasoning, mcts_reasoning),
+	     (reasoning_params, mcts_params(50,20,30)),
+%	     (reasoning, robin_reasoning),
+	     (environment, workshop)]
+     ).		
+
+
+
+% load("workerEX","../examples/worker/worker2",1,[(bindings, late), (reasoning, robin_reasoning), (debug, reasoningdbg),
+%		 (debug, actdbg)]).
+
+
+
+
+load("workerCL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg), (debug, reasoningdbg), 
+				(debug, mctsdpg_path), (debug, mctsdbg)]).
+
+% load("workerCE","../examples/worker/worker",1,[(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)]).
+
+% load("workerL","../examples/worker/worker",1,[(bindings, late), (debug, actdbg)]).
+
+% load("workerE","../examples/worker/worker",1,[(bindings, early), (debug, actdbg)]).
+

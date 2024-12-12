@@ -625,7 +625,7 @@ load_environment_instance_state(Environment, Instance, State):-
     findall(Fact, 
             fact(Environment, Instance, State, Fact), 
             Facts2),
-    add_facts_beliefs_all(Environment, Agent, Facts2).
+    add_facts_clone(Environment, Instance, Facts2).
 
 
 
