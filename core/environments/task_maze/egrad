@@ -153,17 +153,18 @@ init_tasks:-
 %@arg Position: Actual agent's position (room)
 %@arg Percepts: List of percepts in that position (room)
 
-get_percepts_position(Position, Agent, [item(Position, Item, Price) | 
-					Percepts]):-
+get_percepts_position(Position, Agent, Percepts):-
     env_utils:findall_environment(task_maze, Agent, 
 				  (direction(Position, Position2, Direction)),
+                                   % item(Position2, Item, Reward)), 
                                   Directions),
+ writeln(   assign_items_positions(Agent, Directions, Doors)),
     assign_items_positions(Agent, Directions, Doors),
-    env_utils:query_environment(task_maze, Agent, item(Position, Item, Price)),
 
 %    findall(door(Direction, Item), 
 %	    (dirs(Position, Position2, Direction), item(Position2, Item, _)),
 %                                  Doors),
+ writeln(   assigned),
     append(Items, Doors, Percepts).
 
 
@@ -171,7 +172,7 @@ assign_items_positions(_, [],[]).
 
 assign_items_positions(Agent, [direction(_, Position2, Direction)| Directions],
 		       [door(Direction, Item)| Doors]):-
- writeln(items_position:query_environment(task_maze, Agent, item(Position2, Item, Price))),
+ writeln(    env_utils:query_environment(task_maze, Agent, item(Position2, Item, Price))),
     env_utils:query_environment(task_maze, Agent, item(Position2, Item, Price)),
     assign_items_positions(Agent, Directions, Doors).
 
@@ -237,13 +238,11 @@ task_maze(act, Agent, pick, Result):-
     env_utils:delete_facts_beliefs(task_maze, Agent, 
                                    [item(Position, Item, Reward)]),
     degrade_item(Item, Item2, Item2_Price),
- writeln(degraded(Position, Item, Item2)),
-   env_utils:add_facts_beliefs(task_maze, Agent, 
+    env_utils:add_facts_beliefs(task_maze, Agent, 
                                    [item(Position, Item2, Item2_Price)]),
-  
   % TODO
-  %  retract(item(Position, Item, Reward)),
-  %  assert(item(Position, Item2, Item2_Price)),
+    retract(item(Position, Item, Reward)),
+    assert(item(Position, Item2, Item2_Price)),
 
     get_result(Pointer, Agent, Item, Result).
 
@@ -258,7 +257,6 @@ degrade_item(silver, bronze, 1).
 
 degrade_item(bronze, dust, 0).
 
-degrade_item(dust, dust, 0).
  
 get_result(3, Agent, Item, Result):-
     env_utils:query_environment(task_maze, Agent, bag(1, Item1)),
@@ -271,6 +269,7 @@ get_result(3, Agent, Item, Result):-
          [bag(1, Item1), bag(2, Item2)]),
     env_utils:delete_facts_beliefs(task_maze, Agent, [bagpoint(3)]),
     env_utils:add_facts_beliefs(task_maze, Agent, [bagpoint(1)]),
+ writeln(get_result2([Item1, Item2, Item], Tasks, Result)),
     get_result2([Item1, Item2, Item], Tasks, Result).
   
 get_result(Pointer, Agent, Item, true):-
@@ -303,13 +302,13 @@ check_list_match2(L1, L2):-
 %   and adds to the add list what it sees in the new room
 
 change_room_percepts(Agent, Position1, Position2):-
- writeln(chrp1),
+ writeln(gpa),
     get_percepts_position(Position1, Agent, Percepts1),
- writeln(chrp2),
-   get_percepts_position(Position2, Agent, Percepts2),
- writeln(delete_beliefs(Agent, Percepts1)),
+ writeln(gpb),
+    get_percepts_position(Position2, Agent, Percepts2),
+ writeln(gpc),
     delete_beliefs(Agent, Percepts1),      
- writeln(add_beliefs(Agent, Percepts2)), 
+ writeln(gpd), 
     add_beliefs(Agent, Percepts2),
  writeln(hotovo).   
 
