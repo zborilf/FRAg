@@ -58,3 +58,11 @@ Omezit velikost kontextu
 
 
 BUG? Asi je problem, kdyz ma plan jednu akci a ta spadne, plan i tak uspeje (objevilo se ve workshopu)
+
+MCTS, nejde externi cil (tlg), klonovat se maji jen fakta, ne beliefs (snad ok), agenti pri klonovani se
+  prejmenovavaji, ale co kdyz jsou jejich jmena v BB? (asi prejmenovavat). 
+Zvazit, zdali strom by nemel byt zachovavan mezi kroky (resp. jak je to se stavy agentu)
+
+
+
+

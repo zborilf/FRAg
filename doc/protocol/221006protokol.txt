@@ -85,3 +85,5 @@
 
 4.4.24 Další nakoknutí. Budu pracovat na MCTS metodì, snad i dokumentaci, ale hlavnì doladìní a pøíkladech
 
+13.12.24 MCTS dodelano do nejakeho stavu pro pripadny clanek, ulohy maze a task_maze
+

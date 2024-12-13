@@ -1341,6 +1341,7 @@ loop(Steps, Steps_Left):-
     println_debug(String8, interdbg),
     increment_loop,
     Steps2 is Steps-1,
+    garbage_collect,
 
     next_loop(Steps2, Steps_Left).
 

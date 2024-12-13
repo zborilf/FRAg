@@ -470,6 +470,10 @@ join_threads([Thread| Threads]):-
 %   parameters
 
 main_frag:-
+    set_prolog_stack(global, limit(8 000 000 000)),
+    set_prolog_stack(trail, limit(5 000 000 000)),
+    set_prolog_stack(local, limit(5 000 000 000)),
+		
     nl,
     version(Version),
     format(
