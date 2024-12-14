@@ -1309,6 +1309,18 @@ loop(Steps, Steps_Left):-
 ~n',[Loop_Number]),
     println_debug(String1, reasoningdbg),
 
+ statistics(global_stack, Global_Stack),
+ statistics(trail, Trail),
+
+
+%    findall(_, clause(Predicate, Arity), Clauses),
+%    length(Clauses, Count),
+%   writeln(Count),
+
+    format(atom(String_Stat), 'Global stack: ~w ~n Trail: ~w~n', 
+                              [Global_Stack, Trail]),
+    println_debug(String_Stat, interdbg),
+
     format(atom(String2), 'STATE IN LOOP ~w~n', [Loop_Number]),
     print_state(String2),
 
@@ -1341,7 +1353,8 @@ loop(Steps, Steps_Left):-
     println_debug(String8, interdbg),
     increment_loop,
     Steps2 is Steps-1,
-    garbage_collect,
+    !,
+    garbage_all,
 
     next_loop(Steps2, Steps_Left).
 
@@ -1395,6 +1408,13 @@ next_loop(Steps, Steps):-
 
 next_loop( _, Steps_Left):-
     loop( 1, Steps_Left).
+
+garbage_all:-
+    garbage_collect,
+    garbage_collect_atoms,
+    garbage_collect_clauses,
+    trim_stacks.
+
 
 
 % dont sync in virtual mode
@@ -1576,6 +1596,13 @@ set_clauses([Clause| Clauses], Plan_Index):-
     set_clauses(Clauses, Plan_Index).
 
 
+%!  delete_clauses is det
+
+delete_clauses:-
+    retractall(plan(_, _, _, _, _)),
+    retractall(event(_, _, _)),
+    retractall(intention(_, _, _)),
+    retractall(event(_, _, _, _, _, _, _)).
 
 %!  load_program(+Filename, -Clauses) is multi
 %   Loads agent program from specified file

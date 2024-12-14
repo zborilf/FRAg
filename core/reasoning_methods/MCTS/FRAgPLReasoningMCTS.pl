@@ -161,6 +161,9 @@ get_actions(Intention_Index, ach(Goal),_ ,
 get_actions(Intention_ID, ach(Goal), Context, Actions):-
     get_all_action_decisions(Intention_ID, ach(Goal), Context, Actions).
 
+get_actions(Intention_ID, tlg(Goal), Context, Actions):-
+    get_all_action_decisions(Intention_ID, tlg(Goal), Context, Actions).
+
 get_actions(Intention_ID, add(Goal), Context, Actions):-
     get_all_action_decisions(Intention_ID, add(Goal), Context, Actions).
 
@@ -387,11 +390,14 @@ mcts_rollouts(Program, Steps, 0, Results, Rewards_Path, Expanded):-
                 [runResult(Results, 0, Expanded, Goals_Remain)]),
     println_debug(ResultsS, mctsdbg),
     thread_self(Virtual_Agent),
+    remove_all_instances_state(Virtual_Agent, mcts_save),
     remove_clones(Virtual_Agent),
+    delete_clauses,
     close_engine_file,				% close stream
     engine_yield(runResult(results(Rewards_Path, Results), 0, Expanded, 
 		 Goals_Remain)),
     !,
+    garbage_all,
 
 	% ENGINE RESTARTS HERE!
 
@@ -423,6 +429,7 @@ mcts_rollouts(Program, Steps, Simulations, Results, Rewards_Path,
     Simulations2 is Simulations - 1,
     mcts_rollouts(Program, Steps, Simulations2, [Rewards| Results],
                           Rewards_Path, Expanded).
+
 
 
 garbage_all:-
@@ -514,6 +521,8 @@ mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
     %  3, makes simulation of postfix of the program (Program2)
     %      at this point as an engine - each execution of engine makes number_of_simulations(NOS) simulations
     %
+    set_prolog_stack(trail, limit(5 000 000 000)),
+    set_prolog_stack(local, limit(5 000 000 000)),
 
     assert(virtual_mode(true)),
     set_debugs(Debug),
@@ -542,6 +551,7 @@ mcts_frag_engine(Program, Intention_Fresh, Event_Fresh, Path, Expanded,
 
     take_snapshot(Program2),
     save_all_instances_state(Virtual_Agent, mcts_save),
+    !,
     mcts_rollouts(Program2, Steps, Simulations, [], Rewards_Path, 
 			  Expanded).   % Why Expanded? TODO
 
@@ -650,6 +660,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
                                    Debug),
                   Engine),
 
+
     format(atom(ProgramS), 'Engine program: ~w', [Program]),
     println_debug(ProgramS, mctsdbg),
 % Phase 2+3, Expansion and Roll-outs
@@ -682,6 +693,7 @@ mcts_expansion_loop(Program, Expansions, Max_Reward, Simulations):-
     format(atom(ExpansionsS),"Expansions: ~w", [Expansions2]),
     println_debug(ExpansionsS,  mctsdbg),
     close_engine_file,	
+    !,
     mcts_expansion_loop(Program, Expansions2, Max_Reward, Simulations).
                                                                                     
 

@@ -105,6 +105,8 @@ register_clone(Environment, Clone):-
 
 remove_environment_clone(Environment, Clone):-
     retractall(fact(Environment, Clone, _)),
+    retractall(add(Clone, _)),
+    retractall(delete(Clone, _)),
     retractall(situated_agent(_, Environment, Clone)).
 
 
@@ -636,7 +638,8 @@ load_environment_instance_state(Environment, Instance, State):-
 %  @arg State
 
 remove_environment_instance_state(Environment, Instance, State):-
-    retractall(fact(Environment, Instance, State, _)).
+    retractall(fact(Environment, Instance, State, _)),
+    garbage_collect.
 
 md:-
     use_module(library(pldoc/doc_library)),

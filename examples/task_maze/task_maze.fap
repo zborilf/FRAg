@@ -12,7 +12,7 @@ plan(ach, go, [task(Stone1, Stone2, Stone3)],
          ach(get_stone(Stone1)),
          ach(get_stone(Stone2)),
          ach(get_stone(Stone3)),
-	 ach(go)
+	 tlg(go)
         ]
     ).
 

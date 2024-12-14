@@ -361,7 +361,9 @@ mcts_divide_path([_,_| Path], Reasoning_Nodes, Act_Node):-
 
 mcts_model_init:-
     retractall(fresh_node_index(_)),
+    retractall(root_node(_)),
     retractall(tree_node( _, _, _, _, _, _)),
+    garbage_collect,
     assert(root_node(root)),
     assert(fresh_node_index(1)),
     assert(tree_node(root, model_act_node(no_intention, no_action, [[]]),

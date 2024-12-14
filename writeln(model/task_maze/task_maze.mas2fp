@@ -3,9 +3,9 @@
 include_environment("/environments/task_maze/task_maze.pl").
 
 set_agents([(bindings, late), (reasoning, mcts_reasoning), 
-               % (reasoning, random_reasoning),
+                % (reasoning, random_reasoning),
 		(reasoning_params, mcts_params(20,10,40)), 
-	        (control, terminate(timeout, 800)), 
+	        (control, terminate(timeout, 25)), 
                 (environment, task_maze)]).
 		
 
