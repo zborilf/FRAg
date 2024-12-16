@@ -1355,6 +1355,7 @@ loop(Steps, Steps_Left):-
     Steps2 is Steps-1,
     !,
     garbage_all,
+    
 
     next_loop(Steps2, Steps_Left).
 

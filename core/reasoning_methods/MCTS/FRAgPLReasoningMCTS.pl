@@ -392,13 +392,12 @@ mcts_rollouts(Program, Steps, 0, Results, Rewards_Path, Expanded):-
     thread_self(Virtual_Agent),
     remove_all_instances_state(Virtual_Agent, mcts_save),
     remove_clones(Virtual_Agent),
-    delete_clauses,
     close_engine_file,				% close stream
     engine_yield(runResult(results(Rewards_Path, Results), 0, Expanded, 
 		 Goals_Remain)),
     !,
     garbage_all,
-
+    
 	% ENGINE RESTARTS HERE!
 
     garbage_collect_atoms,
@@ -424,6 +423,7 @@ mcts_rollouts(Program, Steps, Simulations, Results, Rewards_Path,
     loop(Steps, Steps_Left),
     rewards_achieved(Rewards), 
     Steps_Done is Steps - Steps_Left,
+    delete_clauses,
     !,
     garbage_all,
     Simulations2 is Simulations - 1,
@@ -454,9 +454,8 @@ open_engine_file(Agent, Agent_Loop, 0):-
     try_make_directory(DirectoryS),
     format(atom(Filename),"~w/__mcts_engine_stp~w.mcts", [DirectoryS, 	
 							Agent_Loop]),
-    open_file(Filename).
-
-
+    open_file(Filename),
+ writeln(nazddaaar).
 
 open_engine_file(Agent, Agent_Loop, Runs):-
     agent_debug(mctsdbg),
