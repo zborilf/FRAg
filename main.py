@@ -15,6 +15,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.file_model = None
         self.initialize_tree_view()
 
+        # Connect signals
+        self.runButton.clicked.connect(self.on_start)
+        self.treeView.doubleClicked.connect(self.on_file_selected)
+
+        # Setting the run button to inactive on startup
+        self.runButton.setEnabled(False)
+
     def initialize_tree_view(self):
         self.file_model = QFileSystemModel()
         self.file_model.setRootPath(QDir.rootPath())
@@ -40,13 +47,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeView.setColumnHidden(2, True)  # Hide the "Type" column
         self.treeView.setColumnHidden(3, True)  # Hide the "Date Modified" column
 
-        # Connect signal for file selection
-        self.treeView.doubleClicked.connect(self.on_file_selected)
+    # Signal handlers
+    def on_start(self):
+        print("Run button clicked")
 
     def on_file_selected(self, index):
         file_path = self.file_model.filePath(index)
         print(f"Selected file: {file_path}")
-
 
 if __name__ == "__main__":
     app = QApplication([])

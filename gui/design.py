@@ -48,13 +48,19 @@ class Ui_MainWindow(object):
         self.topLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
         self.topLayout.setContentsMargins(0, 0, 0, 0)
         self.topLayout.setObjectName("topLayout")
-        self.startButton = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
-        self.startButton.setEnabled(True)
-        self.startButton.setStyleSheet("background-color: green;\n"
-"color: white;\n"
-"")
-        self.startButton.setObjectName("startButton")
-        self.topLayout.addWidget(self.startButton)
+        self.runButton = QtWidgets.QPushButton(parent=self.horizontalLayoutWidget_2)
+        self.runButton.setEnabled(True)
+        self.runButton.setStyleSheet("#runButton {\n"
+"    background-color: green;\n"
+"    color: white;\n"
+"}\n"
+"\n"
+"#runButton:disabled {\n"
+"    background-color: gray;\n"
+"    color: lightgray;\n"
+"}")
+        self.runButton.setObjectName("runButton")
+        self.topLayout.addWidget(self.runButton)
         self.fakeLabel = QtWidgets.QLabel(parent=self.horizontalLayoutWidget_2)
         self.fakeLabel.setEnabled(False)
         self.fakeLabel.setText("")
@@ -82,5 +88,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "FRAg"))
         self.codeTab.setTabText(self.codeTab.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
         self.codeTab.setTabText(self.codeTab.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
-        self.startButton.setText(_translate("MainWindow", "Start"))
+        self.runButton.setText(_translate("MainWindow", "Start"))
         self.menuFRAg.setTitle(_translate("MainWindow", "FRAg"))
