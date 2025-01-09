@@ -11,16 +11,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # Initialize TreeView
+        # Initialize UI components
         self.file_model = None
         self.initialize_tree_view()
-
-        # Connect signals
-        self.runButton.clicked.connect(self.on_start)
-        self.treeView.doubleClicked.connect(self.on_file_selected)
-
-        # Setting the run button to inactive on startup
-        self.runButton.setEnabled(False)
+        self.initialize_buttons()
 
     def initialize_tree_view(self):
         self.file_model = QFileSystemModel()
@@ -46,6 +40,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeView.setColumnHidden(1, True)  # Hide the "Size" column
         self.treeView.setColumnHidden(2, True)  # Hide the "Type" column
         self.treeView.setColumnHidden(3, True)  # Hide the "Date Modified" column
+
+    def initialize_buttons(self):
+        # Connect signals
+        self.runButton.clicked.connect(self.on_start)
+        self.treeView.doubleClicked.connect(self.on_file_selected)
+
+        # Setting the run button to inactive on startup
+        self.runButton.setEnabled(False)
 
     # Signal handlers
     def on_start(self):
