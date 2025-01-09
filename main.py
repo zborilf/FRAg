@@ -1,7 +1,7 @@
 import os
 import pathlib
 
-from PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtGui import QFileSystemModel, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox
 from PyQt6.QtCore import QDir, Qt
 
@@ -51,10 +51,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def initialize_buttons(self):
         # Connect signals
         self.runButton.clicked.connect(self.on_start)
+        self.saveButton.clicked.connect(self.save_current_tab)
         self.treeView.doubleClicked.connect(self.on_file_selected)
 
-        # Setting the run button to inactive on startup
+        # Add keyboard shortcut for save
+        save_shortcut = QShortcut(QKeySequence.StandardKey.Save, self)
+        save_shortcut.activated.connect(self.save_current_tab)
+
+        # Disable buttons
         self.runButton.setEnabled(False)
+        self.saveButton.setEnabled(False)
 
     def initialize_tabs(self):
         self.codeTab.clear()
@@ -90,9 +96,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.open_tabs[file_path] = self.codeTab.count() - 1
 
         # Connect to QTextEdit signal to track changes
-        text_edit.textChanged.connect(lambda: self.mark_tab_as_dirty(file_path))
+        text_edit.textChanged.connect(lambda: self.mark_tab_as_dirty(self.codeTab.count() -1))
 
     def close_tab(self, index):
+        tab_text = self.codeTab.tabText(index)
+        if tab_text.endswith("*"):
+            # Ask user if they want to save changes
+            reply = QMessageBox.question(
+                self,
+                "Save Changes",
+                f"Do you want to save changes to '{tab_text.rstrip(' *')}'?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.save_current_tab()
+            elif reply == QMessageBox.StandardButton.Cancel:
+                return  # Do not close the tab
+
         # Remove the file path from open_tabs
         for file_path, tab_index in list(self.open_tabs.items()):
             if tab_index == index:
@@ -106,13 +126,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.codeTab.removeTab(index)
 
-    def mark_tab_as_dirty(self, file_path):
+    def mark_tab_as_dirty(self, index):
         """Marks a tab as dirty (modified)."""
-        tab_index = self.open_tabs.get(file_path)
-        if tab_index is not None:
-            tab_text = self.codeTab.tabText(tab_index)
-            if not tab_text.endswith("*"):
-                self.codeTab.setTabText(tab_index, tab_text + " *")
+        tab_text = self.codeTab.tabText(index)
+        if not tab_text.endswith("*"):
+            self.codeTab.setTabText(index, tab_text + " *")
+            self.saveButton.setEnabled(True)
+
+    def save_current_tab(self):
+        current_index = self.codeTab.currentIndex()
+        if current_index == -1:
+            return
+
+        # Find the associated file path
+        current_tab = self.codeTab.widget(current_index)
+        for file_path, tab_index in self.open_tabs.items():
+            if tab_index == current_index:
+                break
+        else:
+            return  # No file path associated with the tab
+
+        # Save content to file
+        try:
+            content = current_tab.toPlainText()
+            pathlib.Path(file_path).write_text(content, encoding="utf-8")
+
+            # Update the tab name
+            tab_text = self.codeTab.tabText(current_index).rstrip(" *")
+            self.codeTab.setTabText(current_index, tab_text)
+            self.saveButton.setEnabled(False)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save file:\n{file_path}\n\nError: {e}")
+            return
 
 if __name__ == "__main__":
     app = QApplication([])
