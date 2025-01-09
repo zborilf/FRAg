@@ -4,12 +4,12 @@ from pathlib import Path
 
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
-from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
-from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
-from agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
-from agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
-from agentspeak.frag_generator import FragGenerator
-from agentspeak.mas2fp_generator import Mas2fpGenerator, Agent
+from .asl.AgentSpeakLexer import AgentSpeakLexer
+from .asl.AgentSpeakParser import AgentSpeakParser
+from .mas2j.MAS2JavaLexer import MAS2JavaLexer
+from .mas2j.MAS2JavaParser import MAS2JavaParser
+from .frag_generator import FragGenerator
+from .mas2fp_generator import Mas2fpGenerator, Agent
 
 
 def _compile_mas_file(path: str) -> tuple[str, Agent]:

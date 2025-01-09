@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 
 from examples import get_example_file_path
-from agentspeak.compiler import compile_mas
+from compiler.agentspeak.compiler import compile_mas
 
 _example = 'do_it'
 

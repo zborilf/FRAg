@@ -2,11 +2,11 @@ import unittest
 
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
-from agentspeak.frag_generator import FragGenerator
-from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
-from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
+from compiler.agentspeak.frag_generator import FragGenerator
+from compiler.agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
+from compiler.agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
-from examples import get_example_file_path
+from .examples import get_example_file_path
 
 
 def _compile(example_name: str) -> str:

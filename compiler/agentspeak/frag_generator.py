@@ -1,7 +1,7 @@
-from agentspeak.asl.AgentSpeakListener import AgentSpeakListener
-from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
+from .asl.AgentSpeakListener import AgentSpeakListener
+from .asl.AgentSpeakParser import AgentSpeakParser
 
-from agentspeak.config import internal_functions, internal_functions_mapping
+from .config import internal_functions, internal_functions_mapping
 
 
 class FragGenerator(AgentSpeakListener):

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from agentspeak.mas2j.MAS2JavaListener import MAS2JavaListener
-from agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
+from .mas2j.MAS2JavaListener import MAS2JavaListener
+from .mas2j.MAS2JavaParser import MAS2JavaParser
 
 
 @dataclass
