@@ -1,4 +1,5 @@
 import os
+import glob
 import pathlib
 
 from PyQt6.QtGui import QFileSystemModel, QKeySequence, QShortcut
@@ -7,22 +8,34 @@ from PyQt6.QtCore import QDir, Qt
 
 from gui.design import Ui_MainWindow  # Import the generated UI
 
+
+def is_valid_configuration(folder_path):
+    mas2j_files = glob.glob(os.path.join(folder_path, "*.mas2j"))
+    return mas2j_files[0] if mas2j_files else None
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
 
         # Dictionary to track open files
-        self.open_tabs = {}
+        self.open_files = {}
 
         # File model to display the file system
         self.file_model = None
+
+        # Path to a valid ASL configuration
+        self.active_config_path = None
 
         # Initialize UI components
         self.initialize_tree_view()
         self.initialize_buttons()
         self.initialize_tabs()
 
+        # Set initial status message
+        self.set_invalid_config_status()
+
+    # Init methods
     def initialize_tree_view(self):
         self.file_model = QFileSystemModel()
         self.file_model.setRootPath(QDir.rootPath())
@@ -50,7 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def initialize_buttons(self):
         # Connect signals
-        self.runButton.clicked.connect(self.on_start)
+        self.runButton.clicked.connect(self.on_run)
         self.saveButton.clicked.connect(self.save_current_tab)
         self.treeView.doubleClicked.connect(self.on_file_selected)
 
@@ -63,13 +76,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.saveButton.setEnabled(False)
 
     def initialize_tabs(self):
-        self.codeTab.clear()
-        self.codeTab.setTabsClosable(True)
-        self.codeTab.tabCloseRequested.connect(self.close_tab)
+        self.filesTab.clear()
+        self.filesTab.setTabsClosable(True)
+        self.filesTab.tabCloseRequested.connect(self.close_tab)
+        self.filesTab.currentChanged.connect(self.update_run_button)
 
     # Signal handlers
-    def on_start(self):
-        print("Run button clicked")
+    def on_run(self):
+        print(f"Run button clicked, valid config path: {self.active_config_path}")
 
     def on_file_selected(self, index):
         if self.file_model.isDir(index):
@@ -78,8 +92,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file_path = self.file_model.filePath(index)
         file_name = os.path.basename(file_path)
 
-        if file_path in self.open_tabs:
-            self.codeTab.setCurrentIndex(self.open_tabs[file_path])  # Switch to the open tab
+        if file_path in self.open_files:
+            self.filesTab.setCurrentIndex(self.open_files[file_path])  # Switch to the open tab
             return
 
         # Open the file in a new tab
@@ -90,16 +104,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, "Error", f"Failed to open file:\n{file_path}\n\nError: {e}")
             return
 
-        self.codeTab.addTab(text_edit, file_name)
-        self.codeTab.setCurrentIndex(self.codeTab.count() - 1) # Switch to the new tab
+        self.filesTab.addTab(text_edit, file_name)
+        self.filesTab.setCurrentIndex(self.filesTab.count() - 1) # Switch to the new tab
 
-        self.open_tabs[file_path] = self.codeTab.count() - 1
+        self.open_files[file_path] = self.filesTab.count() - 1
 
         # Connect to QTextEdit signal to track changes
-        text_edit.textChanged.connect(lambda: self.mark_tab_as_dirty(self.codeTab.count() -1))
+        text_edit.textChanged.connect(lambda: self.mark_tab_as_dirty(self.filesTab.count() -1))
+
+        # Update the run button
+        self.update_run_button()
 
     def close_tab(self, index):
-        tab_text = self.codeTab.tabText(index)
+        tab_text = self.filesTab.tabText(index)
         if tab_text.endswith("*"):
             # Ask user if they want to save changes
             reply = QMessageBox.question(
@@ -113,34 +130,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             elif reply == QMessageBox.StandardButton.Cancel:
                 return  # Do not close the tab
 
-        # Remove the file path from open_tabs
-        for file_path, tab_index in list(self.open_tabs.items()):
+        # Remove the file path from open_files
+        for file_path, tab_index in list(self.open_files.items()):
             if tab_index == index:
-                del self.open_tabs[file_path]
+                del self.open_files[file_path]
                 break
 
-        # Adjust indices in open_tabs
-        for file_path, tab_index in self.open_tabs.items():
+        # Adjust indices in open_files
+        for file_path, tab_index in self.open_files.items():
             if tab_index > index:
-                self.open_tabs[file_path] -= 1
+                self.open_files[file_path] -= 1
 
-        self.codeTab.removeTab(index)
+        self.filesTab.removeTab(index)
 
-    def mark_tab_as_dirty(self, index):
-        """Marks a tab as dirty (modified)."""
-        tab_text = self.codeTab.tabText(index)
-        if not tab_text.endswith("*"):
-            self.codeTab.setTabText(index, tab_text + " *")
-            self.saveButton.setEnabled(True)
+        self.update_run_button()
+
 
     def save_current_tab(self):
-        current_index = self.codeTab.currentIndex()
+        current_index = self.filesTab.currentIndex()
         if current_index == -1:
             return
 
         # Find the associated file path
-        current_tab = self.codeTab.widget(current_index)
-        for file_path, tab_index in self.open_tabs.items():
+        current_tab = self.filesTab.widget(current_index)
+        for file_path, tab_index in self.open_files.items():
             if tab_index == current_index:
                 break
         else:
@@ -152,12 +165,63 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             pathlib.Path(file_path).write_text(content, encoding="utf-8")
 
             # Update the tab name
-            tab_text = self.codeTab.tabText(current_index).rstrip(" *")
-            self.codeTab.setTabText(current_index, tab_text)
+            tab_text = self.filesTab.tabText(current_index).rstrip(" *")
+            self.filesTab.setTabText(current_index, tab_text)
             self.saveButton.setEnabled(False)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to save file:\n{file_path}\n\nError: {e}")
             return
+
+    # Helper methods
+    def mark_tab_as_dirty(self, index):
+        """Marks a tab as dirty (modified)."""
+        tab_text = self.filesTab.tabText(index)
+        if not tab_text.endswith("*"):
+            self.filesTab.setTabText(index, tab_text + " *")
+            self.saveButton.setEnabled(True)
+
+    def update_run_button(self):
+        current_index = self.filesTab.currentIndex()
+        if current_index == -1:
+            # No open tabs
+            self.active_config_path = None
+            self.runButton.setEnabled(False)
+            self.set_invalid_config_status()
+            return
+
+        # Get the associated file path for the current tab
+        for file_path, tab_index in self.open_files.items():
+            if tab_index == current_index:
+                current_file = file_path
+                break
+        else:
+            self.active_config_path = None
+            self.runButton.setEnabled(False)
+            self.set_invalid_config_status()
+            return
+
+        # Determine the folder and check for .mas2j
+        folder_path = os.path.dirname(current_file)
+        if current_file.endswith(".mas2j"):
+            self.active_config_path = current_file
+        elif current_file.endswith(".asl"):
+            self.active_config_path = is_valid_configuration(folder_path)
+        else:
+            self.active_config_path = None
+
+        # Update the run button and label
+        self.runButton.setEnabled(self.active_config_path is not None)
+        if self.active_config_path:
+            self.update_dynamic_config_label(self.active_config_path, "blue")
+        else:
+            self.set_invalid_config_status()
+
+    def update_dynamic_config_label(self, text, color):
+        self.configStatusLabel.setText(text)
+        self.configStatusLabel.setStyleSheet(f"color: {color};")
+
+    def set_invalid_config_status(self):
+        self.update_dynamic_config_label("No valid configuration selected.", "orange")
 
 if __name__ == "__main__":
     app = QApplication([])
