@@ -32,6 +32,7 @@ class Ui_MainWindow(object):
         self.centralLayout.addWidget(self.treeView)
         self.codeTab = QtWidgets.QTabWidget(parent=self.horizontalLayoutWidget)
         self.codeTab.setEnabled(True)
+        self.codeTab.setTabsClosable(True)
         self.codeTab.setObjectName("codeTab")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
