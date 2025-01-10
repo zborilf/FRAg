@@ -1,16 +1,16 @@
+from antlr4.CommonTokenStream import CommonTokenStream
+
 from syntax.base_highlighter import BaseSyntaxHighlighter
+from compiler.agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
+from compiler.agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
 class ASLSyntaxHighlighter(BaseSyntaxHighlighter):
-    def __init__(self, document):
-        super().__init__(document)
+    keywords = ["action", "goal"]
+    def __init__(self, document, error_callback=None):
+        super().__init__(document, error_callback)
 
-        # Keywords
-        keywords = ["action", "goal"]
-        for keyword in keywords:
-            self.add_highlighting_rule(rf"\b{keyword}\b", "blue", bold=True)
-
-        # Comments
-        self.add_highlighting_rule(r"//[^\n]*", "green", italic=True)
-
-        # Strings
-        self.add_highlighting_rule(r"\".*?\"", "magenta")
+    def get_parser(self, input_stream):
+        lexer = AgentSpeakLexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = AgentSpeakParser(token_stream)
+        return parser
