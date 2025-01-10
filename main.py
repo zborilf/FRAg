@@ -7,6 +7,10 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox
 from PyQt6.QtCore import QDir, Qt
 
 from gui.design import Ui_MainWindow  # Import the generated UI
+from syntax.asl.highlighter import ASLSyntaxHighlighter
+from syntax.asl.grammar_tools import validate_asl_syntax
+from syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
+from syntax.mas2j.grammar_tools import validate_mas2j_syntax
 
 
 def is_valid_configuration(folder_path):
@@ -92,12 +96,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file_path = self.file_model.filePath(index)
         file_name = os.path.basename(file_path)
 
+        text_edit = QTextEdit()
+
+        file_extension = pathlib.Path(file_path).suffix
+        # Select appropriate highlighter and validator
+        if file_extension == ".asl":
+            text_edit.highlighter = ASLSyntaxHighlighter(text_edit.document())
+            valid, error = validate_asl_syntax(pathlib.Path(file_path).read_text())
+            file_type = "ASL"
+        elif file_extension == ".mas2j":
+            text_edit.highlighter = MAS2JSyntaxHighlighter(text_edit.document())
+            valid, error = validate_mas2j_syntax(pathlib.Path(file_path).read_text())
+            file_type = "MAS2J"
+        else:
+            return # Unsupported file type
+
+        # Handle syntax validation errors
+        if not valid:
+            QMessageBox.warning(self, "Syntax Error", f"Error in {file_type} file:\n{error}")
+
         if file_path in self.open_files:
             self.filesTab.setCurrentIndex(self.open_files[file_path])  # Switch to the open tab
             return
 
         # Open the file in a new tab
-        text_edit = QTextEdit()
         try:
             text_edit.setText(pathlib.Path(file_path).read_text(encoding="utf-8"))
         except Exception as e:
