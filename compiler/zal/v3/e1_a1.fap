@@ -1,2 +1,0 @@
-goal(ach,print_fact(5),null,[[]],active).
-plan(ach,print_fact(N),[]

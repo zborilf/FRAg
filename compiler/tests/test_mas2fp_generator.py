@@ -2,11 +2,11 @@ import unittest
 
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
-from ..agentspeak.mas2fp_generator import Mas2fpGenerator
-from ..agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
-from ..agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
+from compiler.agentspeak.mas2fp_generator import Mas2fpGenerator
+from compiler.agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
+from compiler.agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
 
-from .examples import get_example_file_path
+from examples import get_example_file_path
 
 
 def _compile(example_name: str) -> str:
