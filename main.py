@@ -1,11 +1,14 @@
 import os
 import glob
 import pathlib
+import tempfile
+import subprocess
 
 from PyQt6.QtGui import QFileSystemModel, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit, QMessageBox
 from PyQt6.QtCore import QDir, Qt
 
+from compiler.agentspeak.compiler import compile_mas
 from gui.design import Ui_MainWindow  # Import the generated UI
 from syntax.asl.highlighter import ASLSyntaxHighlighter
 from syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
@@ -88,7 +91,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Signal handlers
     def on_run(self):
-        print(f"Run button clicked, valid config path: {self.active_config_path}")
+        with tempfile.TemporaryDirectory() as dir_name:
+            try:
+                mas2j_path = pathlib.Path(self.active_config_path)
+                mas2fp_path = compile_mas(mas2j_path.as_posix(), dir_name)
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to compile MAS:\n{e}")
+                return
+
+            mas2fp_path_without_extension = mas2fp_path.with_suffix('')
+            command = ["swipl", "-l", "FragPL.pl", "-g", f"\"frag('{mas2fp_path_without_extension.as_posix()}')\"", "-g", "halt"]
+
+            a = 1
+
 
     def on_file_selected(self, index):
         if self.file_model.isDir(index):

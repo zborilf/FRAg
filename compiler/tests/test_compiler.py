@@ -16,9 +16,11 @@ class TestMasCompiler(unittest.TestCase):
         expected_agent_file = get_example_file_path(_example, "fap").read_text()
 
         with tempfile.TemporaryDirectory() as dir_name:
-            compile_mas(mas_file.as_posix(), dir_name)
+            returned_mas_file = compile_mas(mas_file.as_posix(), dir_name)
+            expected_mas_file_path = Path(dir_name) / (_example + ".mas2fp")
+            assert expected_mas_file_path == returned_mas_file
 
-            compiled_mas_file = (Path(dir_name) / (_example + ".mas2fp")).read_text()
+            compiled_mas_file = expected_mas_file_path.read_text()
             compiled_agent = (Path(dir_name) / (_example + ".fap")).read_text()
 
             self.assertEqual(compiled_mas_file, expected_mas_file)

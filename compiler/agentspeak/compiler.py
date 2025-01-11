@@ -11,7 +11,7 @@ from .mas2j.MAS2JavaParser import MAS2JavaParser
 from .frag_generator import FragGenerator
 from .mas2fp_generator import Mas2fpGenerator, Agent
 
-
+# TODO: more agents
 def _compile_mas_file(path: str) -> tuple[str, Agent]:
     input_stream = FileStream(path)
     lexer = MAS2JavaLexer(input_stream)
@@ -40,7 +40,7 @@ def _compile_asl_file(path: str) -> str:
     return frag_generator.output
 
 
-def compile_mas(mas_path: str, output_dir_path) -> None:
+def compile_mas(mas_path: str, output_dir_path) -> Path:
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
 
@@ -52,7 +52,8 @@ def compile_mas(mas_path: str, output_dir_path) -> None:
     output_dir = Path(output_dir_path)
 
     mas_file_name = Path(mas_path).name.replace("mas2j", "mas2fp")
-    with (output_dir / mas_file_name).open("w") as f:
+    mas2fp_file = output_dir / mas_file_name
+    with mas2fp_file.open("w") as f:
         f.write(mas_compiled)
 
     # TODO: handle more directories
@@ -60,6 +61,8 @@ def compile_mas(mas_path: str, output_dir_path) -> None:
     agent_file_name = Path(agent_info.filename).name
     with (output_dir / agent_file_name).open("w") as f:
         f.write(agent_compiled)
+
+    return mas2fp_file
 
 
 if __name__ == "__main__":
