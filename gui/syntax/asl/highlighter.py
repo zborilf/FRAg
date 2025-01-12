@@ -1,8 +1,9 @@
 from antlr4.CommonTokenStream import CommonTokenStream
 
-from syntax.base_highlighter import BaseSyntaxHighlighter
 from compiler.agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
 from compiler.agentspeak.asl.AgentSpeakParser import AgentSpeakParser
+
+from ..base_highlighter import BaseSyntaxHighlighter
 
 class ASLSyntaxHighlighter(BaseSyntaxHighlighter):
     keywords = ["action", "goal"]

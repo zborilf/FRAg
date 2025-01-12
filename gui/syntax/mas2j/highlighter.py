@@ -1,8 +1,9 @@
 from antlr4.CommonTokenStream import CommonTokenStream
 
-from syntax.base_highlighter import BaseSyntaxHighlighter
 from compiler.agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
 from compiler.agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
+
+from ..base_highlighter import BaseSyntaxHighlighter
 
 class MAS2JSyntaxHighlighter(BaseSyntaxHighlighter):
     keywords = ["agents", "environment", "class", "parameters"]

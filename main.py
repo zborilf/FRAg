@@ -10,8 +10,8 @@ from PyQt6.QtCore import QDir, Qt
 
 from compiler.agentspeak.compiler import compile_mas
 from gui.design import Ui_MainWindow  # Import the generated UI
-from syntax.asl.highlighter import ASLSyntaxHighlighter
-from syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
+from gui.syntax.asl.highlighter import ASLSyntaxHighlighter
+from gui.syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
 
 
 def is_valid_configuration(folder_path):
