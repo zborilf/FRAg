@@ -1,1 +1,1 @@
-load("ex1","ex1.fap",1).
+load("ex1","<PATH>/ex1",1,[(debug, systemdbg)]).

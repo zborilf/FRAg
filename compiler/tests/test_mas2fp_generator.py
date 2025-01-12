@@ -16,7 +16,7 @@ def _compile(example_name: str) -> str:
     parser = MAS2JavaParser(stream)
     tree = parser.mas()
 
-    mas2f_generator = Mas2fpGenerator()
+    mas2f_generator = Mas2fpGenerator("<PATH>")
     walker = ParseTreeWalker()
     walker.walk(mas2f_generator, tree)
 

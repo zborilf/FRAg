@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 from .mas2j.MAS2JavaListener import MAS2JavaListener
@@ -12,12 +13,13 @@ class Agent:
 
 
 class Mas2fpGenerator(MAS2JavaListener):
-    def __init__(self):
+    def __init__(self, output_path: str) -> None:
         super().__init__()
 
         self._output = ""
         self._name = ""
         self._agent = None
+        self._output_path = output_path
 
     @property
     def output(self) -> str:
@@ -51,7 +53,9 @@ class Mas2fpGenerator(MAS2JavaListener):
 
     def exitAgent(self, ctx:MAS2JavaParser.AgentContext):
         agent = self._agent
-        self._output = f'load("{self._name}","{agent.filename}",{agent.count}).\n'
+        agent_path_without_extension = os.path.join(self._output_path, agent.filename.replace(".fap", ""))
+        # TODO: attributes
+        self._output = f'load("{self._name}","{agent_path_without_extension}",{agent.count},[(debug, systemdbg)]).\n'
 
     def enterInfrastructure(self, ctx:MAS2JavaParser.InfrastructureContext):
         infrastructure = ctx.ID().symbol.text

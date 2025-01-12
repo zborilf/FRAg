@@ -21,6 +21,9 @@ class TestMasCompiler(unittest.TestCase):
             assert expected_mas_file_path == returned_mas_file
 
             compiled_mas_file = expected_mas_file_path.read_text()
+            # replace the temporary directory with <PATH> to match the expected output
+            compiled_mas_file = compiled_mas_file.replace(dir_name, "<PATH>")
+
             compiled_agent = (Path(dir_name) / (_example + ".fap")).read_text()
 
             self.assertEqual(compiled_mas_file, expected_mas_file)

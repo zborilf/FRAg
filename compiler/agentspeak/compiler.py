@@ -12,22 +12,22 @@ from .frag_generator import FragGenerator
 from .mas2fp_generator import Mas2fpGenerator, Agent
 
 # TODO: more agents
-def _compile_mas_file(path: str) -> tuple[str, Agent]:
-    input_stream = FileStream(path)
+def _compile_mas_file(path: Path, output_dir: Path) -> tuple[str, Agent]:
+    input_stream = FileStream(path.as_posix())
     lexer = MAS2JavaLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MAS2JavaParser(stream)
     tree = parser.mas()
 
-    mas2f_generator = Mas2fpGenerator()
+    mas2f_generator = Mas2fpGenerator(output_dir.as_posix())
     walker = ParseTreeWalker()
     walker.walk(mas2f_generator, tree)
 
     return mas2f_generator.output, mas2f_generator.agent
 
 
-def _compile_asl_file(path: str) -> str:
-    input_stream = FileStream(path)
+def _compile_asl_file(path: Path) -> str:
+    input_stream = FileStream(path.as_posix())
     lexer = AgentSpeakLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
@@ -40,26 +40,28 @@ def _compile_asl_file(path: str) -> str:
     return frag_generator.output
 
 
-def compile_mas(mas_path: str, output_dir_path) -> Path:
-    if not os.path.exists(output_dir_path):
-        os.makedirs(output_dir_path)
+def compile_mas(mas_file: str, output_dir: str) -> Path:
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-    source_dir = Path(mas_path).parent.resolve()
+    mas_path = Path(mas_file)
+    output_dir_path = Path(output_dir)
 
-    mas_compiled, agent_info = _compile_mas_file(mas_path)
-    agent_compiled = _compile_asl_file((source_dir / agent_info.filename.replace("fap", "asl")).as_posix())
+    source_dir = mas_path.parent.resolve()
 
-    output_dir = Path(output_dir_path)
+    mas_compiled, agent_info = _compile_mas_file(mas_path, output_dir_path)
+    agent_compiled = _compile_asl_file((source_dir / agent_info.filename.replace("fap", "asl")))
 
-    mas_file_name = Path(mas_path).name.replace("mas2j", "mas2fp")
-    mas2fp_file = output_dir / mas_file_name
+
+    mas_file_name = mas_path.name.replace("mas2j", "mas2fp")
+    mas2fp_file = output_dir_path / mas_file_name
     with mas2fp_file.open("w") as f:
         f.write(mas_compiled)
 
     # TODO: handle more directories
 
     agent_file_name = Path(agent_info.filename).name
-    with (output_dir / agent_file_name).open("w") as f:
+    with (output_dir_path / agent_file_name).open("w") as f:
         f.write(agent_compiled)
 
     return mas2fp_file
