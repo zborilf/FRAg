@@ -3,6 +3,22 @@ from .asl.AgentSpeakParser import AgentSpeakParser
 
 from .config import internal_functions, internal_functions_mapping
 
+def process_rel_expr(rel_expr: AgentSpeakParser.Rel_exprContext) -> str:
+    text = rel_expr.getText()
+
+    # If it contains `=`, check if it is an arithmetic expression
+    if '=' in text and not any(op in text for op in ['<', '>', '<=', '>=', '==', '\\==']):
+        # Replacing `=` with `is`
+        parts = text.split('=')
+        if len(parts) == 2:
+            left = parts[0].strip()
+            right = parts[1].strip()
+            return f"rel({left} is {right})"
+        else:
+            raise ValueError(f"Invalid assignment expression: {text}")
+
+    return f"rel({text})"
+
 
 class FragGenerator(AgentSpeakListener):
     def __init__(self):
@@ -18,6 +34,10 @@ class FragGenerator(AgentSpeakListener):
         for belief in ctx.literal():
             self._output += f"fact({belief.getText()}).\n"
 
+    def exitBeliefs(self, ctx:AgentSpeakParser.Init_goalContext):
+        if self._output:
+            self._output += "\n"
+
     def enterRules(self, ctx:AgentSpeakParser.RulesContext):
         if ctx.children:
             raise Exception("Currently, beliefs rules are not supported.")
@@ -26,7 +46,11 @@ class FragGenerator(AgentSpeakListener):
         # TODO: other types!
         literal = ctx.literal()
         formula = literal.atomic_formula()
-        self._output += f"goal(ach,{formula.getText()},null,[[]],active).\n"
+        self._output += f"goal(ach,{formula.getText()},[[]]).\n"
+
+    def exitInit_goal(self, ctx:AgentSpeakParser.Init_goalContext):
+        if self._output:
+            self._output += "\n"
 
     def enterPlan(self, ctx:AgentSpeakParser.PlanContext):
         triggering_event = ctx.triggering_event()
@@ -70,10 +94,23 @@ class FragGenerator(AgentSpeakListener):
 
                         if fcn_prolog_name := internal_functions_mapping.get(fcn_name):
                             fnc_call_str = fnc_call_str.replace(fcn_name, fcn_prolog_name, 1)
+                        elif fcn_name == "print":
+                            # Extracting print function arguments
+                            args = child.list_of_terms().getText()
+                            args = [arg.strip() for arg in args.split(",")]
+
+                            message = args[0].strip('"')
+                            variables = args[1:]
+
+                            format_string = f'"{message}' + ''.join(['~w' for _ in variables]) + '~n"'
+                            variables_list = ", ".join(variables)
+
+                            # Creating the correct format for Prolog
+                            fnc_call_str = f'format({format_string}, [{variables_list}])'
 
                         converted_body.append(f"act({fnc_call_str})")
                     elif isinstance(child, AgentSpeakParser.Rel_exprContext):
-                        converted_body.append(f"act({body_formula.getText()})")
+                        converted_body.append(process_rel_expr(child))
                     else:
                         raise Exception("TODO")
                 elif children_len == 2:
@@ -99,4 +136,5 @@ class FragGenerator(AgentSpeakListener):
         self._output += f"plan({plan_type},{event_name},[{context_str}],{body_str}).\n"
 
     def exitAgent(self, ctx: AgentSpeakParser.AgentContext):
-        print(self._output)
+        # print(self._output)
+        pass
