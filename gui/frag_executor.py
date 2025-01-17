@@ -8,51 +8,6 @@ from PyQt6.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QMessageBox
 
 from compiler.agentspeak.compiler import compile_mas
 
-class FragExecutor:
-    def __init__(self, frag_path: pathlib.Path, swipl_path: str) -> None:
-        self.frag_path = frag_path
-        self.swipl_path = swipl_path
-
-    def execute(self, active_config_path: str, main_window: QMainWindow) -> None:
-
-        temp_dir = tempfile.TemporaryDirectory()
-        dir_name = temp_dir.name
-
-        def clear_temp_dir():
-            print(f"Cleaning up temporary directory: {dir_name}")
-            temp_dir.cleanup()
-
-        def on_process_finished(returncode, stdout, stderr):
-            if returncode == 0:
-                print("FRAg process finished successfully.")
-            else:
-                print(f"FRAg process failed: {stderr}")
-                QMessageBox.critical(main_window, "Error", f"Prolog process failed:\n{stderr}")
-
-        try:
-            try:
-                mas2j_path = pathlib.Path(active_config_path)
-                mas2fp_path, output_files = compile_mas(mas2j_path.as_posix(), dir_name)
-            except Exception as e:
-                QMessageBox.critical(main_window, "Error", f"Failed to compile MAS:\n{e}")
-                clear_temp_dir()
-                return
-
-            mas2fp_path_without_extension = mas2fp_path.with_suffix('')
-            command = [self.swipl_path, "-l", "FragPL.pl", "-g", f"frag('{mas2fp_path_without_extension.as_posix()}')",
-                       "-g", "halt"]
-
-            process_thread = ProcessThread(command, self.frag_path.as_posix())
-            process_thread.process_finished.connect(on_process_finished)
-            process_thread.start()
-
-            # Open output window
-            self.output_window = OutputWindow(output_files, temp_dir)
-            self.output_window.show()
-            self.output_window.destroyed.connect(clear_temp_dir)
-        except Exception:
-            clear_temp_dir()
-
 
 class ProcessThread(QThread):
     """Thread to handle the execution of the Prolog process."""
@@ -104,6 +59,9 @@ class FileWatcher(QThread):
 
 class OutputWindow(QMainWindow):
     """Window to display output files in tabs."""
+
+    window_closed = pyqtSignal()
+
     def __init__(self, output_files, temp_dir):
         super().__init__()
         self.setWindowTitle("Output Viewer")
@@ -131,6 +89,7 @@ class OutputWindow(QMainWindow):
         self.temp_dir.cleanup()  # Remove the temporary directory
         for watcher in self.watchers:
             watcher.stop()
+        self.window_closed.emit()
         super().closeEvent(event)
 
     def update_tab_content(self, file_path, content):
@@ -138,3 +97,47 @@ class OutputWindow(QMainWindow):
         for i in range(self.tab_widget.count()):
             if pathlib.Path(file_path).name == self.tab_widget.tabText(i):
                 self.tab_widget.widget(i).setPlainText(content)
+
+class FragExecutor:
+    def __init__(self, frag_path: pathlib.Path, swipl_path: str) -> None:
+        self.frag_path = frag_path
+        self.swipl_path = swipl_path
+
+    def execute(self, active_config_path: str, main_window: QMainWindow) -> OutputWindow:
+
+        temp_dir = tempfile.TemporaryDirectory()
+        dir_name = temp_dir.name
+
+        def clear_temp_dir():
+            print(f"Cleaning up temporary directory: {dir_name}")
+            temp_dir.cleanup()
+
+        def on_process_finished(returncode, stdout, stderr):
+            if returncode == 0:
+                print("FRAg process finished successfully.")
+            else:
+                print(f"FRAg process failed: {stderr}")
+                QMessageBox.critical(main_window, "Error", f"Prolog process failed:\n{stderr}")
+
+        try:
+            try:
+                mas2j_path = pathlib.Path(active_config_path)
+                mas2fp_path, output_files = compile_mas(mas2j_path.as_posix(), dir_name)
+            except Exception as e:
+                QMessageBox.critical(main_window, "Error", f"Failed to compile MAS:\n{e}")
+                clear_temp_dir()
+                return
+
+            mas2fp_path_without_extension = mas2fp_path.with_suffix('')
+            command = [self.swipl_path, "-l", "FragPL.pl", "-g", f"frag('{mas2fp_path_without_extension.as_posix()}')",
+                       "-g", "halt"]
+
+            process_thread = ProcessThread(command, self.frag_path.as_posix())
+            process_thread.process_finished.connect(on_process_finished)
+            process_thread.start()
+
+            # Open output window
+            self.output_window = OutputWindow(output_files, temp_dir)
+            return self.output_window
+        except Exception:
+            clear_temp_dir()
