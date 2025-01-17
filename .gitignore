@@ -3,6 +3,9 @@
 *.mcts
 *.mcts
 .idea/
+.metadata/
+
+config.json
 
 # Python cache a virtualenv
 __pycache__/
