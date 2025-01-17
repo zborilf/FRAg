@@ -16,8 +16,7 @@ infrastructure:
     ;
 
 environment:
-    'environment"' ':' ID
-    ('at' ID)?
+    'environment' ':' STRING
     ;
 
 exec_control:
@@ -71,6 +70,11 @@ FILENAME:
 
 NUMBER:
     DIGIT+
+    ;
+
+ STRING:
+    '"' ~('"')* '"'
+    | '\'' ~('\'')* '\''
     ;
 
 fragment LC_LETTER :

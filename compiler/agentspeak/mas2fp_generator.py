@@ -19,6 +19,7 @@ class Mas2fpGenerator(MAS2JavaListener):
         self._output = ""
         self._name = ""
         self._agent = None
+        self._env_path = ""
         self._output_path = output_path
 
     @property
@@ -55,7 +56,7 @@ class Mas2fpGenerator(MAS2JavaListener):
         agent = self._agent
         agent_path_without_extension = os.path.join(self._output_path, agent.filename.replace(".fap", ""))
         # TODO: attributes
-        self._output = f'load("{self._name}","{agent_path_without_extension}",{agent.count},[(debug, systemdbg)]).\n'
+        self._output += f'load("{self._name}","{agent_path_without_extension}",{agent.count},[(debug, systemdbg)]).\n'
 
     def enterInfrastructure(self, ctx:MAS2JavaParser.InfrastructureContext):
         infrastructure = ctx.ID().symbol.text
@@ -63,7 +64,12 @@ class Mas2fpGenerator(MAS2JavaListener):
             raise Exception("Only Centralised infrastructure is supported")
 
     def enterEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
-        raise Exception("Environment is not supported")
+        self._env_path = ctx.STRING().getText().strip('"')
+        self._output += f'include_environment("{self._env_path}").\n'
+
+    def exitEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
+        if self._env_path:
+            self._output += "\n"
 
     def enterExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
         raise Exception("Exec_control is not supported")

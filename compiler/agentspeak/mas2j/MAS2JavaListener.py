@@ -1,4 +1,4 @@
-# Generated from MAS2Java.g4 by ANTLR 4.9.2
+# Generated from MAS2Java.g4 by ANTLR 4.9
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .MAS2JavaParser import MAS2JavaParser
