@@ -12,6 +12,9 @@ from compiler.agentspeak.compiler import compile_mas
 from gui.design import Ui_MainWindow  # Import the generated UI
 from gui.syntax.asl.highlighter import ASLSyntaxHighlighter
 from gui.syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
+from gui.swipl_config import get_swipl_path
+
+FRAG_PATH = pathlib.Path(__file__).parent / "core"
 
 
 def is_valid_configuration(folder_path):
@@ -42,6 +45,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Set initial status message
         self.set_invalid_config_status()
+
+        # Get the path to SWI-Prolog
+        self.swipl_path = get_swipl_path()
 
     # Init methods
     def initialize_tree_view(self):
@@ -101,6 +107,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             mas2fp_path_without_extension = mas2fp_path.with_suffix('')
             command = ["swipl", "-l", "FragPL.pl", "-g", f"\"frag('{mas2fp_path_without_extension.as_posix()}')\"", "-g", "halt"]
+
+            try:
+                result = subprocess.run(
+                    command,
+                    cwd=FRAG_PATH.as_posix(),  # Set working directory to `core`
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+
+                # Process the output
+                if result.returncode == 0:
+                    print(f"Success: {result.stdout}")
+                else:
+                    print(f"Error: {result.stderr}")
+                    QMessageBox.critical(self, "Error", f"FRAg execution failed:\n{result.stderr}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to execute Frag command:\n{e}")
 
             a = 1
 
