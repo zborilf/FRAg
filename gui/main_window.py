@@ -9,8 +9,8 @@ from PyQt6.QtCore import QDir, Qt
 from .design import Ui_MainWindow  # Import the generated UI
 from .syntax.asl.highlighter import ASLSyntaxHighlighter
 from .syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
-from .swipl_config import get_swipl_path
-from .frag_executor import FragExecutor
+from .logic.swipl_config import get_swipl_path
+from .logic.frag_executor import FragExecutor
 
 FRAG_PATH = pathlib.Path(__file__).parent.parent / "core"
 
