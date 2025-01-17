@@ -94,7 +94,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         with tempfile.TemporaryDirectory() as dir_name:
             try:
                 mas2j_path = pathlib.Path(self.active_config_path)
-                mas2fp_path = compile_mas(mas2j_path.as_posix(), dir_name)
+                mas2fp_path, output_files = compile_mas(mas2j_path.as_posix(), dir_name)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to compile MAS:\n{e}")
                 return
