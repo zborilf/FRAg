@@ -10,7 +10,7 @@ from .design import Ui_MainWindow  # Import the generated UI
 from .syntax.asl.highlighter import ASLSyntaxHighlighter
 from .syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
 from .logic.swipl_config import get_swipl_path
-from .logic.frag_executor import FragExecutor
+from .logic.frag_executor import FragExecutor, FRAgError
 
 FRAG_PATH = pathlib.Path(__file__).parent.parent / "core"
 
@@ -99,9 +99,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     # Signal handlers
     def on_run(self):
         self.runButton.setEnabled(False)
-        output_viewer = self.frag_executor.execute(self.active_config_path, self)
-        output_viewer.show()
-        output_viewer.window_closed.connect(lambda: self.runButton.setEnabled(True))
+        try:
+            output_viewer = self.frag_executor.execute(self.active_config_path)
+            output_viewer.show()
+            output_viewer.window_closed.connect(lambda: self.runButton.setEnabled(True))
+        except FRAgError as e:
+            QMessageBox.critical(self, "Error", str(e))
+            self.runButton.setEnabled(True)
 
     def on_file_selected(self, index):
         if self.file_model.isDir(index):

@@ -8,6 +8,9 @@ from PyQt6.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QMessageBox
 
 from compiler.agentspeak.compiler import compile_mas
 
+class FRAgError(Exception):
+    ...
+
 
 class ProcessThread(QThread):
     """Thread to handle the execution of the Prolog process."""
@@ -103,7 +106,7 @@ class FragExecutor:
         self.frag_path = frag_path
         self.swipl_path = swipl_path
 
-    def execute(self, active_config_path: str, main_window: QMainWindow) -> OutputWindow:
+    def execute(self, active_config_path: str) -> OutputWindow:
 
         temp_dir = tempfile.TemporaryDirectory()
         dir_name = temp_dir.name
@@ -117,16 +120,14 @@ class FragExecutor:
                 print("FRAg process finished successfully.")
             else:
                 print(f"FRAg process failed: {stderr}")
-                QMessageBox.critical(main_window, "Error", f"Prolog process failed:\n{stderr}")
+                raise FRAgError(f"FRAg process failed:\n{stderr}")
 
         try:
             try:
                 mas2j_path = pathlib.Path(active_config_path)
                 mas2fp_path, output_files = compile_mas(mas2j_path.as_posix(), dir_name)
             except Exception as e:
-                QMessageBox.critical(main_window, "Error", f"Failed to compile MAS:\n{e}")
-                clear_temp_dir()
-                return
+                raise FRAgError(f"Failed to compile MAS:\n{e}")
 
             mas2fp_path_without_extension = mas2fp_path.with_suffix('')
             command = [self.swipl_path, "-l", "FragPL.pl", "-g", f"frag('{mas2fp_path_without_extension.as_posix()}')",
@@ -139,5 +140,6 @@ class FragExecutor:
             # Open output window
             self.output_window = OutputWindow(output_files, temp_dir)
             return self.output_window
-        except Exception:
+        except Exception as e:
             clear_temp_dir()
+            raise e
