@@ -5,6 +5,17 @@ from PyQt6.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
 from antlr4.InputStream import InputStream
 from antlr4.error.ErrorListener import ErrorListener
 
+def create_format(color, bold=False, italic=False, underline=False, underline_style=QTextCharFormat.UnderlineStyle.NoUnderline):
+    text_format = QTextCharFormat()
+    text_format.setForeground(QColor(color))
+    if bold:
+        text_format.setFontWeight(QFont.Weight.Bold)
+    if italic:
+        text_format.setFontItalic(italic)
+    if underline:
+        text_format.setUnderlineStyle(underline_style)
+    return text_format
+
 
 class CustomSyntaxError(Exception):
     def __init__(self, msg, line, column):
@@ -24,31 +35,28 @@ class SyntaxErrorListener(ErrorListener):
 
 class BaseSyntaxHighlighter(QSyntaxHighlighter):
     keywords = []
+    internal_actions = []
 
     def __init__(self, document, error_callback=None):
         super().__init__(document)
+        self.updating = False
         self.highlighting_rules = []
         self.error_callback = error_callback
         self.errors = []
 
+        self.document().contentsChanged.connect(self.on_document_changed)
+
         # Formats for highlighting
-        self.error_format = QTextCharFormat()
-        self.error_format.setForeground(QColor("red"))
-        self.error_format.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SingleUnderline)
+        self.error_format = create_format("red", underline=True)
 
-        keyword_format = QTextCharFormat()
-        keyword_format.setForeground(QColor("blue"))
-        keyword_format.setFontWeight(QFont.Weight.Bold)
+        keyword_format = create_format("blue", bold=True)
+        internal_action_format = create_format("purple", bold=True)
+        comment_format = create_format("green", italic=True)
+        string_format = create_format("magenta")
 
-        comment_format = QTextCharFormat()
-        comment_format.setForeground(QColor("green"))
-        comment_format.setFontItalic(True)
-
-        string_format = QTextCharFormat()
-        string_format.setForeground(QColor("magenta"))
-
-        # Adding syntax rules for keywords, comments, and strings
-        self.highlighting_rules += [(rf"\b{keyword}\b", keyword_format) for keyword in self.keywords]
+        # Adding syntax rules for keywords, internal actions, comments, and strings
+        self.highlighting_rules += [(rf"{keyword}", keyword_format) for keyword in self.keywords]
+        self.highlighting_rules += [(rf"{action}", internal_action_format) for action in self.internal_actions]
         self.highlighting_rules.append((r"//[^\n]*", comment_format))
         self.highlighting_rules.append((r"\".*?\"", string_format))
 
@@ -60,10 +68,27 @@ class BaseSyntaxHighlighter(QSyntaxHighlighter):
                 start, end = match.span()
                 self.setFormat(start, end - start, format)
 
-        # Validating syntax using ANTLR parser
-        self.validate_syntax(text)
+        self.highlight_errors(text)
 
-    def validate_syntax(self, text):
+    def highlight_errors(self, text):
+        if not self.errors:
+            return
+
+        block_start = self.currentBlock().position()
+        block_end = block_start + len(text)
+
+        for error in self.errors:
+            error_line_start = self.document().findBlockByNumber(error["line"] - 1).position()
+            error_pos = error_line_start + error["column"]
+
+            if block_start <= error_pos < block_end:
+                start = error_pos - block_start
+                self.setFormat(start, 1, self.error_format)
+
+    def validate_syntax(self):
+        self.errors.clear()
+        text = self.document().toPlainText()
+
         if not text:
             return
         try:
@@ -76,10 +101,21 @@ class BaseSyntaxHighlighter(QSyntaxHighlighter):
 
             parser.agent()
         except CustomSyntaxError as e:
-            self.errors.append(str(e))
+            # self.errors.append(str(e))
+            line, column = e.line, e.column
+            self.errors.append({"line": line, "column": column, "message": str(e)})
             self.setFormat(0, len(text), self.error_format)
         except Exception as e:
             pass
+
+    def on_document_changed(self):
+        if self.updating:
+            return
+
+        self.updating = True
+        # self.validate_syntax() TODO: fix later
+        self.rehighlight()
+        self.updating = False
 
     @abstractmethod
     def get_parser(self, input_stream):

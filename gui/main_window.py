@@ -110,6 +110,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file_path = self.file_model.filePath(index)
         file_name = os.path.basename(file_path)
 
+        index = self.filesTab.count()
         text_edit = QTextEdit()
 
         file_extension = pathlib.Path(file_path).suffix
@@ -142,7 +143,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.open_files[file_path] = self.filesTab.count() - 1
 
         # Connect to QTextEdit signal to track changes
-        text_edit.textChanged.connect(lambda: self.handle_text_change(self.filesTab.count() -1))
+        # text_edit.textChanged.connect(lambda: self.handle_text_change(self.filesTab.count() -1))
+        text_edit.textChanged.connect(lambda idx=index: self.handle_text_change(idx))
 
         # Update the run button
         self.update_run_button()
@@ -172,6 +174,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for file_path, tab_index in self.open_files.items():
             if tab_index > index:
                 self.open_files[file_path] -= 1
+
+        widget = self.filesTab.widget(index)
+        if widget: # Disconnect the signal
+            widget.textChanged.disconnect()
 
         self.filesTab.removeTab(index)
 
