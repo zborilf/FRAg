@@ -1,6 +1,5 @@
 
 
-
 :-module(miconic10,
     [                
 % two or three arity clauses of the module name
@@ -10,6 +9,7 @@
 	miconic10 / 4
     ]
 ).	
+
 
 /** <module>  Miconic10 Environment for FRAg 
 
@@ -35,7 +35,7 @@ This module
 
 
 /*
-  Example model
+  Model Example
 */
 
 lift_at(f0).
@@ -88,7 +88,7 @@ init_beliefs(Agents):-
     add_beliefs_agents(Agents, Beliefs4).
 
 /*
-Exported clauses
+    Exported clauses
 */
 
 
@@ -118,16 +118,24 @@ miconic10(set_property, Property_List).
     
 exit_lift( _, []).
 
+
 exit_lift(Agent, [boarded(Person, Floor)| Persons]):-
     delete_facts_beliefs(miconic10, Agent, [boarded(Person, Floor)]),
     add_facts_beliefs(miconic10, Agent, [served(Person)]),
-%    format("Vystupuje mi pasazer ~w~n", [Person]),
+    format("Vystupuje mi pasazer ~w~n", [Person]),
     exit_lift(Agent, Persons).
 
 
-process_transported(Agent, Floor):-
+process_transported(Agent, Floor, Result):-
     findall_environment(miconic10, Agent, boarded(_ , Floor), To_Exit),
+    length(To_Exit, Processed),
+    get_result(Processed, Result),
     exit_lift(Agent, To_Exit).
+
+
+get_result(0, true).
+
+get_result(Processed, reward(Processed)).
 
 
     
@@ -145,19 +153,16 @@ enter_lift(Agent, [origin(Person, Floor) | Persons]):-
 process_waiting(Agent, Floor):-
     findall_environment(miconic10, Agent, origin(_, Floor), On_Board),
     enter_lift(Agent, On_Board).
-
  
 
 
 %!  miconic10(act, +Agent, +Action, -Result) is det
-%Situates agent to an environment. Agent will percieve the environment and
-%may act in it
-%* Agent: agent name / identifier
-%* Action: 
+%   Situates agent to an environment. Agent will percieve the environment and
+%   may act in it
+%  @arg Agent: agent name / identifier
+%  @arg  Action: 
 %	      go(+Floor_Destination)
-%* Result: action result (see results ling)
-
-
+%  @arg Result: action result (see results)
 
 
 miconic10(act, Agent, go(Destination), true):-
@@ -166,13 +171,14 @@ miconic10(act, Agent, go(Destination), true):-
 %    format("~w: Nemusim nikad jezdit, uz jsem na poschod¡ ~w, 
 %            celkem najeto ~w~n", [Agent, Destination, Distance]).
 
-miconic10(act, Agent, go(Destination), true):-
+miconic10(act, Agent, go(Destination), Result):-
     position(Destination, _),
     !,    
     query_environment(miconic10, Agent, lift_at(Floor_Actual)),
     process_waiting(Agent, Floor_Actual),
     floors_distance(Floor_Actual, Destination, Distance), % static beliefs
-    delete_facts_beliefs_all(miconic10, Agent, [travelled_distance(Travelled_Distance)]),
+    delete_facts_beliefs_all(miconic10, Agent, 
+                             [travelled_distance(Travelled_Distance)]),
     Travelled_Distance2 is Travelled_Distance + Distance,
     add_facts_beliefs_all(miconic10, Agent, 
                           [travelled_distance(Travelled_Distance2)]),	                   
@@ -183,13 +189,13 @@ miconic10(act, Agent, go(Destination), true):-
     process_waiting(Agent, Destination),
     delete_facts_beliefs_all(miconic10, Agent, [lift_at(Floor_Actual)]),
     add_facts_beliefs_all(miconic10, Agent, [lift_at(Destination)]),
-    process_transported(Agent, Destination).
+    process_transported(Agent, Destination, Result).
 
 
 miconic10(act, Agent, silently_(go(Destination)), Result):-
     miconic10(act, Agent, go(Destination), Result).
 
-miconic10(act, _, _, fail).
+miconic10(act, _, _, false).
 
 /*
 	Kopie prostredi pro specifikovane agenty
@@ -237,10 +243,10 @@ miconic10(miconic10, Instance, State):-
     findall(position(Floor, Position), position(Floor, Position), Facts2),
     findall(origin(Passenger, Floor), origin(Passenger, Floor), Facts3),
     findall(destin(Passenger, Floor), destin(Passenger, Floor), Facts4),
-    add_facts(miconic10, Facts1),
-    add_facts(miconic10, Facts2),
-    add_facts(miconic10, Facts3),
-    add_facts(miconic10, Facts4).
+    env_utils:add_facts(miconic10, Facts1),
+    env_utils:add_facts(miconic10, Facts2),
+    env_utils:add_facts(miconic10, Facts3),
+    env_utils:add_facts(miconic10, Facts4).
     
 
 

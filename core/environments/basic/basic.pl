@@ -1,9 +1,14 @@
  
-%
-% 	FragPL, basic environment / ... internal actions
-%       Frantisek Zboril jr. 2021 - 2023
-%	
-%
+/**
+
+FragPL, basic environment / ... internal actions
+       
+@author Frantisek Zboril jr. 
+@version 2021 - 2023
+@licence
+*/
+
+:-dynamic reward /3.
 
 
 % environment(basic).			% zde by mely byt standardni akce, komunikace ...
@@ -16,11 +21,13 @@ action(basic, me, 1).
 
 action(basic, population, 1).
 
+action(basic, reward, 1).
 
 % 	
 %   	FRAg internal actions
 %   	
 
+action(basic, reward, 1).
 action(basic, send,2).
 action(basic, bcast,1). 
 action(basic, sendfg,2). 		% sendFrag ?
@@ -46,18 +53,19 @@ joint_action(basic, jprintfg, 1).
 
 
 
-population(P):-
-    bagof(A,agent(A),P).
+population(Population):-
+    bagof(Agent, fRAgBlackboard:agent(Agent), Population).
 
 
-concatTerm(S1,S2,S):-
-    string(S2),
-    concat(S1,S2,S).
+concatTerm(String1, String2, String):-
+    string(String2),
+    concat(String1, String2, String).
+
 
 % S2 is not a String
-concatTerm(S1,S2,S):-
-    term_string(S2,S2S),
-    concat(S1,S2S,S).
+concatTerm(String1, String2,String):-
+    term_string(String2, String2_S),
+    concat(String1, String2_S , String).
 
 
 printfg(String):-    
@@ -67,7 +75,7 @@ printfg(String):-
     format(atom(String4), String3, [Agent]),
     write(current_output, String4).
 
-  printfg(String, Parameters):-
+printfg(String, Parameters):-
 	format(atom(String2), String, Parameters),
 	term_string(String2, String3),
 	printfg(String3).
@@ -75,19 +83,19 @@ printfg(String):-
 
 
 foo(A):-
-    format(atom(String),"uff ~w",[A]),
+    format(atom(String),"ugh ~w",[A]),
     printfg(String).
 
 foo(A,B):-
-    format(atom(String),"uff ~w ~w",[A,B]),
+    format(atom(String),"ugh ~w ~w",[A,B]),
     printfg(String).
 
 foo(A,B,C):-
-    format(atom(String),"ufff ~w ~w ~w",[A,B,C]),
+    format(atom(String),"ugh ~w ~w ~w",[A,B,C]),
     printfg(String).
 
 foo(A,B,C,D):-
-    format(atom(String),"ufff ~w ~w ~w ~w",[A,B,C,D]),
+    format(atom(String),"ugh ~w ~w ~w ~w",[A,B,C,D]),
     printfg(String).
 
 
@@ -97,10 +105,11 @@ me(X):-
     thread_self(X).
 
 
-sendfg(Receiver,Payload):-
-    thread_self(ME),
+
+sendfg(Receiver, Payload):-
+    thread_self(Me),
     printfg("Sending message ~w~n",[Receiver]),
-    thread_send_message(Receiver,message(ME,inform,pld(Payload))),
+    thread_send_message(Receiver,message(Me, inform,pld(Payload))),
     printfg("Send succeed ~n").
 
 sendfg(_,_):-
@@ -112,18 +121,18 @@ send(Receiver, Payload):-
     thread_send_message(Receiver, message(Me, inform, pld(Payload))).
 
 
-bcast2([],_).
+bcast2([], _).
+           
+bcast2([Agent| Agents], Payload):-
+    sendfg(Agent, Payload),
+    bcast2(Agents, Payload).
 
-bcast2([H|T], Payload):-
-    sendfg(H, Payload),
-    bcast2(T, Payload).
 
-
-  bcast(Payload):-
-        bagof(X,agent(X),L),
-	bcast2(L, Payload).
+bcast(Payload):-
+    bagof(Agent, fRAgBlackboard:agent(Agent) , Agents),
+    bcast2(Agents, Payload).
 		
-  bcast(_).
+bcast( _ ).
 
 
 %
@@ -135,13 +144,19 @@ do(X):-
 
 
     % joint version of printfg
-jprintfg(STRING):-
-    printfg(STRING).	
+jprintfg(String):-
+    printfg(String).	
 
 
 % basic(act, _, Act, true):-
 %    is_exclusive_action(basic, Act),
 %    Act.
+
+% reward act must produce Reward as output
+
+basic(act, _, reward(Reward), reward(Reward)).
+
+% silent acts
 
 basic(act, _, silently_(printfg( _ )), true).
 
@@ -154,17 +169,24 @@ basic(act, _, silently_(format( _)), true).
 basic(act, _, silently_(format( _, _)), true).
 
 basic(act, Agent, silently_(Act), Result):-
-% neni zde zadna, co opravdu chceme umlcet?
+% there is none, do we need to silent it?
     basic(act, Agent, Act, Result). 
+
+
+%   any joint action
 
 basic(act, _, Act, Result):-
     is_joint_action(basic, Act),
     Act,
     Result is Act.
 
+%   any non-joint action
+
 basic(act, _, Act, true):-
     Act.
 	         
+%   action failed
+
 basic(act, _, _, fail).
 
 

@@ -1,0 +1,5 @@
+
+
+load("hadak","examples/multiint",1,[(reasoning, mcts_reasoning)]).
+
+% load("hadak","examples/multiint",1,[(reasoning, mcts_reasoning), (debug, mctsdbg)]).

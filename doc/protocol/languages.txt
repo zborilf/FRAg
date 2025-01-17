@@ -1,61 +1,83 @@
 
-Metasoubor
 
-set_default((ATTR, VAL)*)
-	"(" "bindings" "," ("early"|"late") ")"
-	"(" "reasoning" "," (" XXX "|" XXX " |) ")"		TODO toto by si mel chytat kazdej reasoning modul zvlast
-	"(" "debug" "," ("XXX"|"XXX") ")"
-	"(" "mcts_params" "," "(" EXPANSIONS "," STEPS ")" ")"	, jen pro mcts
-	"(" "environment" "," "( Environment_File, Environment_Name ")" ")"
-
-load
+MULTIAGENT
+==========
 
 
-Klauzule
+%!  include_reasoning(+Filename).
+% Consults reasoning method from file Filename
+%* Filename name of the reasoning file
+* Reasoning files in distribution
+        "/reasoning_methods/Basic/FRAgPLReasoningSimple.pl"
+        "/reasoning_methods/Basic/FRAgPLReasoningRandom.pl"
+        "/reasoning_methods/Basic/FRAgPLReasoningCAN.pl"
+        "/reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl".
+        "/reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl"
 
-set_default(+Atribute, +Value)
+%!  load(+Filename).
+%   Consults arbitrary file +File_Name
+%@arg Filename: name of the file
 
-*Attribute:
-    bindings
-    	early
-    	late
-    reasoning
+%!  load(+Agent_Name, +Agent_File, +Number_Of_Instances, 
+%        +List_Od_Attributes) is det
 
-    reasoning_params
+%!  include_environment(+Environment).
+%   environment available with this distribution is mentioned *here*
+%@arg Environment:
+
+%!  set_environment(+Environment, +Parameters).
+%Set environment parameters. Parameter is a tuple specific to environment
+%Environment. Could be found in Environment documentation
+%@arg Environment:
+%#arg Parameters: List of environment paramteters 
+
+%!  set_default(+Atribute, +Value) is det
+*   Attribute - atribute of the multiagent system which default value is set.
+*
+        control
+        % sets the agent loop control / termination
+            * Value
+                terminate(timeout, Steps)
+% terminates when agent has no active event/intention
+                terminate(no_job)  
+% never terminates (until killed)
+                terminate(+Other)
+
+        bindings
+            * Value
+    	        early   % 'classic' early bindings
+    	        late	% late bindings
+        reasoning
+            * Value
+
+        reasoning_params
+            * Value
     
-    debug
-
-    environment
+        debug
+            * Value
+                no_debug
+	        systemdbg 
+                reasoningdbg
+                mctsdbg
+	        mctsdbg_path
+  
+        environment
+            * Value
      
 
 load(Filename, Agent, Number, Attributes)
                                                                   
 
-
-
 debug
-	no_debug, suppress all debugs
-	mctsdbg
-	mctsdbg_path
-
-
-
+	
 
 Agent
 
-Facts:
 ------
-
-
-
+Facts:
 
 Goals:
-------
 
 Plans:
-------
-
-plan(+Event_Type, +Event_Term, +Conditions, +Context, +Body)
-
-
+    plan(+Event_Type, +Event_Atom, +Conditions, +Context, +Body)
 

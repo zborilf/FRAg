@@ -1,0 +1,52 @@
+fact(a(4)).
+fact(a(5)).
+fact(a(6)).
+
+fact(b(1,5)).
+fact(b(3,3)).
+fact(b(5,5)).
+
+goal(ach,go,[[]]).
+
+% goal(ach,go2,[[]]).
+
+
+
+plan(ach, go, [b(3,3), not(b(2,2))],
+    [
+         test(b(1,5)),
+	 add(b(2,2)),
+%	 ach(go),
+       % act(sleep(0.2)),
+         act(printfg('test prosel')),
+ 	 act(reward(2.5))
+    ]).
+
+plan(ach, go, [b(2,_)],			
+    [
+	act(printfg('Plan1')),
+        act(reward(5.5))
+    ]).
+
+
+plan(ach, go, [a(Y), not(b(Y,5))],			
+    [
+	test(c(y)),
+	act(printfg('Plan2')),
+        act(reward(2.1))
+    ]).
+
+
+plan(ach, go, [],
+    [
+	add(b(4,7)),
+	act(reward(4.8))
+    ]).
+
+
+plan(ach, go, [],
+    [
+	add(b(2,2)),
+	act(reward(3.1))
+    ]).
+

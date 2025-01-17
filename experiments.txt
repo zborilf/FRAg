@@ -1,0 +1,33 @@
+
+
+
+skript
+\core\run.bat
+sekvence 20ti (lze upravit) spusteni FRAga s metamodelem \examples\trader.mas2fp
+
+Trader
+Spousti jednoho nebo dva agenty petra a pavla, podle toho, co se zaremuje %
+Doporucuji spoustet petra, pavla, nebo oba bez (systemdbt reasoningdbg)
+Program vypisuje agenty v souborech trader_peter.out a trader_paul.out, v 
+pripade reasoningdbg zbytecne zatezuje (ale muze byt zajimave obcas se podivat).
+Statistiky jednotlivych behu run.bat se vypisuji do \core\stats.pl
+Spustenim analyze.pl se vypise, kolik procent zakazniku agent nebo agenti udelali
+a prumerne casy vsech 20ti behu.
+
+Shop
+Trader2 pouziva prostredi shop.pl, ktere je v adresari \core\environments\shop
+Zde se take nastavuje vse zajimave pro experimenty. Trader pracuje po 1500 cyklu,
+coz je dostatecne, aby se i dva agenti spusteni zaroven vyblbli.
+Shop pracuje po epozodach. Pamatuje si od zacatku epizody vsechny agenty, ktere 
+jej perceively, pokud nekdo toto ucini podruhe, zacina nova epizoda.
+Shop generuje nove zakazniky az do closing_time (nastaveno na 750, melo by zustat).
+Kupujici i  prodavajici prichazi podle Poissonova rozlozeni se stredy 
+average_buyers(0.08). average_sellers(0.16). - (lze zmenit)
+Muzou prodavat nebo pozadovat (nezaremovane) cd s nejakou cenou. Prodavajici za 
+kolik prodavaji, kupujici za kolik maximalne kupuji. Od uvedene ceny je odectena
+nejaka castka podle stredu a rozptylu pro oba typy mean_discount_seller(0.5).
+dispersion_discount_seller(0.2). mean_discount_buyer(0.5). 
+dispersion_discount_buyer(0.2).      (take lze zmenit)
+
+
+ 

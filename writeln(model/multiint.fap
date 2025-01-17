@@ -1,0 +1,89 @@
+
+
+fact(a(a)).
+fact(a(b)).
+fact(a(c)).
+fact(b(d)).
+fact(b(e)).
+fact(b(f)).
+fact(c(g)).
+fact(c(h)).
+fact(c(i)).
+fact(d(j)).
+fact(d(k)).
+fact(d(l)).
+
+
+goal(ach,g1,[[]]).
+
+goal(ach,g2,[[]]).
+
+goal(ach,g3,[[]]).
+
+goal(ach,g2,[[]]).
+
+goal(ach,g1,[[]]).
+
+plan(ach,g1,[],[
+				test(a(W)),
+				test(b(X)),
+				test(c(Y)),
+				test(d(Z)),
+				act(printfg(a(W))),
+				act(printfg(b(X))),
+				act(printfg(c(Y))),
+				act(printfg(d(Z))),
+				act(printfg(a(W)))
+		]).
+
+
+plan(ach,g1,[],[
+				act(printfg(stop(g1)))
+		]).
+
+
+plan(ach,g1,[],[
+				act(printfg(x(x))),
+				act(printfg(y(y))),
+				act(printfg(z(z)))
+			]).
+
+
+
+
+plan(ach,g2,[],[
+				act(printfg("a")),
+				act(printfg("h")),
+				act(printfg("o")),
+				act(printfg("j")),
+				act(printfg("t")),
+				act(printfg("e"))
+		]).
+
+
+plan(ach,g2,[],[
+				act(printfg(stop(g2)))
+		]).
+
+
+plan(ach,g2,[],[
+				act(printfg(xx(xx))),
+				act(printfg(yy(yy))),
+				act(printfg(zz(zz)))
+			]).
+
+
+plan(ach,g3,[],[
+				act(printfg("b")),
+				act(printfg("o")),
+				act(printfg("r")),
+				act(printfg("c")),
+				act(printfg("i"))
+		]).
+
+plan(ach,g3,[],[
+				act(printfg(stop(g3)))
+		]).
+
+
+

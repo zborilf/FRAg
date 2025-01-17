@@ -1,0 +1,15 @@
+
+
+set_default(bindings, early).
+set_default(reasoning, radndom_reasoning).
+set_default(reasoning_params, mcts_params(10,30)).
+
+% load("worker","worker.fap",1,[]).
+% load("adam","adam.fap",1,[(debug, mctsdbg_path), (debug, reasoningdbg)]).
+
+load("had","examples/snakes1",15,[(reasoning, biggest_joint_reasoning)]).
+% load("franta","examples/adam",6,[]).
+
+
+
+			   

@@ -1,0 +1,59 @@
+
+
+
+
+
+
+goal(ach,go([]),[[]]).
+
+fact(reward_at(l)).
+fact(reward_at(f)).
+fact(reward_at(s)).
+fact(reward_at(m)).
+fact(reward_at(o)).
+fact(reward_at(ae)).
+fact(reward_at(aa)).
+fact(reward_at(ad)).
+fact(reward_at(aj)).
+fact(reward_at(ac)).
+
+plan(ach, go([]), [reward_at(Treasure)],
+	[
+	 ach(go_for(Treasure)),
+         test(not(reward_at(_)))
+	]
+    ).
+
+                   
+
+% plan(del, reward_at(X), [],
+%	[
+%	 test(reward_at(Reward)),
+%	 ach(go(Reward))
+%	]
+%   ).
+
+
+plan(ach, go_for([]), [], []).
+
+
+plan(ach, go_for(Treasure), [my_position(Treasure)], 
+	[
+    	  del(reward_at(Treasure))
+	]).
+
+
+plan(ach, go_for(Treasure), [not(direction(Treasure, Direction))],
+	[
+          del(reward_at(Treasure))
+	]).
+
+plan(ach, go_for(Treasure), [not(my_position(Treasure)), 
+                         direction(Treasure, Direction)],
+	[
+	 act(simple_maze, go(Direction)),
+	 ach(go_for(Treasure))
+        ]).
+
+                         
+

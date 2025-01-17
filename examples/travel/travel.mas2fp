@@ -1,0 +1,3 @@
+set_agents([(bindings, early), (reasoning, robin_reasoning)]).
+
+load("travel","../examples/travel/travel",1,[(debug, systemdbg), (debug, reasoningdbg), (debug, interdbg)]).

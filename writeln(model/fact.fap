@@ -1,0 +1,14 @@
+
+
+fact(n(10)).
+
+
+goal(ach,goFact,null,[[]],active).
+
+
+plan(ach,goFact(X,Y),[n(X)],[act(me(ME)),act(format("~w spocital faktorial ~w~n",[ME,Y]))]).
+plan(ach,goFact(X,Y),[n(M),X<M],[act(X2 is X+1),act(Y2 is X2*Y), ach(goFact(X2,Y2))]).
+
+
+plan(ach,goFact,[],[act(writeln(ahoj)),ach(goFact(1,1)),act(format("nashledanou~n",[]))]).
+ 

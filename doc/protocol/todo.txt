@@ -42,9 +42,27 @@ Dokumentace
    v PIDoc
 
 
+Debug
+misto meho udelatka standartni debug (pak asi neni treba nastavovat pres metafile)
+
 Chyby
 pokud v metafile chci nahrat agenta toho sameho jmena, hlasi to chybu (spravne), mel by to ale chytat frag
 kdyz v mas2fp v load klauzuli v atributech je spatne (atom misto dvvojice) frag vytuhne, mel by ale zartav
+
+
+Kdyz nekdo udela blbe prostredi, tak pada. Asi modul na testovani prostredi
+
+
+Omezit velikost kontextu
+
+
+
+BUG? Asi je problem, kdyz ma plan jednu akci a ta spadne, plan i tak uspeje (objevilo se ve workshopu)
+
+MCTS, nejde externi cil (tlg), klonovat se maji jen fakta, ne beliefs (snad ok), agenti pri klonovani se
+  prejmenovavaji, ale co kdyz jsou jejich jmena v BB? (asi prejmenovavat). 
+Zvazit, zdali strom by nemel byt zachovavan mezi kroky (resp. jak je to se stavy agentu)
+
 
 
 

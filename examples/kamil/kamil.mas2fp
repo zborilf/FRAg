@@ -1,0 +1,11 @@
+
+
+
+set_agents([(bindings, late), (reasoning, mcts_reasoning)]).
+
+
+load("kamil","../examples/kamil/kamil",1,[(debug, mctsdbg), (debug, mcts_path), 
+            (debug, reasoningdbg), (debug, systemdbg)]).
+
+			   
+			  

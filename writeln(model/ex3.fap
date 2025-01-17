@@ -1,0 +1,14 @@
+
+fact(a(b)).
+fact(a(d)).
+fact(b(a)).
+fact(b(b)).
+fact(b(c)).
+fact(b(d)).
+
+
+goal(ach,ex3,[[]]).
+
+plan(ach,ex3,[],[test(b(X)), test(a(X)), act(writeln(vysledekje(X)))]).
+
+

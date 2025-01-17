@@ -25,7 +25,7 @@ Typ atributu
     Mozne hodnoty podle toho, co je nahrano v core/environments
       simple_reasoning,
       random_reasoning
-      can_reasoning,
+      robin_reasoning,
       biggest_joint_reasoning
       mcts_reasoning
  

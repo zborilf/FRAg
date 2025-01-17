@@ -1,0 +1,4 @@
+goal(ach,count,null,[[]],active).
+plan(ach,count,[],[add(fct(0,1))]).
+plan(add,fact(fct(X,Y)),[X<5],[act(Z is X+1),act(W is Z* Y),add(fct(Z,W))]).
+plan(add,fact(fct(X,Y)),[X==5],[act(format("fact 5 ==~w~n", [Y]))]).

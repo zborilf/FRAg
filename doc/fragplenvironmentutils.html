@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>fragplenvironmentutils.pl -- Utilities Support for Making FRAg Environments</title>
+<title>fragplenvironmentutils.pl -- Environments Supporting Clauses</title>
 
 <link rel="stylesheet" type="text/css" href="pldoc.css">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -10,30 +10,24 @@
 <body>
 
 
-<h1 class="file"><span style="float:right"></span>fragplenvironmentutils.pl -- Utilities Support for Making FRAg Environments</h1>
+<h1 class="file"><span style="float:right"></span>fragplenvironmentutils.pl -- Environments Supporting Clauses</h1>
 
 <p>
-This module</p>
+Work with environment instances, facts, beliefs, agents</p>
 
 <dl class="tags">
-<dt class="keyword-author">author</dt><dd class="keyword-author">- Frantisek Zboril</dd>
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Frantisek Zboril 2023 - 2024</dd>
 <dt class="keyword-license">license</dt><dd class="keyword-license">- GPL</dd>
 </dl>
 
 <dl>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="register_environment/1"><b class="pred">register_environment</b><var class="arglist">(Environment)</var></a> is <b class="det">det</b></dt><dd class="defbody">Registers <var>Environment</var> or Clone of the <var>Environment</var>. System can tnen use
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="register_environment/1"><b class="pred">register_environment</b><var class="arglist">(Environment)</var></a> is <b class="det">det</b></dt><dd class="defbody">Registers <var>Environment</var> or Clone of the <var>Environment</var>. System can then use
 <var>Environment</var> and or Clone of <var>Environment</var>, if these two names differs.
-<ul>
-<li><var>Environment</var>: environment name</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="clone_environment/2"><b class="pred">clone_environment</b><var class="arglist">(Environment, Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes clone of <var>Environment</var>, for every <code>fact(Environment, Environment, Fact)</code>,
-creates clone <code>fact(Environment, Clone, Fact)</code>,
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Clone</var>: clone name</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="clone_environment/2"><b class="pred">clone_environment</b><var class="arglist">(Environment, Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Makes clone of <var>Environment</var>, registers it, and creates clone fact for every
+<code>fact(Environment, Environment, Fact)</code> -&gt; <code>fact(Environment, Clone, Fact)</code>
+@arg <var>Environment</var>: name of environment, for which a clone is being created
+@arg <var>Clone</var>: clone name</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="remove_environment_clone/2"><b class="pred">remove_environment_clone</b><var class="arglist">(Environment, Clone)</var></a></dt><dd class="defbody">Removes all the facts of the clone and registration of agens to the clone
 <ul>
 <li><var>Environment</var>: environment name</li>
@@ -41,40 +35,29 @@ creates clone <code>fact(Environment, Clone, Fact)</code>,
 </ul>
 </dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="environment_registered/2"><b class="pred">environment_registered</b><var class="arglist">(Environment, Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Retreives registered <var>Environment</var> and possible <var>Clone</var>
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Clone</var>: clone name</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Clone</var>: clone name</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="situate_agents_clone/3"><b class="pred">situate_agents_clone</b><var class="arglist">(+Agents, +Environment, +Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Situates Agent in <var>Environment</var>, if <var>Clone</var> differs from <var>Environment</var>, then
 the agent is virtual and interacts with <var>Environment</var>'s <var>Clone</var>
-<ul>
-<li>Agent: list of agent names / identifier</li>
-<li><var>Environment</var>: name of environment</li>
-<li><var>Clone</var>: a possible clone of <var>Environment</var></li>
-</ul>
-</dd>
+@arg Agent: list of agent names / identifiers
+@arg <var>Environment</var>: name of environment
+@arg <var>Clone</var>: a possible clone of <var>Environment</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="situate_agent_environment/2"><b class="pred">situate_agent_environment</b><var class="arglist">(+Agent, +Environment)</var></a> is <b class="det">det</b></dt><dd class="defbody">Situates <var>Agent</var> in <var>Environment</var> original instance
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Environment</var>: name of environment</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Environment</var>: name of environment</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="agent_situated_environment/3"><b class="pred">agent_situated_environment</b><var class="arglist">(+Agent, +Environment, +Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Checkas whether <var>Agent</var> is situated in <var>Environment</var> or <var>Environment</var>'s <var>Clone</var> if
 <var>Clone</var> name differs from <var>Environment</var> name
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Environment</var>: name of environment</li>
-<li><var>Clone</var>: a possible clone of <var>Environment</var></li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_all_situated/3"><b class="pred">get_all_situated</b><var class="arglist">(+Environment, +Clone, -Agents)</var></a> is <b class="det">det</b></dt><dd class="defbody">Finds all <var>Agents</var> situated in <var>Clone</var> of <var>Environment</var>
-<ul>
-<li><var>Environment</var>: name of environment</li>
-<li><var>Clone</var>: some clone of <var>Environment</var></li>
-<li><var>Agents</var>: lost of agents</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Environment</var>: name of environment
+@arg <var>Clone</var>: a possible clone of <var>Environment</var></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="get_all_situated/3"><b class="pred">get_all_situated</b><var class="arglist">(+Environment, +Instance, -Agents)</var></a> is <b class="det">det</b></dt><dd class="defbody">Finds all <var>Agents</var> situated in <var>Instance</var> of <var>Environment</var>
+@arg <var>Environment</var>: name of environment
+@arg <var>Instance</var>: instance of <var>Environment</var>
+@arg <var>Agents</var>: list of agents</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="situated_number/3"><b class="pred">situated_number</b><var class="arglist">(+Environment, +Instance, -Number)</var></a> is <b class="det">det</b></dt><dd class="defbody">Provides number of Agents situated in <var>Instance</var> of <var>Environment</var>
+@arg <var>Environment</var>: name of environment
+@arg <var>Instance</var>: instance of <var>Environment</var>
+@arg <var>Number</var>: number of agents situated in instance of name of environment</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="reset_environment_clone/2"><b class="pred">reset_environment_clone</b><var class="arglist">(+Environment, +Clone)</var></a> is <b class="det">det</b></dt><dd class="defbody">Resets the clone, actualize it to the actual state of the original instance of
 the environment
 <ul>
@@ -82,159 +65,101 @@ the environment
 <li><var>Clone</var>: some clone of <var>Environment</var></li>
 </ul>
 </dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="query_environment/3"><b class="pred">query_environment</b><var class="arglist">(+Environment, +Agent, +Query)</var></a> is <b class="det">det</b></dt><dd class="defbody">Queries given <var>Environment</var> or its clone where <var>Agent</var> is situated
-<ul>
-<li><var>Environment</var>: which <var>Environment</var></li>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Query</var>: query to <var>Environment</var> or its clone where <var>Agent</var> is situated</li>
-</ul>
-</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="query_environment/3"><b class="pred">query_environment</b><var class="arglist">(+Environment, +Agent, +Query)</var></a> is <b class="det">det</b></dt><dd class="defbody">Gives <var>Query</var> to given <var>Environment</var> or its clone where <var>Agent</var> is situated
+@arg <var>Environment</var>: which <var>Environment</var>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Query</var>: query to <var>Environment</var> or its clone where <var>Agent</var> is situated</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="query_environment/2"><b class="pred">query_environment</b><var class="arglist">(+Environment, +Query)</var></a> is <b class="det">det</b></dt><dd class="defbody">Gives <var>Query</var> to original instance of <var>Environment</var>
+@arg <var>Environment</var>: which <var>Environment</var>
+@arg <var>Query</var>: query to original instance of <var>Environment</var> </dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="findall_environment/4"><b class="pred">findall_environment</b><var class="arglist">(+Environment, +Agent, +Query, -Answers)</var></a> is <b class="det">det</b></dt><dd class="defbody">Finds all the answers for <var>Query</var> given <var>Environment</var> or its clone where <var>Agent</var> is
 situated (artefact? <code class="nofile">TODO</code>)
-<ul>
-<li><var>Environment</var>: which <var>Environment</var></li>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Query</var>: query to <var>Environment</var> or its clone where <var>Agent</var> is situated</li>
-<li><var>Answers</var>: answers to <var>Query</var> from <var>Environment</var> / Clone where the <var>Agent</var> is</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: which <var>Environment</var>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Query</var>: query to <var>Environment</var> or its clone where <var>Agent</var> is situated
+@arg <var>Answers</var>: answers to <var>Query</var> from <var>Environment</var> / Clone where the <var>Agent</var> is</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="findall_environment/4"><b class="pred">findall_environment</b><var class="arglist">(+Environment, +Template, +Query, -Answers)</var></a> is <b class="det">det</b></dt><dd class="defbody">Finds all the answers for <var>Query</var> in original instance of <var>Environment</var>
+@arg <var>Environment</var>: which <var>Environment</var>
+@arg <var>Query</var>: query to <var>Environment</var> or its clone where Agent is situated
+@arg <var>Answers</var>: answers to <var>Query</var> from <var>Environment</var> / Clone where the Agent is</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_beliefs/2"><b class="pred">add_beliefs</b><var class="arglist">(+Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Inserts <var>Beliefs</var> to <var>Agent</var>'s add list
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Beliefs</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Beliefs</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_beliefs_agents/2"><b class="pred">add_beliefs_agents</b><var class="arglist">(+Agents, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Inserts <var>Beliefs</var> to add lists of the <var>Agents</var>
 environment (or clone of the environment)
-<ul>
-<li><var>Agents</var>: list of agents' names / identifiers</li>
-<li><var>Beliefs</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Agents</var>: list of agents names / identifiers
+@arg <var>Beliefs</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_beliefs_all/2"><b class="pred">add_beliefs_all</b><var class="arglist">(+Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Adds <var>Beliefs</var> to add lists of the <var>Agent</var> and all agents sharing the same
 environment (or clone of the environment)
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Beliefs</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Beliefs</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts_agent/3"><b class="pred">add_facts_agent</b><var class="arglist">(+Environment, +Agent, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Asserts fact for <var>Environment</var> or its clone in which <var>Agent</var> is situated
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Facts</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Facts</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts/2"><b class="pred">add_facts</b><var class="arglist">(+Environment, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Asserts facts for <var>Environment</var>'s original instantion
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Facts</var>: list of atoms or formulas</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts_clone/3"><b class="pred">add_facts_clone</b><var class="arglist">(+Environment, +Clone, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Asserts facts for <var>Environment</var>'s <var>Clone</var>. If <var>Clone</var> is the same as <var>Environment</var>,
-then it is the main / original <var>Environment</var> instance
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Clone</var>: clone name</li>
-<li><var>Facts</var>: list of atoms or formulas</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts_beliefs/3"><b class="pred">add_facts_beliefs</b><var class="arglist">(+Environment, +Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Add <var>Beliefs</var> to the <var>Environment</var> or its clone where <var>Agent</var> is
-and also process agent's add/delete lists. If belief to be added is in delete
-list, it is removed from it, else it is added to agent's add list
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name</li>
-<li><var>Beliefs</var>: list of atoms</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts_beliefs_all/3"><b class="pred">add_facts_beliefs_all</b><var class="arglist">(+Environment, +Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Add <var>Beliefs</var> to the <var>Environment</var> or its clone where <var>Agent</var> is
-and also process add/delete lists for all the agents in the Environent/clone
-If belief to be added is in delete list, it is removed from it, else it is
-added to agent's add list
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name</li>
-<li><var>Beliefs</var>: list of atoms</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Facts</var>: list of atoms or formulas</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="add_facts_clone/3"><b class="pred">add_facts_clone</b><var class="arglist">(+Environment, +Instance, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Asserts facts for <var>Environment</var>'s <var>Instance</var>. If <var>Instance</var> is the same as
+<var>Environment</var>, then it is the main / original <var>Environment</var> instance
+@arg <var>Environment</var>: environment name
+@arg <var>Instance</var>: instance name
+@arg <var>Facts</var>: list of atoms or formulas</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_facts/2"><b class="pred">delete_facts</b><var class="arglist">(+Environment, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Deletes facts for <var>Environment</var>'s original instantion
+@arg <var>Environment</var>: environment name
+@arg <var>Facts</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_beliefs/2"><b class="pred">delete_beliefs</b><var class="arglist">(+Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes <var>Beliefs</var> from <var>Agent</var>'s add list
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li>Belief: list of atoms or formulas</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_beliefs_agents/2"><b class="pred">delete_beliefs_agents</b><var class="arglist">(+Agents, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Deletes <var>Beliefs</var> to add lists of the <var>Agents</var>
-environment (or clone of the environment)
-<ul>
-<li><var>Agents</var>: list of agents' names / identifiers</li>
-<li><var>Beliefs</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg Belief: list of atoms or formulas</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_beliefs_agents/2"><b class="pred">delete_beliefs_agents</b><var class="arglist">(+Agents, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Deletes <var>Beliefs</var> to add lists of the <var>Agents</var> environment or instance of the
+environment
+@arg <var>Agents</var>: list of agents names / identifiers
+@arg <var>Beliefs</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_beliefs_all/2"><b class="pred">delete_beliefs_all</b><var class="arglist">(+Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Delete <var>Beliefs</var> from delte lists of the <var>Agent</var> and all agents sharing the same
 environment (or clone of the environment)
-<ul>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Beliefs</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Beliefs</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_facts_agent/3"><b class="pred">delete_facts_agent</b><var class="arglist">(+Environment, +Agent, +Facts)</var></a> is <b class="det">det</b></dt><dd class="defbody">Retract facts from <var>Environment</var> or its clone in which <var>Agent</var> is situated
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name / identifier</li>
-<li><var>Facts</var>: list of atoms or formulas</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Agent</var>: agent name / identifier
+@arg <var>Facts</var>: list of atoms or formulas</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_facts_beliefs/3"><b class="pred">delete_facts_beliefs</b><var class="arglist">(+Environment, +Agent, +Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Delete the beliefs to the <var>Environment</var> or its clone where <var>Agent</var> is
 and also process agent's add/delete lists. If belief to be deleted is in add
 list, it is removed from it, else it is added to agent's delete list
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name</li>
-<li><var>Beliefs</var>: list of atoms</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Agent</var>: agent name
+@arg <var>Beliefs</var>: list of atoms</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="delete_facts_beliefs_all/3"><b class="pred">delete_facts_beliefs_all</b><var class="arglist">(Environment, Agent, Beliefs)</var></a> is <b class="det">det</b></dt><dd class="defbody">Deletes <var>Beliefs</var> from the <var>Environment</var> or its clone where <var>Agent</var> is
-and also process add/delete lists for all the agents in the Environent/clone
+and also process add/del lists for all the agents in an Environent instance
 If belief to be deleted is in add list, it is removed from it, else it is
 added to agent's delete list
-<ul>
-<li><var>Environment</var>: environment name</li>
-<li><var>Agent</var>: agent name</li>
-<li><var>Beliefs</var>: list of atoms</li>
-</ul>
-</dd>
-<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="retreive_add_delete/3"><b class="pred">retreive_add_delete</b><var class="arglist">(+Agent, -Add_List, -Delete_List)</var></a> is <b class="det">det</b></dt><dd class="defbody">Provides add/delete lists for <var>Agent</var>
-<ul>
-<li><var>Agent</var>: agent name</li>
-<li><var>Add_List</var>: new percepts</li>
-<li><var>Delete_List</var>: ...</li>
-</ul>
-</dd>
+@arg <var>Environment</var>: environment name
+@arg <var>Agent</var>: agent name
+@arg <var>Beliefs</var>: list of atoms</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="retreive_add_delete/3"><b class="pred">retreive_add_delete</b><var class="arglist">(+Agent, -Add_List, -Delete_List)</var></a> is <b class="det">det</b></dt><dd class="defbody">Provides add/delete lists for specified <var>Agent</var>
+@arg <var>Agent</var>: agent name
+@arg <var>Add_List</var>: new percepts
+@arg <var>Delete_List</var>: lost percepts</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="new_episode/1"><b class="pred">new_episode</b><var class="arglist">(+Agent)</var></a> is <b class="det">det</b></dt><dd class="defbody">Succeeds when <var>Agent</var> signalizes for the second time in episode. It adds
+<var>Agent</var> to a list of agents that wisited an environment and when is some
+to be added already in that list new episode begins. The new list contains
+only the actual agent
+@arg <var>Agent</var>: name of siglalizing agent</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="save_environment_instance_state/3"><b class="pred">save_environment_instance_state</b><var class="arglist">(+Environment, +Instance, +State)</var></a> is <b class="det">det</b></dt><dd class="defbody">Saves actual state of <var>Instance</var> of <var>Environment</var> with name <var>State</var>
 If <var>State</var> already exists, it is rewriten
-<ul>
-<li><var>Environment</var></li>
-<li><var>Instance</var></li>
-<li><var>State</var></li>
-</ul>
-</dd>
+@arg <var>Environment</var>
+@arg <var>Instance</var>
+@arg <var>State</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="load_environment_instance_state/3"><b class="pred">load_environment_instance_state</b><var class="arglist">(+Environment, +Instance, +State)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Loads state of <var>Instance</var> of <var>Environment</var> and revivews beliefs for all the agents
 situated in the <var>Instance</var>. Fails when there does not exist saved <var>State</var> for the
 <var>Environment</var> <var>Instance</var>
-<ul>
-<li><var>Environment</var></li>
-<li><var>Instance</var></li>
-<li><var>State</var></li>
-</ul>
-</dd>
+@arg <var>Environment</var>
+@arg <var>Instance</var>
+@arg <var>State</var></dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="remove_environment_instance_state/3"><b class="pred">remove_environment_instance_state</b><var class="arglist">(+Environment, +Instance, +State)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes state of <var>Instance</var> of <var>Environment</var>
-<ul>
-<li><var>Environment</var></li>
-<li><var>Instance</var></li>
-<li><var>State</var></li>
-</ul>
-</dd>
+@arg <var>Environment</var>
+@arg <var>Instance</var>
+@arg <var>State</var></dd>
 </dl>
 
 <h2 class="undoc">Undocumented predicates</h2>
@@ -243,7 +168,9 @@ situated in the <var>Instance</var>. Fails when there does not exist saved <var>
 The following predicates are exported, but not or incorrectly documented.</p>
 
 <dl class="undoc">
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="register_clone/2"><b class="pred">register_clone</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_facts_beliefs_all/3"><b class="pred">add_facts_beliefs_all</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="add_facts_beliefs/3"><b class="pred">add_facts_beliefs</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="findall_environment_template/4"><b class="pred">findall_environment_template</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 </dl>
 
 </body>

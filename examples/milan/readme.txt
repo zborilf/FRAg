@@ -1,1 +1,0 @@
- Ladici, pro vyber planu, kde kontext je i negace

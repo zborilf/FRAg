@@ -1,0 +1,30 @@
+
+1. Introduction
+
+The FRAg system provides a number of ways to select resources during agent 
+interpretation. The original system specifies that the selection of an event, 
+a plan as a means to achieve goals, and the selection of an intention to be 
+followed in the current step are non-deterministic. Their execution is then 
+typically done by placing events in a queue and selecting from it, plans are 
+chosen in the order in which they are declared in the program, and intentions 
+are executed in a round robin fashion.
+
+
+N. Implementation
+
+To create a reasoning module you need to create a Prolog file and place it in
+the \core\reasoning_methods directory (by convention). Such file is included
+into the FRAg system, when the initial 
+fe. see \core\fragini.mas2fp, it contains clause
+include_reasoning("/reasoning_methods/Basic/FRAgPLReasoningSimple.pl").
+that causes ... of the FRAgPLReasoningSimple.pl file
+
+
+Declares
+
+reasoning_method(random_reasoning).
+get_intention(random_reasoning, Intentions, Intention).
+get_substitution(random_reasoning, Action, Context, Vars, Substitution).
+get_plan(random_reasoning, Event, Means, Intended_Means).
+init_reasoning(random_reasoning).
+update_model(random_reasoning).

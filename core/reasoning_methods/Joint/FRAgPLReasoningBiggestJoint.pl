@@ -1,154 +1,178 @@
-%               
+%
 %	Reasoning methods - taking biggest joint action
 %	Frantisek Zboril jr. 2022 - 2023
 %
 
 %
-%	Should define
-%                    	get_intention(+Reasoning_type,+Intentions,-Intention).
-%                       
-%			not defined for:
-%				 get_substitution(+Reasoning_type,+ActionTerm,+SubstitutionList, +VariableList,-SubstitutionList).
-%                       	 get_plan(+Reasoning_type,+Goal,+RelAppPlans,-IntendedMeans).
-%			if required, 'simple_reasoning' will be used.
+% Should define
+%    get_intention(+Reasoning_type,+Intentions,-Intention).
+%
+% not defined:
+%   get_substitution(+Reasoning_type, +Action_Term, +Substitution_List,
+%   +Variable_List,-Substitution_List).
+%   get_plan(+Reasoning_Type, +Goal, +RelAppPlans,-Intended_Means).
+% if required, 'simple_reasoning' is used.
 %
 
 %	This module is loaded / included in the FRAgAgent file
 
 
-  :-thread_local model_action /1. 		
-  :-thread_local model_intention /1. 		
+:-thread_local model_action /1.
+:-thread_local model_intention /1.
 
-  reasoning_method(biggest_joint_reasoning).
-
-
-% First active
+reasoning_method(biggest_joint_reasoning).
 
 
-  most_f_action(A, [], _ , [ac(1,A)]).
-		
-  most_f_action(A, [A], N, [ac(N2,A)]):-
-	N2 is N+1.
- 
-  most_f_action(A, [AN], N, [ac(N,A),ac(1,AN)]).
+%!  most_freq_action(+Action, +Actions, +Number, -Actions_Freq) is det
+%  @Action
+%  @Actions
+%  @Number
+%  @Actions_Freq
 
 
-  most_f_action(A, [A|AT], N, AOUT):-
-	N2 is N+1,
-	most_f_action(A, AT, N2, AOUT).
+% there is only one action for processing
+most_freq_action(Action, [], _ , [ac(1, Action)]).
 
-  most_f_action(A, [AN|AT], N, [ac(N,A)|AOUT]):-
-				most_f_action(AN, AT, 1, AOUT).
+% the last action in the list is the same as the actual one
+most_freq_action(Action, [Action], Number, [ac(Number2, Action)])
+    :-
+    Number2 is Number+1.
 
+% the last action in the list is different from the actual one
+most_freq_action(Action, [Action2], Number, [ac(Number, Action), ac(1, Action2)]).
 
-  get_actions([],[]).
+most_freq_action(Action, [Action| Actions], Number, AOUT):-
+    Number2 is Number+1,
+    most_freq_action(Action, Actions, Number2, AOUT).
 
-  get_actions([intention(_ ,[plan(_ ,_ ,_ ,_ ,CTXP,[act(A)|_])|_ ],active)|IT], ACTSOUT):-
-	functor(A,PREDICATE, Arity),
-	is_joint_action(PREDICATE, Arity),
-	instance_set(A, CTXP, ACTS),
-	get_actions(IT, AST),
-	append(ACTS, AST, ACTSOUT).
-
-  get_actions([intention(_ ,[plan(_ ,_ ,_ ,_ ,_ ,[_ |_ ])|_ ],active)|IT],AST):-
-	get_actions(IT,AST).
-
-  
-  get_actions([intention(_ , INTENTION, AST)]):-
-	get_actions(INTENTION, AST).
-				
-
-  get_action([],ac(0,null)).
-						
-
-  get_action(ACTIONS, ACTION):-
-	msort(ACTIONS,[AH|AT]),
-	most_f_action(AH,AT,1, A),
-	sort(A,AS),
-	reverse(AS,[ACTION|_]),
-	format(atom(STRING), "[JOINT] ACTIONS GATHERED: ~w~n", [ACTIONS]),
-	print_debug(STRING, jointdbg),                               
-	format(atom(STRING2), "[JOINT] ACTION CHOSEN: ~w~n", [ACTION]),
-	print_debug(STRING2, jointdbg).                               
-
-
-  get_intention2(null,INTENTIONS,INTENTION):-
-	get_intention(simple_reasoning,INTENTIONS,INTENTION).
-
-  get_intention2(ACTION,_,intention(INT,[plan(IDX,GT,G,PC,CTXP,[act(ACTION)|AT])|PT],active)):-
-	get_intention(simple_reasoning,_ ,_ ),
-     	intention(INT,[plan(IDX,GT,G,PC,CTXP,[act(ACTION)|AT])|PT],active).
-			
-
-
-  get_not_joint_action([intention(_ ,[plan(_ ,_ ,_ ,_ ,_ ,[act(Action)|_ ])|_ ],active)| Intentions], Intention):-
-	functor(Action, PREDICATE, Arity),
-	is_joint_action(PREDICATE, Arity),
-	!,
-	get_not_joint_action(Intentions, Intention).
-
-  get_not_joint_action([INTENTION|_ ], INTENTION).
-
-
-  get_model_intention(biggest_joint_reasoning, INTENTIONS, INTENTION):-
-	format(atom(STRING), "[JOINT] INTENTIONS: ~w~n", [INTENTIONS]),
-	print_debug(STRING, jointdbg),                               	
-	get_actions(INTENTIONS,ACTIONS),
-	get_action(ACTIONS, ac(_, ACT)),
-	format(atom(STRING2), "[JOINT] ACTIONS2: ~w~n", [ACT]),
-	print_debug(STRING2, jointdbg),                               
-	get_intention2(ACT, INTENTIONS, INTENTION),
-	format(atom(STRING3), "[JOINT] INTENTION: ~w~n", [INTENTION]),
-	print_debug(STRING3, jointdbg).                                                            
+most_freq_action(Action, [Action2|Actions2], Number, [ac(Number, Action)| Action_Out])
+    :-
+    most_freq_action(Action2, Actions2, 1, Action_Out).
 
 
 
-  update_model(biggest_joint_reasoning):-
-	retractall(model_intention( _ )),
-	retractall(model_action( _ )),
+get_actions([],[]).
 
-	format(atom(STRING), "[JOINT] UPDATING JOINT MODEL~n", []),
-	bagof(intention(IDENTIFIER,CONTEXT,STATUS),intention(IDENTIFIER,CONTEXT,STATUS),INTENTIONS),
-	!,	
-	format(atom(STRING2), "[JOINT] UPDATING JOINT MODEL, INTENTIONS: ~w ~n", [INTENTIONS]),
-	get_model_intention(biggest_joint_reasoning, INTENTIONS, INTENTION), 
-	format(atom(STRING3), "[JOINT] UPDATING JOINT MODEL, INTENTION: ~w ~n", [INTENTION]),
-	print_debug(STRING, jointdbg),
-	print_debug(STRING2, jointdbg),
-	print_debug(STRING3, jointdbg),
+get_actions([intention(_ ,[plan(_ ,_ ,_ ,_ , Context,[act(Act)|_])|_ ],active)|
+	                   Intentions], Acts_Out):-
+    functor(Act, Predicate, Arity),
+    is_joint_action( Predicate, Arity),
+    instance_set(Act, Context, Acts),
+    get_actions(Intentions, Actions),
+    append(Acts, Actions, Acts_Out).
 
+get_actions([intention(_ ,[plan(_ ,_ ,_ ,_ ,_ ,[_ |_ ])|_ ],active)| Intentions],
+	    Acts)
+    :-
+    get_actions(Intentions, Acts).
 
-	INTENTION = intention( _,  [ plan(_, _, _, _, _, [ACT | _])|  _ ], _),
-
-	assert(model_intention(INTENTION)),
-	assert(model_action(ACT)),
-
-	format(atom(STRING4), "[JOINT] UPDATING JOINT MODEL, ACT: ~w ~n", [ACT]),
-	print_debug(STRING, jointdbg),
-	print_debug(STRING2, jointdbg),
-	print_debug(STRING3, jointdbg),
-	print_debug(STRING4, jointdbg).
-
-	
-  update_model(biggest_joint_reasoning).
+get_actions([intention(_ , Intention, Acts)]):-  %??? tady je neco spatne
+    get_actions(Intention, Acts).
 
 
 
-  get_intention(biggest_joint_reasoning, INTENTIONS, INTENTION):-
-	get_not_joint_action(INTENTIONS, INTENTION).
+get_action([], ac(0,null)).
 
-  get_intention(biggest_joint_reasoning, _, INTENTION):-
-	model_intention(INTENTION).
+get_action(Actions, Action):-
+    msort(Actions, [Action2| Actions2]),
+    most_freq_action(Action2, Actions2, 1, A),
+    sort(A, AS),
+    reverse(AS,[Action| _]),
+    format(atom(String), "[JOINT] ACTIONS GATHERED: ~w~n", [Actions]),
+    print_debug(String, jointdbg),
+    format(atom(String2), "[JOINT] ACTION CHOSEN: ~w~n", [Action]),
+    print_debug(String2, jointdbg).
 
 
 
+get_intention2(null, Intentions, Intention):-
+    get_intention(simple_reasoning, Intentions, Intention).
+
+get_intention2(Act,_,
+	       intention(Intention_ID,
+			 [plan(Plan_ID, Event_Type, Event_Term, Conditions,
+			       Context,[act(Act)| Acts])| Plans], active))
+    :-
+    get_intention(simple_reasoning,_ ,_ ),
+    intention(Intention_ID,
+	      [plan(Plan_ID, Event_Type, Event_Term, Conditions, Context,
+		    [act(Act)|Acts])| Plans], active).
+
+
+
+get_not_joint_action([intention(_ ,[plan(_ ,_ ,_ ,_ ,_ ,[act(Action)|_ ])|_ ],
+				active)|
+		      Intentions],
+		     Intention)
+    :-
+    functor(Action, Predicate, Arity),
+    is_joint_action(Predicate, Arity),
+    !,
+    get_not_joint_action(Intentions, Intention).
+
+get_not_joint_action([Intention| _ ], Intention).
+
+
+
+get_model_intention(biggest_joint_reasoning, Intentions, Intention):-
+    format(atom(String), "[JOINT] INTENTIONS: ~w~n", [Intentions]),
+    print_debug(String, jointdbg),
+    get_actions(Intentions, Actions),
+    get_action(Actions, ac(_, Act)),
+    format(atom(String2), "[JOINT] ACTIONS2: ~w~n", [Act]),
+    print_debug(String2, jointdbg),
+    get_intention2(Act, Intentions, Intention),
+    format(atom(String3), "[JOINT] INTENTION: ~w~n", [Intention]),
+    print_debug(String3, jointdbg).
+
+
+
+update_model(biggest_joint_reasoning):-
+    retractall(model_intention( _ )),
+    retractall(model_action( _ )),
+
+    format(atom(String), "[JOINT] UPDATING JOINT MODEL~n", []),
+    bagof(intention(Intention_ID, Context, Status),
+	  intention(Intention_ID, Context, Status), Intentions),
+    !,
+    format(atom(String2),
+	   "[JOINT] UPDATING JOINT MODEL, INTENTIONS: ~w ~n", [Intentions]),
+    get_model_intention(biggest_joint_reasoning, Intentions, Intention),
+    format(atom(String3),
+	   "[JOINT] UPDATING JOINT MODEL, INTENTION: ~w ~n", [Intention]),
+    print_debug(String, jointdbg),
+    print_debug(String2, jointdbg),
+    print_debug(String3, jointdbg),
+
+
+    Intention = intention( _,  [ plan(_, _, _, _, _, [Act | _])|  _ ], _),
+
+    assert(model_intention(Intention)),
+    assert(model_action(Act)),
+
+    format(atom(String4), "[JOINT] UPDATING JOINT MODEL, ACT: ~w ~n", [Act]),
+    print_debug(String, jointdbg),
+    print_debug(String2, jointdbg),
+    print_debug(String3, jointdbg),
+    print_debug(String4, jointdbg).
+
+update_model(biggest_joint_reasoning).
+
+
+
+get_intention(biggest_joint_reasoning, Intentions, Intention):-
+    get_not_joint_action(Intentions, Intention).
+
+get_intention(biggest_joint_reasoning, _, Intention):-
+    model_intention(Intention).
 
 
 
 %% K cemu jsou ty dole?
 
-%  get_intention(simple_reasoning,[intention(IDX,CONTENT,active)|_],intention(IDX,CONTENT,active)).
-% 
+%  get_intention(simple_reasoning,[intention(IDX,CONTENT,active)|_],
+%		                   intention(IDX,CONTENT,active)).
+%
 %  get_intention(simple_reasoning,[_|T],INTENTION):-
 %	get_intention(simple_reasoning,T,INTENTION).
 %
@@ -158,20 +182,23 @@
 %	redirecting the other two to simple_reasoning
 %
 
-  get_plan(biggest_joint_reasoning, EVENT, MEANS, INTENDEDMEANS):-
-        get_plan(simple_reasoning, EVENT, MEANS, INTENDEDMEANS).
+get_plan(biggest_joint_reasoning, Event, Means, Intended_Means):-
+    get_plan(simple_reasoning, Event, Means, Intended_Means).
 
-  get_substitution(biggest_joint_reasoning, ACTION, _, _, SUBSTITUTION):-
-	model_action(ACTION2),
-	format(atom(STRING), "[JOINT] ACTION ~w MODEL ACTION: ~w ~n", [ACTION, ACTION2]),
-	print_debug(STRING, jointdbg),
-	unifiable(act(ACTION), ACTION2, SUBSTITUTION),
-	format(atom(STRING2), "[JOINT] SUBSTITUTION: ~w ~n", [SUBSTITUTION]),
-	print_debug(STRING2, jointdbg).
+get_substitution(biggest_joint_reasoning, Action, _, _, Substitution):-
+    model_action(Action2),
+    format(atom(String),
+	   "[JOINT] ACTION ~w MODEL ACTION: ~w ~n", [Action, Action2]),
+    print_debug(String, jointdbg),
+    unifiable(act(Action), Action2, Substitution),
+    format(atom(String2), "[JOINT] SUBSTITUTION: ~w ~n", [Substitution]),
+    print_debug(String2, jointdbg).
 
-  get_substitution(biggest_joint_reasoning, ACTION, CONTEXT, VARS, SUBSTITUTION):-
-	get_substitution(simple_reasoning, ACTION, CONTEXT, VARS, SUBSTITUTION).
+get_substitution(biggest_joint_reasoning, Action, Context, Vars, Substitution)
+    :-
+    get_substitution(simple_reasoning, Action, Context, Vars, Substitution).
 
 
-  init_reasoning(biggest_joint_reasoning).
+
+init_reasoning(biggest_joint_reasoning).
 

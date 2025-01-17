@@ -1,0 +1,22 @@
+fact(transport(taxi)).
+fact(transport(bus)).
+fact(price(taxi, 100)).
+fact(price(bus, 50)).
+fact(money(60)).
+
+fact(is_raining(true)).
+
+goal(ach,travel,[[]]).
+
+plan(ach, travel, [], [test(is_raining(false)), act(printfg("I walked to my destination."))]).
+
+plan(ach, travel, [], [
+    test(money(Money)),
+    test(transport(Transport)),
+    test(price(Transport, Price)),
+    rel(Money > Price),
+    act(printfg(
+        'I used means of transport ~w to reach my destination for ~w amount of money.', 
+        [Transport, Price])
+    )
+]).

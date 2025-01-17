@@ -1,0 +1,57 @@
+fact(wants(betty, cd9,125)).
+fact(wants(betty, cd2,60)).
+fact(wants(betty, cd4,60)).
+fact(wants(betty, cd1,90)).
+fact(wants(hana, cd1,100)).
+fact(wants(hana, cd8,60)).
+fact(wants(tereza, c7,160)).
+fact(wants(tereza, cd3,60)).
+
+% fact(has(cd1)).
+% fact(has(cd3)).
+% fact(has(cd4)).
+% fact(has(cd5)).
+% fact(has(cd7)).
+% fact(has(cd8)).
+% fact(has(cd9)).
+
+
+fact(price(cd1,100)).
+fact(price(cd2,80)).
+fact(price(cd3,68)).
+fact(price(cd4,110)).
+fact(price(cd5,50)).
+fact(price(cd6,90)).
+fact(price(cd7,110)).
+fact(price(cd8,55)).
+fact(price(cd9,150)).
+
+fact(price(cd5,130)).
+fact(price(cd6,70)).
+fact(price(cd7,110)).
+fact(price(cd8,130)).
+
+
+
+goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
+goal(ach,sell,[[]]).
+
+
+
+
+plan(ach,sell,[],[
+			act(me(ME)),
+			act(format(atom(S),"Zkousi ~w neco prodat",[ME])),
+			act(printfg(S)),
+			test(has(ME, CARD)),
+			test(wants(BUYER,CARD,OFFERS)),
+			test(price(CARD,PRICE)),
+			act(DIF is (PRICE-OFFERS)/PRICE),
+			act(DIF<0.2),
+			act(obchod, sell(BUYER, CARD)),		% act in environment 1 by performing act 'sell(betty, CARD)'
+			act(printfg(CARD))
+		]).
+
+plan(ach,sell,[a(a)],[act(writeln(nevysloTo))]).

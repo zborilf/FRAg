@@ -1,0 +1,39 @@
+pdt: ----------------------------------
+pdt: Sun Sep 03 15:21:45 CEST 2023
+pdt: ----------------------------------
+pdt: set debug output to LOGFILE
+pdt: ----------------------------------
+pdt: Sun Sep 03 15:21:45 CEST 2023
+pdt: ----------------------------------
+pdt: set debug output to LOGFILE
+pdt: WARNING - 03/09 15:21:47 - Prolog Process Default Process Work: Prolog warnings and errors during initialization:
+Location: c:/users/zbori/.p2/pool/plugins/org.cs3.pdt.common_3.1.2.202007280926/pl/pdt_manual_entry.pl:22
+Message: source_sink `library(helpidx)' does not exist
+
+Location: c:/users/zbori/.p2/pool/plugins/org.cs3.pdt.common_3.1.2.202007280926/pl/pdt_manual_entry.pl:22
+Message: Goal (directive) failed: pdt_manual_entry:use_module(library(helpidx))
+
+Location: c:/users/zbori/.p2/pool/plugins/org.cs3.prolog.library_3.1.2.202007280926/pl/count.pl:56
+Message: Singleton variable in branch: N
+
+Location: c:/users/zbori/.p2/pool/plugins/org.cs3.prolog.library_3.1.2.202007280926/pl/files.pl:239
+Message: Singleton variables: [OutGoal,Goal]
+
+
+pdt: WARNING - 03/09 16:11:34 - Console Reader Thread: pdt: The following Exception was caught:
+java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.endRead(NioSocketImpl.java:248)
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:327)
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:350)
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:803)
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966)
+	at java.base/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:270)
+	at java.base/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:313)
+	at java.base/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:188)
+	at java.base/java.io.InputStreamReader.read(InputStreamReader.java:177)
+	at java.base/java.io.BufferedReader.fill(BufferedReader.java:162)
+	at java.base/java.io.BufferedReader.read1(BufferedReader.java:213)
+	at java.base/java.io.BufferedReader.read(BufferedReader.java:287)
+	at java.base/java.io.Reader.read(Reader.java:250)
+	at org.cs3.pdt.console.internal.views.PrologSocketConsoleModel$ConsoleReader.run(PrologSocketConsoleModel.java:129)
+	at java.base/java.lang.Thread.run(Thread.java:833)

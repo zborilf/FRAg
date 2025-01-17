@@ -1,0 +1,22 @@
+
+fact(a(f)).
+fact(a(b)).
+fact(a(c)).
+fact(a(g)).
+fact(a(i)).
+fact(a(a)).
+fact(b(g)).
+fact(b(i)).
+fact(c(2)).
+fact(c(4)).
+
+
+
+goal(ach,ex3,[[]]).
+
+plan(ach,ex3,[a(Q), c(M)],[act(me(ME)),test(b(Q)),act(format("jsem tu, ~w, ~w~n",[ME,Q]))]).
+
+% plan(ach,ex3,[],[act(me(ME)),test(a(Q)),act(format("jsem tu, ~w, ~w~n",[ME,Q]))]).
+
+
+plan(add,message(SRC,inform,pld(res(X))),[],[act(me(ME)),act(format("Take dekuji ~w za zpravu! Tvoje ~w~n",[SRC,ME]))]).
