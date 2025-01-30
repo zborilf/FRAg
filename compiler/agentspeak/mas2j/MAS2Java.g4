@@ -25,30 +25,16 @@ parameters:
     |
     ;
 
-parameter_list:
+ parameter_list:
     parameter (',' parameter)*
-    |
     ;
 
 parameter:
-    parameter_definition
-    ;
-
-parameter_definition:
     ID
+    | NUMBER
     | '(' parameter_list ')'
     | '[' parameter_list ']'
     ;
-
-term:
-    ID
-    | INTEGER
-    | FLOAT
-    | STRING
-    | '(' parameter_list ')'
-    | '[' parameter_list ']'
-    ;
-
 
 exec_control:
     'executionControl' ':' ID
@@ -66,7 +52,7 @@ agent:
     ( agt_arch_class )?
     ( agt_belief_base_class )?
     ( agt_class )?
-    ('#' INTEGER)?
+    ('#' NUMBER)?
     (agt_at)?
     ';'
     ;
@@ -92,25 +78,25 @@ agt_at:
     ;
 
 // --- terminal symbols -----------------------------------------------------------------
+NUMBER:
+    INT_PART DOT DEC_PART
+    | INT_PART
+    ;
 
-ID: (LC_LETTER | UP_LETTER)+( LC_LETTER | UP_LETTER | DIGIT | '_' )*;
-
-FILENAME:
+ FILENAME:
     [a-zA-Z0-9_/]+'.'[A-Za-z0-9]+
-    ;
-
-INTEGER:
-    DIGIT+
-    ;
-
- FLOAT:
-    DIGIT+ '.' DIGIT+
     ;
 
  STRING:
     '"' ~('"')* '"'
     | '\'' ~('\'')* '\''
     ;
+
+ID: (LC_LETTER | UP_LETTER)+( LC_LETTER | UP_LETTER | DIGIT | '_' )*;
+
+fragment INT_PART: DIGIT+;
+fragment DEC_PART: DIGIT+;
+fragment DOT: '.';
 
 fragment LC_LETTER :
     [a-z]

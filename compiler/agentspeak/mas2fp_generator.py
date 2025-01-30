@@ -38,8 +38,8 @@ class Mas2fpGenerator(MAS2JavaListener):
             raise Exception("Only one agent is supported for now")
 
         agent_name = ctx.ID().getText()
-        agent_count = ctx.INTEGER()
-        agent_count = 1 if agent_count is None else int(ctx.INTEGER().getText())
+        agent_count = ctx.NUMBER()
+        agent_count = 1 if agent_count is None else int(ctx.NUMBER().getText())
 
         agent_filename = ctx.FILENAME()
         if agent_filename is None:
