@@ -13,5 +13,12 @@ MAS call_loud {
         (reasoning_params, mcts_params(10, 20, 40)),
         (control, terminate(timeout, 12))
     ]
-    agents: call_loud;
+    agents: call_loud [
+        (debug, reasoningdbg),
+        (debug, mctsdbg_path),
+        (debug, mctsdbg),
+        (debug, actdbg),
+        (debug, interdbg),
+        (debug, systemdbg)
+    ];
 }

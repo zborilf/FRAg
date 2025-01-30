@@ -10,6 +10,7 @@ class Agent:
     name: str
     filename: str
     count: int
+    options: str
 
 
 class Mas2fpGenerator(MAS2JavaListener):
@@ -49,13 +50,16 @@ class Mas2fpGenerator(MAS2JavaListener):
         if agent_count > 1:
             raise Exception("Only one agent is supported for now")
 
-        self._agent = Agent(agent_name, agent_filename, agent_count)
+        agt_options = ctx.agt_options()
+        options = agt_options.getText() if agt_options else "[(debug,systemdbg)]"
+
+        self._agent = Agent(agent_name, agent_filename, agent_count, options)
 
     def exitAgent(self, ctx:MAS2JavaParser.AgentContext):
         agent = self._agent
         agent_path_without_extension = os.path.join(self._output_path, agent.filename.replace(".fap", ""))
-        # TODO: attributes
-        self._output += f'load("{self._name}","{agent_path_without_extension}",{agent.count},[(debug, systemdbg)]).\n'
+
+        self._output += f'load("{self._name}","{agent_path_without_extension}",{agent.count},{agent.options}).\n'
 
     def enterInfrastructure(self, ctx:MAS2JavaParser.InfrastructureContext):
         infrastructure = ctx.ID().symbol.text
@@ -86,9 +90,6 @@ class Mas2fpGenerator(MAS2JavaListener):
 
     def enterExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
         raise Exception("Exec_control is not supported")
-
-    def enterAgt_options(self, ctx:MAS2JavaParser.Agt_optionsContext):
-        raise Exception("Options are not supported")
 
     def enterAgt_arch_class(self, ctx:MAS2JavaParser.Agt_arch_classContext):
         raise Exception("agentArchClass is not supported")

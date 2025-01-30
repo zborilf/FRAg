@@ -64,7 +64,7 @@ agent:
     ;
 
 agt_options:
-    '[' .*? ']'
+    parameters
     ;
 
 agt_arch_class:
