@@ -1,5 +1,5 @@
 MAS do_it {
     infrastructure: Centralised
-    environment: "<environments>/workshop/workshop.pl"
+    environment: simple_shop "<environments>/workshop/workshop.pl"
 	agents:	do_it;
  }

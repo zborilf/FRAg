@@ -1194,3 +1194,5 @@ stats(task_maze,52.85937500000001,12).
 stats(fragagent,0.0,1).
 stats(task_maze,54.09375000000001,12).
 [].
+stats(fragagent,0.0035759999999999993,1).
+stats(factorial,0.008496,26).

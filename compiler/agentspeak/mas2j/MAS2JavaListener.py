@@ -35,6 +35,51 @@ class MAS2JavaListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MAS2JavaParser#parameters.
+    def enterParameters(self, ctx:MAS2JavaParser.ParametersContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameters.
+    def exitParameters(self, ctx:MAS2JavaParser.ParametersContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#parameter_list.
+    def enterParameter_list(self, ctx:MAS2JavaParser.Parameter_listContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameter_list.
+    def exitParameter_list(self, ctx:MAS2JavaParser.Parameter_listContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#parameter.
+    def enterParameter(self, ctx:MAS2JavaParser.ParameterContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameter.
+    def exitParameter(self, ctx:MAS2JavaParser.ParameterContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#parameter_definition.
+    def enterParameter_definition(self, ctx:MAS2JavaParser.Parameter_definitionContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameter_definition.
+    def exitParameter_definition(self, ctx:MAS2JavaParser.Parameter_definitionContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#term.
+    def enterTerm(self, ctx:MAS2JavaParser.TermContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#term.
+    def exitTerm(self, ctx:MAS2JavaParser.TermContext):
+        pass
+
+
     # Enter a parse tree produced by MAS2JavaParser#exec_control.
     def enterExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
         pass

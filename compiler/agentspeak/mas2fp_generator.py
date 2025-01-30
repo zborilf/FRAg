@@ -38,8 +38,8 @@ class Mas2fpGenerator(MAS2JavaListener):
             raise Exception("Only one agent is supported for now")
 
         agent_name = ctx.ID().getText()
-        agent_count = ctx.NUMBER()
-        agent_count = 1 if agent_count is None else int(ctx.NUMBER().getText())
+        agent_count = ctx.INTEGER()
+        agent_count = 1 if agent_count is None else int(ctx.INTEGER().getText())
 
         agent_filename = ctx.FILENAME()
         if agent_filename is None:
@@ -66,6 +66,13 @@ class Mas2fpGenerator(MAS2JavaListener):
     def enterEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
         self._env_path = ctx.STRING().getText().strip('"')
         self._output += f'include_environment("{self._env_path}").\n'
+
+        self._output += "\n"
+
+        env_name = ctx.ID().getText()
+        parameters = ctx.parameters().getText() or "[]"
+
+        self._output += f'set_environment({env_name}, {parameters}).\n'
 
     def exitEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
         if self._env_path:

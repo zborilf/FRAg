@@ -16,8 +16,39 @@ infrastructure:
     ;
 
 environment:
-    'environment' ':' STRING
+    'environment' ':' ID STRING parameters
     ;
+
+parameters:
+    '[' parameter_list ']'
+    | '[' ']'
+    |
+    ;
+
+parameter_list:
+    parameter (',' parameter)*
+    |
+    ;
+
+parameter:
+    parameter_definition
+    ;
+
+parameter_definition:
+    ID
+    | '(' parameter_list ')'
+    | '[' parameter_list ']'
+    ;
+
+term:
+    ID
+    | INTEGER
+    | FLOAT
+    | STRING
+    | '(' parameter_list ')'
+    | '[' parameter_list ']'
+    ;
+
 
 exec_control:
     'executionControl' ':' ID
@@ -35,7 +66,7 @@ agent:
     ( agt_arch_class )?
     ( agt_belief_base_class )?
     ( agt_class )?
-    ('#' NUMBER)?
+    ('#' INTEGER)?
     (agt_at)?
     ';'
     ;
@@ -68,8 +99,12 @@ FILENAME:
     [a-zA-Z0-9_/]+'.'[A-Za-z0-9]+
     ;
 
-NUMBER:
+INTEGER:
     DIGIT+
+    ;
+
+ FLOAT:
+    DIGIT+ '.' DIGIT+
     ;
 
  STRING:
