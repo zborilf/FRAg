@@ -7,5 +7,11 @@ MAS call_loud {
         (par_c, [0.5, 0.3]),
         (par_d, foo)
     ]
+    agent_defaults: [
+        (bindings, early),
+        (reasoning, mcts_reasoning),
+        (reasoning_params, mcts_params(10, 20, 40)),
+        (control, terminate(timeout, 12))
+    ]
     agents: call_loud;
 }

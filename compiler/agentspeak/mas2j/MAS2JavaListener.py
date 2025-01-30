@@ -71,6 +71,15 @@ class MAS2JavaListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MAS2JavaParser#agent_defaults.
+    def enterAgent_defaults(self, ctx:MAS2JavaParser.Agent_defaultsContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#agent_defaults.
+    def exitAgent_defaults(self, ctx:MAS2JavaParser.Agent_defaultsContext):
+        pass
+
+
     # Enter a parse tree produced by MAS2JavaParser#agents.
     def enterAgents(self, ctx:MAS2JavaParser.AgentsContext):
         pass

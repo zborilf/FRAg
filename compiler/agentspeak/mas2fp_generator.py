@@ -19,7 +19,6 @@ class Mas2fpGenerator(MAS2JavaListener):
         self._output = ""
         self._name = ""
         self._agent = None
-        self._env_path = ""
         self._output_path = output_path
 
     @property
@@ -64,8 +63,8 @@ class Mas2fpGenerator(MAS2JavaListener):
             raise Exception("Only Centralised infrastructure is supported")
 
     def enterEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
-        self._env_path = ctx.STRING().getText().strip('"')
-        self._output += f'include_environment("{self._env_path}").\n'
+        env_path = ctx.STRING().getText().strip('"')
+        self._output += f'include_environment("{env_path}").\n'
 
         self._output += "\n"
 
@@ -74,9 +73,16 @@ class Mas2fpGenerator(MAS2JavaListener):
 
         self._output += f'set_environment({env_name}, {parameters}).\n'
 
-    def exitEnvironment(self, ctx:MAS2JavaParser.EnvironmentContext):
-        if self._env_path:
-            self._output += "\n"
+        self._output += "\n"
+
+    def enterAgent_defaults(self, ctx:MAS2JavaParser.Agent_defaultsContext):
+        parameters = ctx.parameters().getText()
+        if not parameters:
+            raise ValueError("Agent defaults must have parameters")
+
+        self._output += f'set_agents({parameters}).\n'
+
+        self._output += "\n"
 
     def enterExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
         raise Exception("Exec_control is not supported")

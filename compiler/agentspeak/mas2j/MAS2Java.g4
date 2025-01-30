@@ -7,6 +7,7 @@ mas:
     ( infrastructure )?
     ( environment )?
     (exec_control)?
+    (agent_defaults)?
     agents
     '}'
 ;
@@ -40,6 +41,10 @@ parameter:
 exec_control:
     'executionControl' ':' ID
     ('at' ID)?
+    ;
+
+agent_defaults:
+    'agent_defaults' ':' parameters
     ;
 
 agents:
