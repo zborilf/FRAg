@@ -1,4 +1,4 @@
 MAS factorial {
     infrastructure: Centralised
-	agents:	factorial factorial.asl;
+	agents:	factorial factorial.asl [(debug, systemdbg), (debug, reasoningdbg)];
  }
