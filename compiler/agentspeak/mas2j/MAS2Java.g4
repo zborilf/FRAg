@@ -32,6 +32,7 @@ parameters:
 parameter:
     ID
     | NUMBER
+    | ID '(' parameter_list ')'
     | '(' parameter_list ')'
     | '[' parameter_list ']'
     ;

@@ -34,8 +34,7 @@ def _get_example(example_name: str) -> tuple[str, str]:
     return output, expected_output
 
 
-# _examples = ('adam', 'do_it', 'call_loud')
-_examples = ('call_loud',)
+_examples = ('adam', 'do_it', 'call_loud')
 
 
 class TestMas2fpGenerator(unittest.TestCase):
