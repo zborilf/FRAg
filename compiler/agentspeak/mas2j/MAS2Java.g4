@@ -17,13 +17,12 @@ infrastructure:
     ;
 
 environment:
-    'environment' ':' ID STRING parameters
+    'environment' ':' ID STRING parameters?
     ;
 
 parameters:
     '[' parameter_list ']'
     | '[' ']'
-    |
     ;
 
  parameter_list:

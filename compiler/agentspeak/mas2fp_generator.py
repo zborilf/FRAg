@@ -66,7 +66,7 @@ class Mas2fpGenerator(MAS2JavaListener):
         self._output += "\n"
 
         env_name = ctx.ID().getText()
-        parameters = ctx.parameters().getText() or "[]"
+        parameters = "[]" if ctx.parameters() is None else ctx.parameters().getText()
 
         self._output += f'set_environment({env_name}, {parameters}).\n'
 
