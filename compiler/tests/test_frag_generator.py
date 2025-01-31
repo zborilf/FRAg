@@ -34,7 +34,7 @@ def _get_example(example_name: str) -> tuple[str, str]:
     return output, expected_output
 
 
-_examples = ('factorial', 'do_it', 'e2_a1')
+_examples = ('factorial', 'do_it', 'count', 'call_loud')
 
 
 class TestFragGenerator(unittest.TestCase):

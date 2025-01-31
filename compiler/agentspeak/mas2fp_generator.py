@@ -19,7 +19,7 @@ class Mas2fpGenerator(MAS2JavaListener):
 
         self._output = ""
         self._name = ""
-        self._agent = None
+        self._agents = []
         self._output_path = output_path
 
     @property
@@ -27,16 +27,13 @@ class Mas2fpGenerator(MAS2JavaListener):
         return self._output
 
     @property
-    def agent(self) -> Agent:
-        return self._agent
+    def agents(self) -> list[Agent]:
+        return self._agents
 
     def enterMas(self, ctx:MAS2JavaParser.MasContext):
         self._name = ctx.ID().getText()
 
     def enterAgent(self, ctx:MAS2JavaParser.AgentContext):
-        if self._agent:
-            raise Exception("Only one agent is supported for now")
-
         agent_name = ctx.ID().getText()
         agent_count = ctx.NUMBER()
         agent_count = 1 if agent_count is None else int(ctx.NUMBER().getText())
@@ -47,19 +44,15 @@ class Mas2fpGenerator(MAS2JavaListener):
         else:
             agent_filename = agent_filename.getText().replace(".asl", ".fap")
 
-        if agent_count > 1:
-            raise Exception("Only one agent is supported for now")
-
         agt_options = ctx.agt_options()
         options = agt_options.getText() if agt_options else "[(debug,systemdbg)]"
 
-        self._agent = Agent(agent_name, agent_filename, agent_count, options)
+        agent = Agent(agent_name, agent_filename, agent_count, options)
+        self.agents.append(agent)
 
-    def exitAgent(self, ctx:MAS2JavaParser.AgentContext):
-        agent = self._agent
         agent_path_without_extension = os.path.join(self._output_path, agent.filename.replace(".fap", ""))
 
-        self._output += f'load("{self._name}","{agent_path_without_extension}",{agent.count},{agent.options}).\n'
+        self._output += f'load("{agent.name}","{agent_path_without_extension}",{agent.count},{agent.options}).\n'
 
     def enterInfrastructure(self, ctx:MAS2JavaParser.InfrastructureContext):
         infrastructure = ctx.ID().symbol.text

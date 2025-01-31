@@ -23,7 +23,7 @@ def _compile_mas_file(path: Path, output_dir: Path) -> tuple[str, list[Agent]]:
     walker = ParseTreeWalker()
     walker.walk(mas2f_generator, tree)
 
-    return mas2f_generator.output, [mas2f_generator.agent]
+    return mas2f_generator.output, mas2f_generator.agents
 
 
 def _compile_asl_file(path: Path) -> str:
@@ -65,7 +65,11 @@ def compile_mas(mas_file: str, output_dir: str) -> tuple[Path, list[Path]]:
         with (output_dir_path / agent_file_name).open("w") as f:
             f.write(agent_compiled)
 
-        output_files.append(output_dir_path / f"{program_name}_{agent_info.name}.out")
+        if agent_info.count == 1:
+            output_files.append(output_dir_path / f"{program_name}_{agent_info.name}.out")
+        else:
+            for i in range(1, agent_info.count + 1):
+                output_files.append(output_dir_path / f"{program_name}_{agent_info.name}{i}.out")
 
     return mas2fp_file, output_files
 
