@@ -81,6 +81,10 @@ class FragGenerator(AgentSpeakListener):
         def process_context(p_ctx: AgentSpeakParser.ContextContext) -> str:
             if not p_ctx:
                 return ""
+
+            if p_ctx.getText() == "true":
+                return ""
+
             conditions = p_ctx.getText().split('&')
             return ','.join(condition.strip() for condition in conditions)
 
@@ -90,6 +94,9 @@ class FragGenerator(AgentSpeakListener):
 
         if body := ctx.body():
             for body_formula in body.body_formula():
+                if body_formula.getText() == "true":
+                    continue
+                
                 children_len = len(body_formula.children)
                 if children_len == 1:
                     child = body_formula.getChild(0)
