@@ -85,3 +85,14 @@ warehouses(warehouseB).
        .println("Product manufactured").
 
 +!do_walk([]) : true <- true.
+
++!do_walk([Location | Locations]) : true <-
+   go(Location);
+   !do_walk(Locations).
+
++!go_to(Location) : location(Location) <- true.
+
++!go_to(Location) : not(location(Location))
+    & location(Location_Now)
+    <- ?path(Location_Now, Location, Path);
+       !do_walk(Path).

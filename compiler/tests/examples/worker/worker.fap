@@ -33,3 +33,6 @@ plan(ach,complete_task(Machine,Material),[not(carry(_))],[ach(go_to(warehouseB))
 plan(ach,complete_task(_,_),[carry(product(_,_))],[act(printfg("I'm carrying something right now"))]).
 plan(ach,make_product(Machine,Material),[machine(Machine,true)],[act(workshop,do(Machine,Material)),act(printfg("Product manufactured"))]).
 plan(ach,do_walk([]),[],[]).
+plan(ach,do_walk([Location|Locations]),[],[act(workshop,go(Location)),ach(do_walk(Locations))]).
+plan(ach,go_to(Location),[location(Location)],[]).
+plan(ach,go_to(Location),[not(location(Location)),location(Location_Now)],[test(path(Location_Now,Location,Path)),ach(do_walk(Path))]).
