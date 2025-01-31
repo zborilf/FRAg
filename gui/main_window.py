@@ -50,6 +50,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Initialize the FragExecutor
         self.frag_executor = FragExecutor(FRAG_PATH, self.swipl_path)
 
+        # Output viewer
+        self.output_viewer = None
+
     # Init methods
     def initialize_tree_view(self):
         self.file_model = QFileSystemModel()
@@ -100,12 +103,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_run(self):
         self.runButton.setEnabled(False)
         try:
-            output_viewer = self.frag_executor.execute(self.active_config_path)
-            output_viewer.show()
-            output_viewer.window_closed.connect(lambda: self.runButton.setEnabled(True))
+            self.output_viewer = self.frag_executor.execute(self.active_config_path)
+            self.output_viewer.show()
+            self.output_viewer.window_closed.connect(self.on_output_viewer_closed)
         except FRAgError as e:
             QMessageBox.critical(self, "Error", str(e))
             self.runButton.setEnabled(True)
+
+    def on_output_viewer_closed(self):
+        self.runButton.setEnabled(True)
+        self.output_viewer = None
 
     def on_file_selected(self, index):
         if self.file_model.isDir(index):

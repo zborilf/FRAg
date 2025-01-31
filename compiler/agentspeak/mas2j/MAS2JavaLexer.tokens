@@ -23,6 +23,7 @@ FILENAME=22
 STRING=23
 ID=24
 WS=25
+LC=26
 'MAS'=1
 '{'=2
 '}'=3

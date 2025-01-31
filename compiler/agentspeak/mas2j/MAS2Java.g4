@@ -124,3 +124,7 @@ fragment DIGIT:
 WS: // while space
    (' ' | '\t' | '\n' | '\r')+ -> skip
    ;
+
+LC:  // line comment
+    ('//' | '#') .*? '\r'? '\n' -> skip
+    ;
