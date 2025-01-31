@@ -12,57 +12,58 @@ else:
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\33")
-        buf.write("\u0098\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u0099\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\3\2\3\2\3\2\3\2\5\2%\n\2\3\2")
         buf.write("\5\2(\n\2\3\2\5\2+\n\2\3\2\5\2.\n\2\3\2\3\2\3\2\3\3\3")
         buf.write("\3\3\3\3\3\3\4\3\4\3\4\3\4\3\4\5\4<\n\4\3\5\3\5\3\5\3")
         buf.write("\5\3\5\3\5\5\5D\n\5\3\6\3\6\3\6\7\6I\n\6\f\6\16\6L\13")
         buf.write("\6\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7\3\7")
-        buf.write("\3\7\3\7\5\7]\n\7\3\b\3\b\3\b\3\b\3\b\5\bd\n\b\3\t\3\t")
-        buf.write("\3\t\3\t\3\n\3\n\3\n\6\nm\n\n\r\n\16\nn\3\13\3\13\5\13")
-        buf.write("s\n\13\3\13\5\13v\n\13\3\13\5\13y\n\13\3\13\5\13|\n\13")
-        buf.write("\3\13\5\13\177\n\13\3\13\3\13\5\13\u0083\n\13\3\13\5\13")
-        buf.write("\u0086\n\13\3\13\3\13\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3")
-        buf.write("\16\3\17\3\17\3\17\3\20\3\20\3\20\3\20\2\2\21\2\4\6\b")
-        buf.write("\n\f\16\20\22\24\26\30\32\34\36\2\2\2\u009c\2 \3\2\2\2")
-        buf.write("\4\62\3\2\2\2\6\66\3\2\2\2\bC\3\2\2\2\nE\3\2\2\2\f\\\3")
-        buf.write("\2\2\2\16^\3\2\2\2\20e\3\2\2\2\22i\3\2\2\2\24p\3\2\2\2")
-        buf.write("\26\u0089\3\2\2\2\30\u008b\3\2\2\2\32\u008e\3\2\2\2\34")
-        buf.write("\u0091\3\2\2\2\36\u0094\3\2\2\2 !\7\3\2\2!\"\7\32\2\2")
-        buf.write("\"$\7\4\2\2#%\5\4\3\2$#\3\2\2\2$%\3\2\2\2%\'\3\2\2\2&")
-        buf.write("(\5\6\4\2\'&\3\2\2\2\'(\3\2\2\2(*\3\2\2\2)+\5\16\b\2*")
-        buf.write(")\3\2\2\2*+\3\2\2\2+-\3\2\2\2,.\5\20\t\2-,\3\2\2\2-.\3")
-        buf.write("\2\2\2./\3\2\2\2/\60\5\22\n\2\60\61\7\5\2\2\61\3\3\2\2")
-        buf.write("\2\62\63\7\6\2\2\63\64\7\7\2\2\64\65\7\32\2\2\65\5\3\2")
-        buf.write("\2\2\66\67\7\b\2\2\678\7\7\2\289\7\32\2\29;\7\31\2\2:")
-        buf.write("<\5\b\5\2;:\3\2\2\2;<\3\2\2\2<\7\3\2\2\2=>\7\t\2\2>?\5")
-        buf.write("\n\6\2?@\7\n\2\2@D\3\2\2\2AB\7\t\2\2BD\7\n\2\2C=\3\2\2")
-        buf.write("\2CA\3\2\2\2D\t\3\2\2\2EJ\5\f\7\2FG\7\13\2\2GI\5\f\7\2")
-        buf.write("HF\3\2\2\2IL\3\2\2\2JH\3\2\2\2JK\3\2\2\2K\13\3\2\2\2L")
-        buf.write("J\3\2\2\2M]\7\32\2\2N]\7\27\2\2OP\7\32\2\2PQ\7\f\2\2Q")
-        buf.write("R\5\n\6\2RS\7\r\2\2S]\3\2\2\2TU\7\f\2\2UV\5\n\6\2VW\7")
-        buf.write("\r\2\2W]\3\2\2\2XY\7\t\2\2YZ\5\n\6\2Z[\7\n\2\2[]\3\2\2")
-        buf.write("\2\\M\3\2\2\2\\N\3\2\2\2\\O\3\2\2\2\\T\3\2\2\2\\X\3\2")
-        buf.write("\2\2]\r\3\2\2\2^_\7\16\2\2_`\7\7\2\2`c\7\32\2\2ab\7\17")
-        buf.write("\2\2bd\7\32\2\2ca\3\2\2\2cd\3\2\2\2d\17\3\2\2\2ef\7\20")
-        buf.write("\2\2fg\7\7\2\2gh\5\b\5\2h\21\3\2\2\2ij\7\21\2\2jl\7\7")
-        buf.write("\2\2km\5\24\13\2lk\3\2\2\2mn\3\2\2\2nl\3\2\2\2no\3\2\2")
-        buf.write("\2o\23\3\2\2\2pr\7\32\2\2qs\7\30\2\2rq\3\2\2\2rs\3\2\2")
-        buf.write("\2su\3\2\2\2tv\5\26\f\2ut\3\2\2\2uv\3\2\2\2vx\3\2\2\2")
-        buf.write("wy\5\30\r\2xw\3\2\2\2xy\3\2\2\2y{\3\2\2\2z|\5\32\16\2")
-        buf.write("{z\3\2\2\2{|\3\2\2\2|~\3\2\2\2}\177\5\34\17\2~}\3\2\2")
-        buf.write("\2~\177\3\2\2\2\177\u0082\3\2\2\2\u0080\u0081\7\22\2\2")
-        buf.write("\u0081\u0083\7\27\2\2\u0082\u0080\3\2\2\2\u0082\u0083")
-        buf.write("\3\2\2\2\u0083\u0085\3\2\2\2\u0084\u0086\5\36\20\2\u0085")
-        buf.write("\u0084\3\2\2\2\u0085\u0086\3\2\2\2\u0086\u0087\3\2\2\2")
-        buf.write("\u0087\u0088\7\23\2\2\u0088\25\3\2\2\2\u0089\u008a\5\b")
-        buf.write("\5\2\u008a\27\3\2\2\2\u008b\u008c\7\24\2\2\u008c\u008d")
-        buf.write("\7\32\2\2\u008d\31\3\2\2\2\u008e\u008f\7\25\2\2\u008f")
-        buf.write("\u0090\7\32\2\2\u0090\33\3\2\2\2\u0091\u0092\7\26\2\2")
-        buf.write("\u0092\u0093\7\32\2\2\u0093\35\3\2\2\2\u0094\u0095\7\17")
-        buf.write("\2\2\u0095\u0096\7\32\2\2\u0096\37\3\2\2\2\23$\'*-;CJ")
-        buf.write("\\cnrux{~\u0082\u0085")
+        buf.write("\3\7\3\7\3\7\5\7^\n\7\3\b\3\b\3\b\3\b\3\b\5\be\n\b\3\t")
+        buf.write("\3\t\3\t\3\t\3\n\3\n\3\n\6\nn\n\n\r\n\16\no\3\13\3\13")
+        buf.write("\5\13t\n\13\3\13\5\13w\n\13\3\13\5\13z\n\13\3\13\5\13")
+        buf.write("}\n\13\3\13\5\13\u0080\n\13\3\13\3\13\5\13\u0084\n\13")
+        buf.write("\3\13\5\13\u0087\n\13\3\13\3\13\3\f\3\f\3\r\3\r\3\r\3")
+        buf.write("\16\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\20\2\2\21")
+        buf.write("\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36\2\2\2\u009e\2")
+        buf.write(" \3\2\2\2\4\62\3\2\2\2\6\66\3\2\2\2\bC\3\2\2\2\nE\3\2")
+        buf.write("\2\2\f]\3\2\2\2\16_\3\2\2\2\20f\3\2\2\2\22j\3\2\2\2\24")
+        buf.write("q\3\2\2\2\26\u008a\3\2\2\2\30\u008c\3\2\2\2\32\u008f\3")
+        buf.write("\2\2\2\34\u0092\3\2\2\2\36\u0095\3\2\2\2 !\7\3\2\2!\"")
+        buf.write("\7\32\2\2\"$\7\4\2\2#%\5\4\3\2$#\3\2\2\2$%\3\2\2\2%\'")
+        buf.write("\3\2\2\2&(\5\6\4\2\'&\3\2\2\2\'(\3\2\2\2(*\3\2\2\2)+\5")
+        buf.write("\16\b\2*)\3\2\2\2*+\3\2\2\2+-\3\2\2\2,.\5\20\t\2-,\3\2")
+        buf.write("\2\2-.\3\2\2\2./\3\2\2\2/\60\5\22\n\2\60\61\7\5\2\2\61")
+        buf.write("\3\3\2\2\2\62\63\7\6\2\2\63\64\7\7\2\2\64\65\7\32\2\2")
+        buf.write("\65\5\3\2\2\2\66\67\7\b\2\2\678\7\7\2\289\7\32\2\29;\7")
+        buf.write("\31\2\2:<\5\b\5\2;:\3\2\2\2;<\3\2\2\2<\7\3\2\2\2=>\7\t")
+        buf.write("\2\2>?\5\n\6\2?@\7\n\2\2@D\3\2\2\2AB\7\t\2\2BD\7\n\2\2")
+        buf.write("C=\3\2\2\2CA\3\2\2\2D\t\3\2\2\2EJ\5\f\7\2FG\7\13\2\2G")
+        buf.write("I\5\f\7\2HF\3\2\2\2IL\3\2\2\2JH\3\2\2\2JK\3\2\2\2K\13")
+        buf.write("\3\2\2\2LJ\3\2\2\2M^\7\32\2\2N^\7\b\2\2O^\7\27\2\2PQ\7")
+        buf.write("\32\2\2QR\7\f\2\2RS\5\n\6\2ST\7\r\2\2T^\3\2\2\2UV\7\f")
+        buf.write("\2\2VW\5\n\6\2WX\7\r\2\2X^\3\2\2\2YZ\7\t\2\2Z[\5\n\6\2")
+        buf.write("[\\\7\n\2\2\\^\3\2\2\2]M\3\2\2\2]N\3\2\2\2]O\3\2\2\2]")
+        buf.write("P\3\2\2\2]U\3\2\2\2]Y\3\2\2\2^\r\3\2\2\2_`\7\16\2\2`a")
+        buf.write("\7\7\2\2ad\7\32\2\2bc\7\17\2\2ce\7\32\2\2db\3\2\2\2de")
+        buf.write("\3\2\2\2e\17\3\2\2\2fg\7\20\2\2gh\7\7\2\2hi\5\b\5\2i\21")
+        buf.write("\3\2\2\2jk\7\21\2\2km\7\7\2\2ln\5\24\13\2ml\3\2\2\2no")
+        buf.write("\3\2\2\2om\3\2\2\2op\3\2\2\2p\23\3\2\2\2qs\7\32\2\2rt")
+        buf.write("\7\30\2\2sr\3\2\2\2st\3\2\2\2tv\3\2\2\2uw\5\26\f\2vu\3")
+        buf.write("\2\2\2vw\3\2\2\2wy\3\2\2\2xz\5\30\r\2yx\3\2\2\2yz\3\2")
+        buf.write("\2\2z|\3\2\2\2{}\5\32\16\2|{\3\2\2\2|}\3\2\2\2}\177\3")
+        buf.write("\2\2\2~\u0080\5\34\17\2\177~\3\2\2\2\177\u0080\3\2\2\2")
+        buf.write("\u0080\u0083\3\2\2\2\u0081\u0082\7\22\2\2\u0082\u0084")
+        buf.write("\7\27\2\2\u0083\u0081\3\2\2\2\u0083\u0084\3\2\2\2\u0084")
+        buf.write("\u0086\3\2\2\2\u0085\u0087\5\36\20\2\u0086\u0085\3\2\2")
+        buf.write("\2\u0086\u0087\3\2\2\2\u0087\u0088\3\2\2\2\u0088\u0089")
+        buf.write("\7\23\2\2\u0089\25\3\2\2\2\u008a\u008b\5\b\5\2\u008b\27")
+        buf.write("\3\2\2\2\u008c\u008d\7\24\2\2\u008d\u008e\7\32\2\2\u008e")
+        buf.write("\31\3\2\2\2\u008f\u0090\7\25\2\2\u0090\u0091\7\32\2\2")
+        buf.write("\u0091\33\3\2\2\2\u0092\u0093\7\26\2\2\u0093\u0094\7\32")
+        buf.write("\2\2\u0094\35\3\2\2\2\u0095\u0096\7\17\2\2\u0096\u0097")
+        buf.write("\7\32\2\2\u0097\37\3\2\2\2\23$\'*-;CJ]dosvy|\177\u0083")
+        buf.write("\u0086")
         return buf.getvalue()
 
 
@@ -506,7 +507,7 @@ class MAS2JavaParser ( Parser ):
         localctx = MAS2JavaParser.ParameterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_parameter)
         try:
-            self.state = 90
+            self.state = 91
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,7,self._ctx)
             if la_ == 1:
@@ -518,38 +519,44 @@ class MAS2JavaParser ( Parser ):
             elif la_ == 2:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 76
-                self.match(MAS2JavaParser.NUMBER)
+                self.match(MAS2JavaParser.T__5)
                 pass
 
             elif la_ == 3:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 77
-                self.match(MAS2JavaParser.ID)
-                self.state = 78
-                self.match(MAS2JavaParser.T__9)
-                self.state = 79
-                self.parameter_list()
-                self.state = 80
-                self.match(MAS2JavaParser.T__10)
+                self.match(MAS2JavaParser.NUMBER)
                 pass
 
             elif la_ == 4:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 82
+                self.state = 78
+                self.match(MAS2JavaParser.ID)
+                self.state = 79
                 self.match(MAS2JavaParser.T__9)
-                self.state = 83
+                self.state = 80
                 self.parameter_list()
-                self.state = 84
+                self.state = 81
                 self.match(MAS2JavaParser.T__10)
                 pass
 
             elif la_ == 5:
                 self.enterOuterAlt(localctx, 5)
-                self.state = 86
-                self.match(MAS2JavaParser.T__6)
-                self.state = 87
+                self.state = 83
+                self.match(MAS2JavaParser.T__9)
+                self.state = 84
                 self.parameter_list()
+                self.state = 85
+                self.match(MAS2JavaParser.T__10)
+                pass
+
+            elif la_ == 6:
+                self.enterOuterAlt(localctx, 6)
+                self.state = 87
+                self.match(MAS2JavaParser.T__6)
                 self.state = 88
+                self.parameter_list()
+                self.state = 89
                 self.match(MAS2JavaParser.T__7)
                 pass
 
@@ -596,19 +603,19 @@ class MAS2JavaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 92
-            self.match(MAS2JavaParser.T__11)
             self.state = 93
-            self.match(MAS2JavaParser.T__4)
+            self.match(MAS2JavaParser.T__11)
             self.state = 94
+            self.match(MAS2JavaParser.T__4)
+            self.state = 95
             self.match(MAS2JavaParser.ID)
-            self.state = 97
+            self.state = 98
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__12:
-                self.state = 95
-                self.match(MAS2JavaParser.T__12)
                 self.state = 96
+                self.match(MAS2JavaParser.T__12)
+                self.state = 97
                 self.match(MAS2JavaParser.ID)
 
 
@@ -651,11 +658,11 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 14, self.RULE_agent_defaults)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 99
-            self.match(MAS2JavaParser.T__13)
             self.state = 100
-            self.match(MAS2JavaParser.T__4)
+            self.match(MAS2JavaParser.T__13)
             self.state = 101
+            self.match(MAS2JavaParser.T__4)
+            self.state = 102
             self.parameters()
         except RecognitionException as re:
             localctx.exception = re
@@ -700,17 +707,17 @@ class MAS2JavaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 103
-            self.match(MAS2JavaParser.T__14)
             self.state = 104
+            self.match(MAS2JavaParser.T__14)
+            self.state = 105
             self.match(MAS2JavaParser.T__4)
-            self.state = 106 
+            self.state = 107 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 105
+                self.state = 106
                 self.agent()
-                self.state = 108 
+                self.state = 109 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not (_la==MAS2JavaParser.ID):
@@ -781,67 +788,67 @@ class MAS2JavaParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 110
+            self.state = 111
             self.match(MAS2JavaParser.ID)
-            self.state = 112
+            self.state = 113
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.FILENAME:
-                self.state = 111
+                self.state = 112
                 self.match(MAS2JavaParser.FILENAME)
 
 
-            self.state = 115
+            self.state = 116
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__6:
-                self.state = 114
+                self.state = 115
                 self.agt_options()
 
 
-            self.state = 118
+            self.state = 119
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__17:
-                self.state = 117
+                self.state = 118
                 self.agt_arch_class()
 
 
-            self.state = 121
+            self.state = 122
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__18:
-                self.state = 120
+                self.state = 121
                 self.agt_belief_base_class()
 
 
-            self.state = 124
+            self.state = 125
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__19:
-                self.state = 123
+                self.state = 124
                 self.agt_class()
 
 
-            self.state = 128
+            self.state = 129
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__15:
-                self.state = 126
-                self.match(MAS2JavaParser.T__15)
                 self.state = 127
+                self.match(MAS2JavaParser.T__15)
+                self.state = 128
                 self.match(MAS2JavaParser.NUMBER)
 
 
-            self.state = 131
+            self.state = 132
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==MAS2JavaParser.T__12:
-                self.state = 130
+                self.state = 131
                 self.agt_at()
 
 
-            self.state = 133
+            self.state = 134
             self.match(MAS2JavaParser.T__16)
         except RecognitionException as re:
             localctx.exception = re
@@ -882,7 +889,7 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 20, self.RULE_agt_options)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 135
+            self.state = 136
             self.parameters()
         except RecognitionException as re:
             localctx.exception = re
@@ -922,9 +929,9 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 22, self.RULE_agt_arch_class)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 137
-            self.match(MAS2JavaParser.T__17)
             self.state = 138
+            self.match(MAS2JavaParser.T__17)
+            self.state = 139
             self.match(MAS2JavaParser.ID)
         except RecognitionException as re:
             localctx.exception = re
@@ -964,9 +971,9 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 24, self.RULE_agt_belief_base_class)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 140
-            self.match(MAS2JavaParser.T__18)
             self.state = 141
+            self.match(MAS2JavaParser.T__18)
+            self.state = 142
             self.match(MAS2JavaParser.ID)
         except RecognitionException as re:
             localctx.exception = re
@@ -1006,9 +1013,9 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 26, self.RULE_agt_class)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 143
-            self.match(MAS2JavaParser.T__19)
             self.state = 144
+            self.match(MAS2JavaParser.T__19)
+            self.state = 145
             self.match(MAS2JavaParser.ID)
         except RecognitionException as re:
             localctx.exception = re
@@ -1048,9 +1055,9 @@ class MAS2JavaParser ( Parser ):
         self.enterRule(localctx, 28, self.RULE_agt_at)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 146
-            self.match(MAS2JavaParser.T__12)
             self.state = 147
+            self.match(MAS2JavaParser.T__12)
+            self.state = 148
             self.match(MAS2JavaParser.ID)
         except RecognitionException as re:
             localctx.exception = re

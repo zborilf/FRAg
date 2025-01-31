@@ -31,6 +31,10 @@ parameters:
 
 parameter:
     ID
+    | 'environment'  // Allow 'environment' as a parameter value even though it's a keyword
+                     // This is necessary because 'environment' has dual usage:
+                     // 1. As a keyword in MAS configuration section
+                     // 2. As a parameter identifier in agent_defaults and other parameter lists
     | NUMBER
     | ID '(' parameter_list ')'
     | '(' parameter_list ')'
