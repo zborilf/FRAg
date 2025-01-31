@@ -33,3 +33,55 @@ warehouses(warehouseB).
        drop;
        go(construction);
        !complete_tasks.
+
++!complete_tasks : not(carry(_))
+    & not(location(construction))
+    <- !go_to(construction);
+       !complete_tasks.
+
++!complete_tasks : not(carry(_))
+    & location(construction)
+    & task(Machine2, Material2)
+    <- !complete_task(Machine2, Material2);
+       !complete_tasks.
+
++!complete_tasks
+    <- .println("Apparently no task available");
+       !complete_tasks.
+
++!complete_task(Machine, Material) : not(carry(_))
+    <- !go_to(hall);
+       ?product(Machine, Material, _);
+       pick(Machine, Material);
+       go(construction);
+       submit.
+
++!complete_task(Machine, Material) : not(carry(_))
+    <- !go_to(warehouseA);
+       ?resource(warehouseA, Material, _);
+       pick(Material);
+       go(workshop);
+       !make_product(Machine, Material);
+       go(hall);
+       go(construction);
+       submit.
+
++!complete_task(Machine, Material) : not(carry(_))
+    <- !go_to(warehouseB);
+       ?resource(warehouseB, Material, _);
+       pick(Material);
+       go(workshop);
+       !make_product(Machine, Material);
+       go(hall);
+       go(construction);
+       submit.
+
++!complete_task(_, _) : carry(product(_, _))
+    <- .println("I'm carrying something right now").
+
++!make_product(Machine, Material) :
+    machine(Machine, true)
+    <- do(Machine, Material);
+       .println("Product manufactured").
+
++!do_walk([]) : true <- true.

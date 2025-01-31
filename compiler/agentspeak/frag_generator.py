@@ -78,7 +78,13 @@ class FragGenerator(AgentSpeakListener):
         if plan_type is None:
             raise Exception(f"Unsupported plan type for prefix: {event_prefix}")
 
-        context_str = context.getText() if (context := ctx.context()) else ""
+        def process_context(p_ctx: AgentSpeakParser.ContextContext) -> str:
+            if not p_ctx:
+                return ""
+            conditions = p_ctx.getText().split('&')
+            return ','.join(condition.strip() for condition in conditions)
+
+        context_str = process_context(context) if (context := ctx.context()) else ""
 
         converted_body = []
 
