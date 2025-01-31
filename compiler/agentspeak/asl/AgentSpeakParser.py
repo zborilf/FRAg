@@ -1,4 +1,4 @@
-# Generated from AgentSpeak.g4 by ANTLR 4.9.2
+# Generated from AgentSpeak.g4 by ANTLR 4.9
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -226,7 +226,7 @@ class AgentSpeakParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.2")
+        self.checkVersion("4.9")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -234,7 +234,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class AgentContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -315,7 +314,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Init_belsContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -363,7 +361,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class BeliefsContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -419,7 +416,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class RulesContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -486,7 +482,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Init_goalContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -532,7 +527,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class PlanContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -619,7 +613,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Triggering_eventContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -682,7 +675,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class LiteralContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -733,7 +725,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class ContextContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -788,7 +779,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Log_exprContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -905,7 +895,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Simple_log_exprContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -971,7 +960,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class BodyContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1029,7 +1017,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Body_formulaContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1125,7 +1112,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Atomic_formulaContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1206,7 +1192,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class List_of_termsContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1264,7 +1249,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class TermContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1362,7 +1346,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Term_valueContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1415,7 +1398,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Internal_actionContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1468,7 +1450,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class List_structureContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1565,7 +1546,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Rel_exprContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1629,7 +1609,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Rel_termContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1688,7 +1667,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Arithm_exprContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -1752,7 +1730,6 @@ class AgentSpeakParser ( Parser ):
 
 
     class Arithm_termContext(ParserRuleContext):
-        __slots__ = 'parser'
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)

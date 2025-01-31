@@ -21,10 +21,11 @@ def process_rel_expr(rel_expr: AgentSpeakParser.Rel_exprContext) -> str:
 
 
 class FragGenerator(AgentSpeakListener):
-    def __init__(self):
+    def __init__(self, env_name: str | None = None) -> None:
         super().__init__()
 
         self._output = ""
+        self._env_name = env_name
 
     @property
     def output(self) -> str:
@@ -111,6 +112,10 @@ class FragGenerator(AgentSpeakListener):
                         converted_body.append(f"act({fnc_call_str})")
                     elif isinstance(child, AgentSpeakParser.Rel_exprContext):
                         converted_body.append(process_rel_expr(child))
+                    elif isinstance(child, AgentSpeakParser.Atomic_formulaContext): # env action
+                        if self._env_name is None:
+                            raise ValueError("Environment action found but no environment name provided")
+                        converted_body.append(f"act({self._env_name},{child.getText()})")
                     else:
                         raise Exception("TODO")
                 elif children_len == 2:

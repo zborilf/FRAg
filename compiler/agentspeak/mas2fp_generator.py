@@ -19,12 +19,17 @@ class Mas2fpGenerator(MAS2JavaListener):
 
         self._output = ""
         self._name = ""
+        self._env_name = None
         self._agents = []
         self._output_path = output_path
 
     @property
     def output(self) -> str:
         return self._output
+
+    @property
+    def env_name(self) -> str:
+        return self._env_name
 
     @property
     def agents(self) -> list[Agent]:
@@ -69,6 +74,8 @@ class Mas2fpGenerator(MAS2JavaListener):
         parameters = "[]" if ctx.parameters() is None else ctx.parameters().getText()
 
         self._output += f'set_environment({env_name}, {parameters}).\n'
+
+        self._env_name = env_name
 
         self._output += "\n"
 

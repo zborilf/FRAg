@@ -149,11 +149,9 @@ NUMBER:
     | (DIGIT)+ ([eE] ([+-])? (DIGIT)+)
     ;
 
-//VAR:
-//    LC_LETTER (CHAR)*
-//;
-
 VAR:
+    '_'    // anonymous variable
+    |
     ( UP_LETTER | LC_LETTER )
     ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
     ;

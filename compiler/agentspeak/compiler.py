@@ -12,7 +12,7 @@ from .frag_generator import FragGenerator
 from .mas2fp_generator import Mas2fpGenerator, Agent
 
 # TODO: more agents
-def _compile_mas_file(path: Path, output_dir: Path) -> tuple[str, list[Agent]]:
+def _compile_mas_file(path: Path, output_dir: Path) -> tuple[str, str | None, list[Agent]]:
     input_stream = FileStream(path.as_posix())
     lexer = MAS2JavaLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -23,17 +23,17 @@ def _compile_mas_file(path: Path, output_dir: Path) -> tuple[str, list[Agent]]:
     walker = ParseTreeWalker()
     walker.walk(mas2f_generator, tree)
 
-    return mas2f_generator.output, mas2f_generator.agents
+    return mas2f_generator.output, mas2f_generator.env_name, mas2f_generator.agents
 
 
-def _compile_asl_file(path: Path) -> str:
+def _compile_asl_file(path: Path, env_name: str | None) -> str:
     input_stream = FileStream(path.as_posix())
     lexer = AgentSpeakLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = AgentSpeakParser(stream)
     tree = parser.agent()
 
-    frag_generator = FragGenerator()
+    frag_generator = FragGenerator(env_name)
     walker = ParseTreeWalker()
     walker.walk(frag_generator, tree)
 
@@ -49,7 +49,7 @@ def compile_mas(mas_file: str, output_dir: str) -> tuple[Path, list[Path]]:
 
     source_dir = mas_path.parent.resolve()
 
-    mas_compiled, agents_info = _compile_mas_file(mas_path, output_dir_path)
+    mas_compiled, mas_env_name, agents_info = _compile_mas_file(mas_path, output_dir_path)
 
     mas_file_name = mas_path.name.replace("mas2j", "mas2fp")
     mas2fp_file = output_dir_path / mas_file_name
@@ -60,7 +60,7 @@ def compile_mas(mas_file: str, output_dir: str) -> tuple[Path, list[Path]]:
     output_files = []
 
     for agent_info in agents_info:
-        agent_compiled = _compile_asl_file((source_dir / agent_info.filename.replace("fap", "asl")))
+        agent_compiled = _compile_asl_file((source_dir / agent_info.filename.replace("fap", "asl")), mas_env_name)
         agent_file_name = Path(agent_info.filename).name
         with (output_dir_path / agent_file_name).open("w") as f:
             f.write(agent_compiled)
