@@ -1,4 +1,5 @@
 import os
+import platform
 from dataclasses import dataclass
 
 from .mas2j.MAS2JavaListener import MAS2JavaListener
@@ -56,6 +57,9 @@ class Mas2fpGenerator(MAS2JavaListener):
         self.agents.append(agent)
 
         agent_path_without_extension = os.path.join(self._output_path, agent.filename.replace(".fap", ""))
+
+        if platform.system() == "Windows":
+            agent_path_without_extension = os.path.normpath(agent_path_without_extension).replace('\\', '/')
 
         self._output += f'load("{agent.name}","{agent_path_without_extension}",{agent.count},{agent.options}).\n'
 

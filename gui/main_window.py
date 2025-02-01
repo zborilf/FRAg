@@ -1,6 +1,7 @@
 import os
 import glob
 import pathlib
+import platform
 
 from PyQt6.QtGui import QFileSystemModel, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QMainWindow, QTextEdit, QMessageBox
@@ -55,13 +56,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Init methods
     def initialize_tree_view(self):
+        # Create an instance of QFileSystemModel
         self.file_model = QFileSystemModel()
-        self.file_model.setRootPath(QDir.rootPath())
         self.treeView.setModel(self.file_model)
 
-        # Open the current working folder
+        # Retrieve the current working directory
         current_dir = os.getcwd()
-        self.treeView.setRootIndex(self.file_model.index(QDir.rootPath()))
+
+        # Determine the root path based on the operating system
+        if platform.system() == "Windows":
+            # On Windows, split the drive letter from the current directory
+            drive, _ = os.path.splitdrive(current_dir)
+            # Construct the root path (e.g., "D:\")
+            root_drive = drive + os.path.sep
+        else:
+            # On Unix-like systems (e.g., macOS), use the system root "/"
+            root_drive = QDir.rootPath()  # Typically "/"
+
+        # Set the root path for the file system model to the determined drive or root directory
+        self.file_model.setRootPath(root_drive)
+
+        # Set the tree view's root index to the determined root path
+        self.treeView.setRootIndex(self.file_model.index(root_drive))
+
+        # Set the current index to highlight the current working directory within the tree
         self.treeView.setCurrentIndex(self.file_model.index(current_dir))
 
         # Set filters
