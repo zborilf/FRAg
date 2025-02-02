@@ -7,6 +7,7 @@ from PyQt6.QtGui import QFileSystemModel, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QMainWindow, QTextEdit, QMessageBox
 from PyQt6.QtCore import QDir, Qt
 
+from .error_dialog import ErrorDialog
 from .design import Ui_MainWindow  # Import the generated UI
 from .syntax.asl.highlighter import ASLSyntaxHighlighter
 from .syntax.mas2j.highlighter import MAS2JSyntaxHighlighter
@@ -124,9 +125,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.output_viewer = self.frag_executor.execute(self.active_config_path)
             self.output_viewer.show()
             self.output_viewer.window_closed.connect(self.on_output_viewer_closed)
+            self.frag_executor.process_thread.error_occurred.connect(self.handle_frag_error)
         except FRAgError as e:
             QMessageBox.critical(self, "Error", str(e))
             self.runButton.setEnabled(True)
+
+    def handle_frag_error(self, error_message):
+        if self.output_viewer is not None:
+            self.output_viewer.close()
+
+        dialog = ErrorDialog("Error", error_message, self)
+        dialog.exec()
+        self.runButton.setEnabled(True)
 
     def on_output_viewer_closed(self):
         self.runButton.setEnabled(True)

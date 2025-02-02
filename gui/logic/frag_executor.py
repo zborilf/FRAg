@@ -15,6 +15,7 @@ class FRAgError(Exception):
 class ProcessThread(QThread):
     """Thread to handle the execution of the Prolog process."""
     process_finished = pyqtSignal(int, str, str)  # Emit return code, stdout, and stderr
+    error_occurred = pyqtSignal(str)
 
     def __init__(self, command, working_dir):
         super().__init__()
@@ -99,7 +100,15 @@ class OutputWindow(QMainWindow):
         """Update the content of the corresponding tab."""
         for i in range(self.tab_widget.count()):
             if pathlib.Path(file_path).name == self.tab_widget.tabText(i):
-                self.tab_widget.widget(i).setPlainText(content)
+                text_edit = self.tab_widget.widget(i)
+                # Remember the scrollbar position
+                scrollbar = text_edit.verticalScrollBar()
+                current_position = scrollbar.value()
+
+                text_edit.setPlainText(content)
+
+                # Restore scrollbar position
+                scrollbar.setValue(current_position)
 
 class FragExecutor:
     def __init__(self, frag_path: pathlib.Path, swipl_path: str) -> None:
@@ -120,7 +129,7 @@ class FragExecutor:
                 print("FRAg process finished successfully.")
             else:
                 print(f"FRAg process failed: {stderr}")
-                raise FRAgError(f"FRAg process failed:\n{stderr}")
+                process_thread.error_occurred.emit(f"FRAg process failed:\n{stderr}")
 
         try:
             try:
@@ -139,6 +148,9 @@ class FragExecutor:
 
             # Open output window
             self.output_window = OutputWindow(output_files, temp_dir)
+
+            self.process_thread = process_thread
+
             return self.output_window
         except Exception as e:
             clear_temp_dir()
