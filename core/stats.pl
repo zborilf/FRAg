@@ -1232,3 +1232,10 @@ stats(workerE,3.90099,1200).
 [stats(workerE,workshop,workshop,reward(100))].
 stats(workerL,4.594119999999999,1200).
 [stats(workerL,workshop,workshop,reward(90))].
+stats(fragagent,0.0037080000000000004,1).
+stats(workerL,5.000801,1200).
+[stats(workerL,workshop,workshop,reward(120))].
+stats(workerCL,4.073239999999999,1200).
+[stats(workerCL,workshop,workshop,reward(110))].
+stats(workerE,4.499377,1200).
+[stats(workerE,workshop,workshop,reward(60))].

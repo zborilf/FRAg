@@ -189,7 +189,7 @@ WS: // while space
    ;
 
 LC:  // line comment
-    ('//' | '#') .*? '\r'? '\n' -> skip
+    '//' .*? '\r'? '\n' -> skip
     ;
 
 BC: // block comment
