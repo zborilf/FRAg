@@ -129,6 +129,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except FRAgError as e:
             QMessageBox.critical(self, "Error", str(e))
             self.runButton.setEnabled(True)
+        except SyntaxError as e:
+            QMessageBox.critical(self, "Syntax Error", f"Syntax Error\n\n{str(e)}")
+            self.runButton.setEnabled(True)
 
     def handle_frag_error(self, error_message):
         if self.output_viewer is not None:

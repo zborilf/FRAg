@@ -135,6 +135,8 @@ class FragExecutor:
             try:
                 mas2j_path = pathlib.Path(active_config_path)
                 mas2fp_path, output_files = compile_mas(mas2j_path.as_posix(), dir_name)
+            except SyntaxError:
+                raise # Handled in the main window
             except Exception as e:
                 raise FRAgError(f"Failed to compile MAS:\n{e}")
 
