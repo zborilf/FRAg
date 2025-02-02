@@ -4,7 +4,7 @@ import time
 import pathlib
 import tempfile
 from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QTextEdit, QProgressBar, QWidget, QHBoxLayout, QLabel
 
 from compiler.agentspeak.compiler import compile_mas
 
@@ -16,6 +16,7 @@ class ProcessThread(QThread):
     """Thread to handle the execution of the Prolog process."""
     process_finished = pyqtSignal(int, str, str)  # Emit return code, stdout, and stderr
     error_occurred = pyqtSignal(str)
+    execution_completed = pyqtSignal(bool)
 
     def __init__(self, command, working_dir):
         super().__init__()
@@ -32,8 +33,10 @@ class ProcessThread(QThread):
                 text=True
             )
             self.process_finished.emit(result.returncode, result.stdout, result.stderr)
+            self.execution_completed.emit(result.returncode == 0)
         except Exception as e:
             self.process_finished.emit(-1, "", str(e))
+            self.execution_completed.emit(False)
 
 
 class FileWatcher(QThread):
@@ -66,11 +69,15 @@ class OutputWindow(QMainWindow):
 
     window_closed = pyqtSignal()
 
-    def __init__(self, output_files, temp_dir):
+    def __init__(self, output_files, temp_dir, process_thread: ProcessThread):
         super().__init__()
         self.setWindowTitle("Output Viewer")
         self.resize(800, 600)  # Initial size
         self.temp_dir = temp_dir
+
+        self.process_thread = process_thread
+        self.process_thread.execution_completed.connect(self.on_execution_completed)
+        self.is_completed = False
 
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
@@ -86,6 +93,36 @@ class OutputWindow(QMainWindow):
             watcher.file_updated.connect(self.update_tab_content)
             watcher.start()
             self.watchers.append(watcher)
+
+        # Status bar setup
+        self.status_bar = self.statusBar()
+
+        # Create container widget
+        status_widget = QWidget()
+        status_layout = QHBoxLayout(status_widget)
+        status_layout.setSpacing(10)  # Gap between elements
+        status_layout.setContentsMargins(5, 0, 5, 0)  # Small margins
+
+        # Status label
+        self.status_label = QLabel("Running...")
+        status_layout.addWidget(self.status_label)
+
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 0)  # Endless animation
+        self.progress_bar.setFixedWidth(100)
+        self.progress_bar.setMinimumHeight(14) # Ensures minimum height
+        status_layout.addWidget(self.progress_bar)
+
+        status_layout.addStretch()
+
+        self.status_bar.addWidget(status_widget)
+
+    def on_execution_completed(self, success: bool):
+        self.is_completed = True
+        self.progress_bar.setRange(0, 1) # Stops animation
+        self.progress_bar.setValue(1) # Sets full progress
+        self.status_bar.showMessage("Completed" if success else "Failed")
 
     def closeEvent(self, event):
         """Clean up the temporary directory when the window is closed."""
@@ -114,6 +151,10 @@ class FragExecutor:
     def __init__(self, frag_path: pathlib.Path, swipl_path: str) -> None:
         self.frag_path = frag_path
         self.swipl_path = swipl_path
+
+        # Initialize variables
+        self.output_window = None
+        self.process_thread = None
 
     def execute(self, active_config_path: str) -> OutputWindow:
 
@@ -149,7 +190,7 @@ class FragExecutor:
             process_thread.start()
 
             # Open output window
-            self.output_window = OutputWindow(output_files, temp_dir)
+            self.output_window = OutputWindow(output_files, temp_dir, process_thread)
 
             self.process_thread = process_thread
 
