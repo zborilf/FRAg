@@ -34,9 +34,6 @@ class SyntaxErrorListener(ErrorListener):
 
 
 class BaseSyntaxHighlighter(QSyntaxHighlighter):
-    keywords = []
-    internal_actions = []
-
     def __init__(self, document, error_callback=None):
         super().__init__(document)
         self.updating = False
@@ -49,16 +46,21 @@ class BaseSyntaxHighlighter(QSyntaxHighlighter):
         # Formats for highlighting
         self.error_format = create_format("red", underline=True)
 
-        keyword_format = create_format("blue", bold=True)
-        internal_action_format = create_format("purple", bold=True)
-        comment_format = create_format("green", italic=True)
-        string_format = create_format("magenta")
+        # Base rules that should be applied first
+        self.add_rule(r'"[^"]*"', create_format("magenta"))  # Strings
+        self.add_rule(r'\b-?\d+(\.\d+)?\b', create_format("cyan"))  # Numbers
+        self.add_rule(r"//.*", create_format("gray"))  # Single-line comments
+        self.add_rule(r"/\*[\s\S]*?\*/", create_format("gray"))  # Multi-line comments
 
-        # Adding syntax rules for keywords, internal actions, comments, and strings
-        self.highlighting_rules += [(rf"{keyword}", keyword_format) for keyword in self.keywords]
-        self.highlighting_rules += [(rf"{action}", internal_action_format) for action in self.internal_actions]
-        self.highlighting_rules.append((r"//[^\n]*", comment_format))
-        self.highlighting_rules.append((r"\".*?\"", string_format))
+        self.add_language_specific_rules()
+
+    def add_rule(self, pattern, format):
+        """Add a new rule to the beginning of the rules list."""
+        self.highlighting_rules.insert(0, (pattern, format))
+
+    def add_language_specific_rules(self):
+        """Hook method for derived classes to add their specific rules"""
+        pass
 
     def highlightBlock(self, text):
         # Highlighting according to the rules
