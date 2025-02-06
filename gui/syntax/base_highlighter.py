@@ -54,9 +54,9 @@ class BaseSyntaxHighlighter(QSyntaxHighlighter):
 
         self.add_language_specific_rules()
 
-    def add_rule(self, pattern, format):
+    def add_rule(self, pattern, format, group=0):
         """Add a new rule to the beginning of the rules list."""
-        self.highlighting_rules.insert(0, (pattern, format))
+        self.highlighting_rules.insert(0, (pattern, format, group))
 
     def add_language_specific_rules(self):
         """Hook method for derived classes to add their specific rules"""
@@ -64,10 +64,10 @@ class BaseSyntaxHighlighter(QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         # Highlighting according to the rules
-        for pattern, format in self.highlighting_rules:
+        for pattern, format, group in self.highlighting_rules:
             matches = re.finditer(pattern, text)
             for match in matches:
-                start, end = match.span()
+                start, end = match.span(group)
                 self.setFormat(start, end - start, format)
 
         self.highlight_errors(text)

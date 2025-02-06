@@ -30,6 +30,8 @@ class MAS2JSyntaxHighlighter(BaseSyntaxHighlighter):
             agent_format
         )
 
+        self.add_rule(r"#(?=\s*\d+)", create_format("cyan")) # '#'
+
         sections_format = create_format("blue", bold=True)
         platform_format = create_format("purple", bold=True)
 
