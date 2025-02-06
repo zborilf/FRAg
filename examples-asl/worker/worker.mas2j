@@ -17,9 +17,9 @@ MAS worker {
         (reasoning, random_reasoning),
         (environment, workshop)
     ]
-	agents:
-	    workerCL worker.asl [(bindings, late), (reasoning, robin_reasoning), (debug, actdbg)];
-	    // workerCE worker.asl [(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)];
-	    workerL worker.asl [(bindings, late), (debug, actdbg)];
-	    workerE worker.asl [(bindings, early), (debug, actdbg)];
+    agents:
+        workerCL worker.asl [(bindings, late), (reasoning, robin_reasoning), (debug, actdbg)];
+        workerCE worker.asl [(bindings, early), (reasoning, robin_reasoning), (debug, actdbg)];
+        workerL worker.asl [(bindings, late), (debug, actdbg)];
+        workerE worker.asl [(bindings, early), (debug, actdbg)];
  }
