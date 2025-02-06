@@ -1,4 +1,4 @@
-# Generated from MAS2Java.g4 by ANTLR 4.9.2
+# Generated from MAS2Java.g4 by ANTLR 4.9
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .MAS2JavaParser import MAS2JavaParser
@@ -35,12 +35,48 @@ class MAS2JavaListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MAS2JavaParser#parameters.
+    def enterParameters(self, ctx:MAS2JavaParser.ParametersContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameters.
+    def exitParameters(self, ctx:MAS2JavaParser.ParametersContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#parameter_list.
+    def enterParameter_list(self, ctx:MAS2JavaParser.Parameter_listContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameter_list.
+    def exitParameter_list(self, ctx:MAS2JavaParser.Parameter_listContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#parameter.
+    def enterParameter(self, ctx:MAS2JavaParser.ParameterContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#parameter.
+    def exitParameter(self, ctx:MAS2JavaParser.ParameterContext):
+        pass
+
+
     # Enter a parse tree produced by MAS2JavaParser#exec_control.
     def enterExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
         pass
 
     # Exit a parse tree produced by MAS2JavaParser#exec_control.
     def exitExec_control(self, ctx:MAS2JavaParser.Exec_controlContext):
+        pass
+
+
+    # Enter a parse tree produced by MAS2JavaParser#agent_defaults.
+    def enterAgent_defaults(self, ctx:MAS2JavaParser.Agent_defaultsContext):
+        pass
+
+    # Exit a parse tree produced by MAS2JavaParser#agent_defaults.
+    def exitAgent_defaults(self, ctx:MAS2JavaParser.Agent_defaultsContext):
         pass
 
 

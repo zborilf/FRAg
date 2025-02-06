@@ -2,5 +2,15 @@
 *.out
 *.mcts
 *.mcts
+.idea/
+.metadata/
 
-.idea
+config.json
+
+# Python cache a virtualenv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/

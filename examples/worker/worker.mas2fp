@@ -1,6 +1,6 @@
                                                                                             
 
-include_environment("/environments/workshop/workshop.pl").
+include_environment("environments/workshop/workshop.pl").
 
 
 set_environment(workshop, 

@@ -1,4 +1,0 @@
-plan(ach,fact(X,Y),[X<5],[add(fact(X+1,(X+1)*Y))]).
-plan(ach,fact(X,Y),[X==5],[act(print("fact 5 ==",Y))]).
-goal(ach,count,null,[[]],active).
-plan(ach,count,[true],[add(fact(0,1))]).

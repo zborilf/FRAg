@@ -1,10 +1,10 @@
 
 
-include_reasoning("/reasoning_methods/Basic/FRAgPLReasoningSimple.pl").
-include_reasoning("/reasoning_methods/Basic/FRAgPLReasoningRandom.pl").
-include_reasoning("/reasoning_methods/Basic/FRAgPLReasoningRobin.pl").
-include_reasoning("/reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl").
-include_reasoning("/reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl").
+include_reasoning("reasoning_methods/Basic/FRAgPLReasoningSimple.pl").
+include_reasoning("reasoning_methods/Basic/FRAgPLReasoningRandom.pl").
+include_reasoning("reasoning_methods/Basic/FRAgPLReasoningRobin.pl").
+include_reasoning("reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl").
+include_reasoning("reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl").
 
 % include_environment("/environments/shop/shop.pl").
 

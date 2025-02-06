@@ -1,4 +1,0 @@
-MAS do_it {
-    infrastructure: Centralised
-	agents:	do_it;
- }

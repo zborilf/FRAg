@@ -49,7 +49,7 @@ literal:
     ;
 
 context:
-    log_expr | 'true'
+    log_expr | ATOM
     ;
 
 log_expr:
@@ -96,7 +96,6 @@ term:
     ;
 
 term_value :
-    LOGICAL_VALUE
     | NUMBER
     | STRING
     ;
@@ -106,7 +105,9 @@ internal_action:
     ;
 
 list_structure:
-    '[' ( term ( ',' term )* ( '|' ( list_structure | VAR ) )? )? ']'
+    '[' ']'
+    | '[' term ( ',' term )* ']'
+    | '[' term ( ',' term )* '|' ( list_structure | VAR ) ']'
     ;
 
 rel_expr:
@@ -139,8 +140,9 @@ arithm_term:
 //    ;
 
 ATOM :
-    LC_LETTER
-    ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
+    'true'          // přidáno
+    | 'false'       // přidáno pokud chcete i false
+    | LC_LETTER ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
     ;
 
 NUMBER:
@@ -149,11 +151,9 @@ NUMBER:
     | (DIGIT)+ ([eE] ([+-])? (DIGIT)+)
     ;
 
-//VAR:
-//    LC_LETTER (CHAR)*
-//;
-
 VAR:
+    '_'    // anonymous variable
+    |
     ( UP_LETTER | LC_LETTER )
     ( LC_LETTER | UP_LETTER | DIGIT | '_' )*
     ;
@@ -182,13 +182,6 @@ STRING:
     | '\'' ~('\'')* '\''
     ;
 
-
-LOGICAL_VALUE:
-    'true'
-    | 'false'
-    ;
-
-
 // --- skip items -----------------------------------------------------------------------
 
 WS: // while space
@@ -196,7 +189,7 @@ WS: // while space
    ;
 
 LC:  // line comment
-    ('//' | '#') .*? '\r'? '\n' -> skip
+    '//' .*? '\r'? '\n' -> skip
     ;
 
 BC: // block comment
