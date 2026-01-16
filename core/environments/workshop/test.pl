@@ -16,21 +16,11 @@ g3(N):-
 
 g2(N):-
     use_module('workshop.pl'),
-    card_shop(add_agent, adam),
+    workshop(add_agent, adam),
     g3(N).
 
 g:-
     use_module('workshop.pl'),
     workshop(add_agent, adam),
     pw(adam).
- /*   card_shop(act, adam, sell(hana, cd5), Result1),
-    card_shop(act, vera, sell(adam, vera, cd3), _),
-    card_shop(act, vera, sell(adam, hana, cd8), _),
-    card_shop(act, vera, sell(adam, hana, cd1), _),
-    card_shop(remove_environment_clone, kartovy_klon),
-    card_shop(act, adam, sell(adam, vera, cd8), _),
-    pw(vera),
-    pw(adam),
-    pw(hana).
- */   
 

@@ -1,16 +1,11 @@
+include_environment("environments/miconic/miconic.pl").
 
+set_environment(miconic, [ (episoding, sim_time) ]).
 
-include_environment("environments/miconic/miconic.pl").                                        
-set_agents([(bindings, late), (reasoning, random_reasoning), 
-	    (environment, miconic10), 
-  	    (reasoning_params, mcts_params(50,20,30))]).
+set_agents([ (control,   terminate(timeout, 500)),
+             (bindings,  early),
+             (reasoning, simple_reasoning),
+             (environment, miconic)
+           ]).
 
-
-load("miconic","../examples/miconic/miconic",1,[(reasoning, mcts_reasoning), (debug, mctsdbg), (debug, mctsdbg_path), 
-                                                  (debug, reasoningdbg), (debug, systemdbg)]).
-
-% load("miconic","../examples/miconic/miconic",1,[(debug, systemdbg)]).
-			   
-% load("franta","../examples/miconic/miconic",1,[(reasoning, mcts_reasoning), (debug, systemdbg)]).
-
-% load("miconic","../examples/miconic/miconic",1,[]).
+load("lift","../examples/miconic/miconic",1,[(debug, systemdbg), (debug, reasoningdbg)]).

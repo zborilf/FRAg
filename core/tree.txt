@@ -4,7 +4,8 @@ C:.
 -   fragagent.fap
 -   FRAgAgent.pl	   % (vars ok, koment beta)
 -   FRAgAgentInterface.pl  % (vars ok, koment castecne)
--   FRAgBlackboard.pl      % (ok, ale je nezbytna? -> FRAgAgent jako shared)
+-   FRAgTerminal.pl      % (ok, ???)
+-   FRAgSync.pl
 -   fraginit.mas2fp
 -   FragPL.pl              % (vars ok, koment beta, ale vypadaji fajn)
 -   FRAgPLFRAg.pl          %

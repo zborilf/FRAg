@@ -1,6 +1,6 @@
                                                                                             
 
-include_environment("environments/workshop/workshop.pl").
+include_environment("/environments/workshop/workshop.pl").
 
 
 set_environment(workshop, 
@@ -33,7 +33,7 @@ set_agents([
              (control, terminate(timeout, 1000)),
              (bindings, late),
              (reasoning, mcts_reasoning),
-	     (reasoning_params, mcts_params(50,20,30)),
+	     (reasoning_params, mcts_params(10,10,10)),
 %	     (reasoning, robin_reasoning),
 	     (environment, workshop)]
      ).		

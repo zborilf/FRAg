@@ -1,0 +1,13 @@
+include_environment("environments/stalker/stalker.pl").
+
+% Maybe not necessary
+set_environment(stalker, [ (episoding, sim_time) ]).
+
+set_agents([ (control,   terminate(timeout, 1000)),
+             (bindings,  early),
+             (reasoning, simple_reasoning),
+             (environment, stalker)
+           ]).
+
+load("paul","../examples/stalker/stalker",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
+

@@ -1,0 +1,89 @@
+"""
+Author: Ondrej Misar
+Description: Implementation of the ZMQ request for external MCTS service, which is called by the Prolog implementation.
+             Based on the external architecture
+"""
+
+import traceback
+import json
+import time
+import zmq
+from loguru import logger
+
+prolog_input_step1 = "[fact(bagpoint(1)),fact(my_position(a)),fact(task(gold,gold,gold)),fact(task(gold,gold,bronze)),fact(task(gold,bronze,gold)),fact(task(bronze,gold,gold)),fact(task(gold,silver,bronze)),fact(task(gold,bronze,silver)),fact(task(bronze,bronze,silver)),fact(task(bronze,silver,bronze)),fact(item([1,1],gold,1)),fact(door(right,silver)),fact(door(down,gold)),event(1,ach,go,null,[[]],active,[]),event(2,add,bagpoint(1),null,[[]],active,[]),event(3,add,my_position(a),null,[[]],active,[]),event(4,add,task(gold,gold,gold),null,[[]],active,[]),event(5,add,task(gold,gold,bronze),null,[[]],active,[]),event(6,add,task(gold,bronze,gold),null,[[]],active,[]),event(7,add,task(bronze,gold,gold),null,[[]],active,[]),event(8,add,task(gold,silver,bronze),null,[[]],active,[]),event(9,add,task(gold,bronze,silver),null,[[]],active,[]),event(10,add,task(bronze,bronze,silver),null,[[]],active,[]),event(11,add,task(bronze,silver,bronze),null,[[]],active,[]),event(12,add,item([1,1],gold,1),null,[[]],active,[]),event(13,add,door(right,silver),null,[[]],active,[]),event(14,add,door(down,gold),null,[[]],active,[]),plan(1,ach,go,[task(_3536,_3538,_3540)],[ach(get_stone(_3536)),ach(get_stone(_3538)),ach(get_stone(_3540)),tlg(go)]),plan(2,ach,get_stone(_3482),[item(_3492,_3482,_3496)],[act(task_maze,silently_(pick))]),plan(3,ach,get_stone(_3420),[door(_3430,_3420)],[act(task_maze,silently_(go(_3430))),act(task_maze,silently_(pick))]),plan(4,ach,get_stone(_3356),[door(_3366,_3368)],[act(task_maze,silently_(go(_3366))),ach(get_stone(_3356))])]"
+environment_facts = "[fact(task_maze,task_maze,direction([1,1],[2,1],right)),fact(task_maze,task_maze,direction([1,1],[1,2],down)),fact(task_maze,task_maze,direction([2,1],[1,1],left)),fact(task_maze,task_maze,direction([2,1],[3,1],right)),fact(task_maze,task_maze,direction([2,1],[2,2],down)),fact(task_maze,task_maze,direction([3,1],[2,1],left)),fact(task_maze,task_maze,direction([3,1],[4,1],right)),fact(task_maze,task_maze,direction([3,1],[3,2],down)),fact(task_maze,task_maze,direction([4,1],[3,1],left)),fact(task_maze,task_maze,direction([4,1],[5,1],right)),fact(task_maze,task_maze,direction([4,1],[4,2],down)),fact(task_maze,task_maze,direction([5,1],[4,1],left)),fact(task_maze,task_maze,direction([5,1],[6,1],right)),fact(task_maze,task_maze,direction([5,1],[5,2],down)),fact(task_maze,task_maze,direction([6,1],[5,1],left)),fact(task_maze,task_maze,direction([6,1],[6,2],down)),fact(task_maze,task_maze,direction([1,2],[1,1],up)),fact(task_maze,task_maze,direction([1,2],[2,2],right)),fact(task_maze,task_maze,direction([1,2],[1,3],down)),fact(task_maze,task_maze,direction([2,2],[2,1],up)),fact(task_maze,task_maze,direction([2,2],[1,2],left)),fact(task_maze,task_maze,direction([2,2],[3,2],right)),fact(task_maze,task_maze,direction([2,2],[2,3],down)),fact(task_maze,task_maze,direction([3,2],[3,1],up)),fact(task_maze,task_maze,direction([3,2],[2,2],left)),fact(task_maze,task_maze,direction([3,2],[4,2],right)),fact(task_maze,task_maze,direction([3,2],[3,3],down)),fact(task_maze,task_maze,direction([4,2],[4,1],up)),fact(task_maze,task_maze,direction([4,2],[3,2],left)),fact(task_maze,task_maze,direction([4,2],[5,2],right)),fact(task_maze,task_maze,direction([4,2],[4,3],down)),fact(task_maze,task_maze,direction([5,2],[5,1],up)),fact(task_maze,task_maze,direction([5,2],[4,2],left)),fact(task_maze,task_maze,direction([5,2],[6,2],right)),fact(task_maze,task_maze,direction([5,2],[5,3],down)),fact(task_maze,task_maze,direction([6,2],[6,1],up)),fact(task_maze,task_maze,direction([6,2],[5,2],left)),fact(task_maze,task_maze,direction([6,2],[6,3],down)),fact(task_maze,task_maze,direction([1,3],[1,2],up)),fact(task_maze,task_maze,direction([1,3],[2,3],right)),fact(task_maze,task_maze,direction([1,3],[1,4],down)),fact(task_maze,task_maze,direction([2,3],[2,2],up)),fact(task_maze,task_maze,direction([2,3],[1,3],left)),fact(task_maze,task_maze,direction([2,3],[3,3],right)),fact(task_maze,task_maze,direction([2,3],[2,4],down)),fact(task_maze,task_maze,direction([3,3],[3,2],up)),fact(task_maze,task_maze,direction([3,3],[2,3],left)),fact(task_maze,task_maze,direction([3,3],[4,3],right)),fact(task_maze,task_maze,direction([3,3],[3,4],down)),fact(task_maze,task_maze,direction([4,3],[4,2],up)),fact(task_maze,task_maze,direction([4,3],[3,3],left)),fact(task_maze,task_maze,direction([4,3],[5,3],right)),fact(task_maze,task_maze,direction([4,3],[4,4],down)),fact(task_maze,task_maze,direction([5,3],[5,2],up)),fact(task_maze,task_maze,direction([5,3],[4,3],left)),fact(task_maze,task_maze,direction([5,3],[6,3],right)),fact(task_maze,task_maze,direction([5,3],[5,4],down)),fact(task_maze,task_maze,direction([6,3],[6,2],up)),fact(task_maze,task_maze,direction([6,3],[5,3],left)),fact(task_maze,task_maze,direction([6,3],[6,4],down)),fact(task_maze,task_maze,direction([1,4],[1,3],up)),fact(task_maze,task_maze,direction([1,4],[2,4],right)),fact(task_maze,task_maze,direction([1,4],[1,5],down)),fact(task_maze,task_maze,direction([2,4],[2,3],up)),fact(task_maze,task_maze,direction([2,4],[1,4],left)),fact(task_maze,task_maze,direction([2,4],[3,4],right)),fact(task_maze,task_maze,direction([2,4],[2,5],down)),fact(task_maze,task_maze,direction([3,4],[3,3],up)),fact(task_maze,task_maze,direction([3,4],[2,4],left)),fact(task_maze,task_maze,direction([3,4],[4,4],right)),fact(task_maze,task_maze,direction([3,4],[3,5],down)),fact(task_maze,task_maze,direction([4,4],[4,3],up)),fact(task_maze,task_maze,direction([4,4],[3,4],left)),fact(task_maze,task_maze,direction([4,4],[5,4],right)),fact(task_maze,task_maze,direction([4,4],[4,5],down)),fact(task_maze,task_maze,direction([5,4],[5,3],up)),fact(task_maze,task_maze,direction([5,4],[4,4],left)),fact(task_maze,task_maze,direction([5,4],[6,4],right)),fact(task_maze,task_maze,direction([5,4],[5,5],down)),fact(task_maze,task_maze,direction([6,4],[6,3],up)),fact(task_maze,task_maze,direction([6,4],[5,4],left)),fact(task_maze,task_maze,direction([6,4],[6,5],down)),fact(task_maze,task_maze,direction([1,5],[1,4],up)),fact(task_maze,task_maze,direction([1,5],[2,5],right)),fact(task_maze,task_maze,direction([1,5],[1,6],down)),fact(task_maze,task_maze,direction([2,5],[2,4],up)),fact(task_maze,task_maze,direction([2,5],[1,5],left)),fact(task_maze,task_maze,direction([2,5],[3,5],right)),fact(task_maze,task_maze,direction([2,5],[2,6],down)),fact(task_maze,task_maze,direction([3,5],[3,4],up)),fact(task_maze,task_maze,direction([3,5],[2,5],left)),fact(task_maze,task_maze,direction([3,5],[4,5],right)),fact(task_maze,task_maze,direction([3,5],[3,6],down)),fact(task_maze,task_maze,direction([4,5],[4,4],up)),fact(task_maze,task_maze,direction([4,5],[3,5],left)),fact(task_maze,task_maze,direction([4,5],[5,5],right)),fact(task_maze,task_maze,direction([4,5],[4,6],down)),fact(task_maze,task_maze,direction([5,5],[5,4],up)),fact(task_maze,task_maze,direction([5,5],[4,5],left)),fact(task_maze,task_maze,direction([5,5],[6,5],right)),fact(task_maze,task_maze,direction([5,5],[5,6],down)),fact(task_maze,task_maze,direction([6,5],[6,4],up)),fact(task_maze,task_maze,direction([6,5],[5,5],left)),fact(task_maze,task_maze,direction([6,5],[6,6],down)),fact(task_maze,task_maze,direction([1,6],[1,5],up)),fact(task_maze,task_maze,direction([1,6],[2,6],right)),fact(task_maze,task_maze,direction([2,6],[2,5],up)),fact(task_maze,task_maze,direction([2,6],[1,6],left)),fact(task_maze,task_maze,direction([2,6],[3,6],right)),fact(task_maze,task_maze,direction([3,6],[3,5],up)),fact(task_maze,task_maze,direction([3,6],[2,6],left)),fact(task_maze,task_maze,direction([3,6],[4,6],right)),fact(task_maze,task_maze,direction([4,6],[4,5],up)),fact(task_maze,task_maze,direction([4,6],[3,6],left)),fact(task_maze,task_maze,direction([4,6],[5,6],right)),fact(task_maze,task_maze,direction([5,6],[5,5],up)),fact(task_maze,task_maze,direction([5,6],[4,6],left)),fact(task_maze,task_maze,direction([5,6],[6,6],right)),fact(task_maze,task_maze,direction([6,6],[6,5],up)),fact(task_maze,task_maze,direction([6,6],[5,6],left)),fact(task_maze,task_maze,task(gold,gold,gold)),fact(task_maze,task_maze,task(gold,gold,bronze)),fact(task_maze,task_maze,task(gold,bronze,gold)),fact(task_maze,task_maze,task(bronze,gold,gold)),fact(task_maze,task_maze,task(gold,silver,bronze)),fact(task_maze,task_maze,task(gold,bronze,silver)),fact(task_maze,task_maze,task(bronze,bronze,silver)),fact(task_maze,task_maze,task(bronze,silver,bronze)),fact(task_maze,task_maze,item([1,1],gold,1)),fact(task_maze,task_maze,item([1,2],gold,2)),fact(task_maze,task_maze,item([1,3],gold,3)),fact(task_maze,task_maze,item([1,4],silver,3)),fact(task_maze,task_maze,item([1,5],bronze,3)),fact(task_maze,task_maze,item([1,6],bronze,3)),fact(task_maze,task_maze,item([2,1],silver,3)),fact(task_maze,task_maze,item([2,2],gold,2)),fact(task_maze,task_maze,item([2,3],gold,2)),fact(task_maze,task_maze,item([2,4],gold,2)),fact(task_maze,task_maze,item([2,5],bronze,1)),fact(task_maze,task_maze,item([2,6],silver,1)),fact(task_maze,task_maze,item([3,1],bronze,1)),fact(task_maze,task_maze,item([3,2],bronze,1)),fact(task_maze,task_maze,item([3,3],silver,2)),fact(task_maze,task_maze,item([3,4],silver,2)),fact(task_maze,task_maze,item([3,5],bronze,1)),fact(task_maze,task_maze,item([3,6],gold,3)),fact(task_maze,task_maze,item([4,1],gold,3)),fact(task_maze,task_maze,item([4,2],bronze,1)),fact(task_maze,task_maze,item([4,3],gold,3)),fact(task_maze,task_maze,item([4,4],gold,3)),fact(task_maze,task_maze,item([4,5],silver,2)),fact(task_maze,task_maze,item([4,6],silver,2)),fact(task_maze,task_maze,item([5,1],silver,2)),fact(task_maze,task_maze,item([5,2],bronze,1)),fact(task_maze,task_maze,item([5,3],gold,3)),fact(task_maze,task_maze,item([5,4],silver,2)),fact(task_maze,task_maze,item([5,5],gold,3)),fact(task_maze,task_maze,item([5,6],bronze,1)),fact(task_maze,task_maze,item([6,1],gold,3)),fact(task_maze,task_maze,item([6,2],gold,2)),fact(task_maze,task_maze,item([6,3],gold,2)),fact(task_maze,task_maze,item([6,4],gold,2)),fact(task_maze,task_maze,item([6,5],bronze,1)),fact(task_maze,task_maze,item([6,6],bronze,1)),fact(task_maze,task_maze,bagpoint(1)),fact(task_maze,task_maze,position([1,1]))]"
+
+
+def call_mcts_service(
+        program, environment,
+        expansions, simulation, steps,
+        type_mcts,
+        environment_name, environment_path):
+
+    # Connect to ZMQ service
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+
+    payload = {
+        "program": program,
+        "environment": environment,
+        "expansions": expansions,
+        "simulation": simulation,
+        "steps": steps,
+        "type": type_mcts,
+        "environment_name": environment_name,
+        "environment_path": environment_path
+    }
+
+    # Send ZMQ request to external service
+    socket.send(json.dumps(payload).encode())
+    # Receive the response of external service
+    response = socket.recv()
+    result = json.loads(response.decode())
+
+    if "prefix" in result and "act" in result:
+        logger.debug("Service returned:", result["prefix"] + result["act"])
+        # Return the service result
+        return result["prefix"], result["act"]
+    else:
+        logger.debug("Service error:", result.get("error"))
+        return "", ""
+
+
+def get_result(
+        program, environment,
+        expansion, simulation, steps,
+        type_mcts,
+        environment_name, environment_path):
+    try:
+        start_time = time.perf_counter()
+        # Call external MCTS service
+        prefix, act = call_mcts_service(
+            program, environment,
+            expansion, simulation, steps,
+            type_mcts,
+            environment_name, environment_path)
+
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        logger.debug(f"All processes completed in {elapsed_time:.4f} seconds.")
+
+        # Return the reasoning and action
+        return f"[[{prefix}],[{act}]]"
+    except Exception as e:
+        logger.debug("Python Error:", e)
+        traceback.print_exc()
+        return f"[[],[]]"
+
+
+if __name__ == '__main__':
+    get_result(
+        prolog_input_step1,
+        environment_facts,
+        10,
+        10,
+        60,
+        "basic_parallel",
+        "task_maze",
+        "c:/users/ondra/sync/school-mit/dp/dp/mcts/core/environments/task_maze/task_maze.pl")

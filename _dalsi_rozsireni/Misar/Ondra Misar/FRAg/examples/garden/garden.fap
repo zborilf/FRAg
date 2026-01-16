@@ -1,0 +1,32 @@
+
+goal(ach, maintain_garden, [[]]).
+
+plan(ach, maintain_garden, [critical_zone(Zone)],
+    [
+        ach(resolve_critical(Zone)),
+        tlg(maintain_garden)
+    ]
+).
+
+
+plan(ach, resolve_critical(Zone), [zone(Zone, _)],
+    [
+        act(garden, water)
+    ]
+).
+
+
+plan(ach, resolve_critical(Zone), [door(Direction, Zone)],
+    [
+        act(garden, go(Direction)),
+        act(garden, water)
+    ]
+).
+
+plan(ach, resolve_critical(Zone), [door(Direction, _)],
+    [
+        act(garden, go(Direction)),
+        ach(resolve_critical(Zone))
+    ]
+).
+

@@ -1,0 +1,9 @@
+stats(fragagent,6.400999999999629e-6,201).
+stats(fragagent,8.957000000000409e-6,201).
+stats(fragagent,7.412999999999517e-6,201).
+stats(fragagent,9.327000000001681e-6,201).
+stats(fragagent,7.142999999999386e-6,201).
+stats(fragagent,6.842999999999433e-6,201).
+stats(fragagent,1.238299999999998e-5,201).
+stats(fragagent,1.016899999999911e-5,201).
+stats(fragagent,1.1009999999998799e-5,201).

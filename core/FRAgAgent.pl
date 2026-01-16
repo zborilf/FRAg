@@ -26,7 +26,10 @@
 	force_reasoning /2,
 	force_execution /3,
 	force_perceiving /0,
-	take_snapshot /1
+	take_snapshot /1,
+	set_python_interpreter /1,
+	reset_python_interpreter /0,
+	python_interpreter /1
     ]
   ).
 
@@ -37,7 +40,7 @@
 This module contains code for thread clauses declarations for individual agents
 
 @author Frantisek Zboril
-@version 0.95 (2021 - 2024)
+@version 0.96 (2021 - 2026)
 @license GPL
 */
 
@@ -97,6 +100,7 @@ terminate(no_job).
 :-dynamic timeout /1.
 :-dynamic start_time /1.
 :-dynamic finish_time /1.
+:-dynamic python_interpreter /1.
 
 
 %!  plan(+Event_Type, +Event_Atom, +Conditions, +Context, +Body).
@@ -118,7 +122,7 @@ terminate(no_job).
 %  @arg Type: goal type [only 'ach' in this version]
 %  @arg Atom: goal atom
 %  @arg Context: should be empty [[]], but can contain some substutitutions
-%   in the form [[
+%   in the form [list_of_tuples1, list_of_tuples2, ...]
 
 :-thread_local goal /3.
 
@@ -178,6 +182,12 @@ set_reasoning_params(Parameters):-
 % reasoning files
     set_reasoning_method_params(Parameters).
 
+set_python_interpreter(Setting):-
+    assert(python_interpreter(Setting)).
+
+reset_python_interpreter:-
+    retractall(python_interpreter(_)).
+
 
 
 %!  load_environment(+Filename) is det
@@ -202,7 +212,7 @@ get_default_environments(Environments):-
 
 write_stats(String):-
     open('stats.pl', append, Stats_File),
-    thread_self(Agent),
+%    thread_self(Agent),
     write(Stats_File, String),
     writeln(Stats_File,'.'),
     agents_stats(Stats_File),
@@ -235,16 +245,23 @@ agents_stats( _ ).
 %   Incorporates Beliefs to agent's BB
 %  @arg Beliefs: List of belief atoms
 
-process_add_list([]).
+process_add_list(Beliefs):-
+    try_retract_belief(fact(add_list( _ ))),
+    assert(fact(add_list(Beliefs))),
+    process_add_list2(Beliefs).
 
-process_add_list([Belief| Beliefs]):-
+
+
+process_add_list2([]).
+
+process_add_list2([Belief| Beliefs]):-
     fact(Belief),  % is already in BB
-    process_add_list(Beliefs).
+    process_add_list2(Beliefs).
 
-process_add_list([Belief| Beliefs]):-
+process_add_list2([Belief| Beliefs]):-
     assert(fact(Belief)),
     create_event(add, Belief),
-    process_add_list(Beliefs).
+    process_add_list2(Beliefs).
 
 
 
@@ -252,17 +269,23 @@ process_add_list([Belief| Beliefs]):-
 %   Removes Beliefs to agent's BB
 %  @arg Beliefs: List of belief atoms
 
-process_delete_list([]).
+process_delete_list(Beliefs):-
+    try_retract_belief(fact(delete_list( _ ))),
+    assert(fact(delete_list(Beliefs))),
+    process_delete_list2(Beliefs).
 
-process_delete_list([Belief | Beliefs]):-
+
+process_delete_list2([]).
+
+process_delete_list2([Belief | Beliefs]):-
 %    fact(Belief), % is in BB, should be deletd
     retractall(fact(Belief)),
     create_event(del, Belief),
-    process_delete_list(Beliefs).
+    process_delete_list2(Beliefs).
 
 %   not present in BB, need not to be deleted
-process_delete_list([_ |Beliefs]):-
-    process_delete_list(Beliefs).
+process_delete_list2([_ |Beliefs]):-
+    process_delete_list2(Beliefs).
 
 
 
@@ -318,6 +341,7 @@ sensing:-
 
 
 %!  execute(+Intention, +Plan_Before, - Plan_After) is det
+%  @arg Intention: intention identifier
 %  @arg Plan_Before: plan plan(Event_Atom, Conditions, Context, Plan_Body)
 %  @arg Plan_After: state of the plan after execution of its actual act,
 %   it means the first act in Plan_Body.
@@ -390,7 +414,7 @@ execute( _, plan(Event_Type, Event_Atom, Conditions, Context,
 
 %   Top level goal (external event) declaration
 
-execute(Intention_ID,
+execute( _,
         plan(Event_Type, Goal_Atom, Conditions, Context, [tlg(Goal)| Acts]),
         plan(Event_Type, Goal_Atom, Conditions, Context, Acts),
         true)                                                            
@@ -459,7 +483,7 @@ execute(_ ,plan(Event_Type, Goal_Atom, Conditions, Context, []),
 
 execute(_ ,
         plan(Event_Type, Goal_Atom, Conditions, Context_In, [rel(Term1 is Term2)|
-                                                            Acts]),
+                                                             Acts]),
         plan(Event_Type, Goal_Atom, Conditions, Context_Out, Acts), Result)
     :-
     alop(Term1 is Term2, Context_In, Context_Out, Result).
@@ -744,7 +768,8 @@ try_retract_event(Intention_ID):-
     findall(Event_ID, event(Event_ID, _, _, _, _, Intention_ID, _),
             Event_IDs),
     max_list(Event_IDs, Event_ID_Max),
-    retract(event(Event_ID_Max, Type, Atom, Intention, Context, _, History)).
+%    retract(event(Event_ID_Max, Type, Atom, Intention, Context, _, History)).
+    retract(event(Event_ID_Max, _, _, _, _, _, _)).
 %    loop_number(Loop_Number),
 %    assert(event(Event_ID_Max, Type, Atom, Intention, Context, 
 %                  reached(Loop_Number), History)).
@@ -882,7 +907,7 @@ update_intention(intention(_, [ _ ], _), false).
 % level plan executes the achievement goal.
 
 update_intention(intention(Intention_ID,
-                           [plan( _, Event_Type, Event_Atom, _, _, _)| Plans],
+                           [plan( _, _, _, _, _, _)| Plans],
                            Status), false):-
     loop_number(Loop_Number),
     format(atom(String), '[~w] Update intention: SUBPLAN FAILED', 
@@ -1468,13 +1493,14 @@ finished:-
 force_perceiving:-
     sensing.
 
-%!  force_reasoning(+Model_Reasoning_Node) is det
+%!  force_reasoning(+Node_ID, +Model_Reasoning_Node) is det
 %   Forces adaption of plan with Plan_ID in Context for specified WEI
+%  @arg Node_ID: seems not needed here - TODO
 %  @arg Model_Node: reasoning node of look-ahead model, defined in
 %   FRAgMCTSModel.pl as model_reasoning_node(WEI, Plan_ID,
 %   Context)
 
-force_reasoning(Node_ID, 
+force_reasoning( _, 
 		model_reasoning_node(
                     event(Event_Index, Event_Type, Event_Atom, Parent_Intention,
                           Event_Context, active, History),
@@ -1492,22 +1518,23 @@ force_reasoning(Node_ID,
                  [Plan, Plan_Context]).
 
 
-%!  force_execution(+Model_Act_Node, -Reward) is multi
+%!  force_execution(+Node_Id, +Model_Act_Node, -Reward) is multi
 %   Performs Act. This Act's instance given by Decision.
+%  @arg Node_ID: seems not needed here - TODO
 %  @arg Model_Act_Node: act node of look-ahead model, defined in
 %   FRAgMCTSModel.pl as model_act_node(Intention_ID, Act, Decision)
 %  @arg Reward: Action reward, if any
 
 % sub-plan finished, just update intention
 
-force_execution(Node_ID, model_act_node(Intention_ID, true, _), 0):-
+force_execution( _, model_act_node(Intention_ID, true, _), 0):-
     intention(Intention_ID, Plan_Stack, Status),
     update_intention(intention(Intention_ID, Plan_Stack, Status), _).
 
 
 % perform the act
 
-force_execution(Node_ID, model_act_node(Intention_ID, Act, Decision), Reward):-
+force_execution( _, model_act_node(Intention_ID, Act, Decision), Reward):-
     retract(intention(Intention_ID,
                       [plan(Plan_ID, Event_Type, Goal_Atom, Conditions, Context,
                             [Plan_Act| Plan_Acts])| Plans],
@@ -1536,7 +1563,7 @@ force_execution(Node_ID, model_act_node(Intention_ID, Act, Decision), Reward):-
 
 % in the case acing failed
 
-force_execution(_, model_act_node( _, _, _)).
+force_execution( _, model_act_node( _, _, _)).
 
 
 check_reward(reward(Reward), Reward).
@@ -1923,6 +1950,7 @@ fa_init_environments2([Environment| Environments]):-
 %   Set bindings strategy and resets 'fresh' identifiers
 
 fa_init_run:-
+ %   attach_console,
     retractall(late_bindings( _ )),
     default_late_bindings(Bindings),
     assert(late_bindings(Bindings)),

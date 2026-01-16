@@ -591,7 +591,6 @@ do_apply(true, Context):-
 % simulate_early_bindings( _, [], []).
 
 %   late bindings are set, so do not simulate early bindings
-
 simulate_early_bindings( _, Context, Context, true, _).
 
 

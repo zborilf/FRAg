@@ -10,7 +10,6 @@
 
 
 
-
 %  :-module(fRAgMCTSModel,
 %    [
 %	mcts_model_init /0,
@@ -241,10 +240,11 @@ mcts_print_path([Node_ID, Node| Path], Debug):-
     mcts_print_path(Path, Debug).
 
 
-
-%!  mcts_get_best_ucb_path(-Path, +UCB) is det
-%@arg Path: best path due to criteria below
-%@arg UCB: if true, the criterion is the UCB value, false - the criterion is
+   
+%  !mcts_get_best_ucb_path(-Path, +UCB) is det
+%   Generates a path (list of nodes) from the asserted tree model
+%  @arg Path: best path due to criteria below
+%  @arg UCB: if true, the criterion is the UCB value, false - the criterion is
 %           the exploitation rating of the node
 
 mcts_get_best_ucb_path(Path, UCB):-
@@ -264,11 +264,19 @@ mcts_get_best_ucb_path(ID, [node(ID), Action| Path], UCB):-
     mcts_get_best_ucb_path(Best_Child, Path, UCB).
 
 
+%  !select_bect_child( ,+UCB)
+%   walks down the tree until it finds a leaf node 
+%  @Parent:
+%  @Children:
+%  @Child: ?? output
+%  @UCB: The choice of the child depends on UCB if the term UCB is true 
+%   otherwise, the selection is based on the Value parameter.
 
 % best child of the node
 %     UCB = true  ... depends on UCB   (for making MCTS model)
 %     UCB = false ... depends on score (for extraction of the best path of the model)
 
+% narazili jsme (v druhem seznamu) na neexpandovany node, treti term je on sam
 select_best_child( _, [Child| _], Child, _):-
     tree_node(Child, _, not_expanded, Reward, _, _).
 
@@ -278,8 +286,6 @@ select_best_child(Parent, [Child| Children] , Best_Child, UCB):-
     select_best_child2(Parent, Child, Best_Child2, Best_Child, UCB).
  
 select_best_child(_, [Child], Child, _).
-
-
 
 %  select_best_child2(Parent, Child1, Child2, Child, false) ?? TODO
 
@@ -314,25 +320,19 @@ select_best_child3( _, _, _, Child2, Child2).
 
 
 
+%!  divide_path(+Path, -Reasoning_Prefix, -First_Act) is det
+%   rozdeli path na prefix obsahujici reasoning nodes na zacatku az po prvni 
+%   akt, a dale onen akt
+%  @Path: List of nodes - path in the model tree
+%  @Reasoning_Prefix: List of reasoning nodes before the first act node
+%  @First_Act: The first act node in the path
 
-  % select_best_child(Parent, List of children, Child, UCB)
+% PATH - optimal path by MCTS
+	% REASONING - path prefix (without the Root node) of reasoning nodes before the first act
+	% ACT - list with the first act in PATH
 
-
-
-
-%
-%  MCTS supporting clauses
-%
-
-%!  divide_path(+PATH: list of nodes, -REASONING_PREFIX: list of nodes, -FIRST_ACT: node) is det
-%   rozdeli path na prefix obsahujici reasoning nodes na zacatku az po prvni akt, a dale onen akt
-%   * PATH
-%       List of nodes, path in the model
-%   * REASONING_PREFIX
-%       List of reasoning nodes before the first act node
-%   * -FIRST_ACT
-%       The first act node in the path
-
+mcts_divide_path([_,_| Path], Reasoning_Nodes, Act_Node):-
+    divide_path2(Path, Reasoning_Nodes, Act_Node).
 
 
 divide_path2([_,model_reasoning_node(Event, Plan, Context)| Path],
@@ -344,18 +344,6 @@ divide_path2([ _, model_act_node(Intention, Action, Context)| _], [],
              [model_act_node(Intention, Action, Context)]).
 
 divide_path2(_,[],[]).
-
-% PATH - optimal path by MCTS
-	% REASONING - path prefix (without the Root node) of reasoning nodes before the first act
-	% ACT - list with the first act in PATH
-
-mcts_divide_path([_,_| Path], Reasoning_Nodes, Act_Node):-
-    divide_path2(Path, Reasoning_Nodes, Act_Node).
-
-
-% model_init:-
-%   fresh_node_index(_),
-%   tree_node(root, _, _, _, _, _).
 
 
 

@@ -1,10 +1,49 @@
 
+% goal(ach,go,[[]]).
+goal(ach, go_chat,[[]]).
 
 
+plan(ach, go_chat, [],
+    [
+     %    act(llm_environment, chat(chat_gpt, 'Budu ti zadávat belief base agenta a ty budeš øíkat pouze a jenom akce co mám dìlat, nic jiného psát nebudeš. Chci jen akci co napíšeš pøevzít a pøedat agentnímu programu. Mùžeš používat akce go(Direction) a pick. Za chvíli dostaneš první belief base a odepíšeš akci.', Answer)),
+ act(printfg("Budu ti zadávat belief base agenta a ty budeš øíkat pouze a jenom akce co mám dìlat, nic jiného psát nebudeš. Chci jen akci co napíšeš pøevzít a pøedat agentnímu programu. Mùžeš používat akce go(Direction) a pick. Za chvíli dostaneš první belief base a odepíšeš akci.")),
+         act(printfg("Answer is:~w~n", [Answer])),
+         tlg(go_move)         
+    ]
+   ).
 
 
+plan(ach, go_move, [],
+    [
+	 act(basic, get_bb(Beliefs)),
+         act(printfg(Beliefs)),
+%         act(llm_environment, chat(chat_gpt, Beliefs, Action)),
+         act(printfg('Zadej akci:')),
+         act(read(Action)),
+	 act(printfg(Action)),
+	 act(printfg('Provest tuto akci?')),
+         act(read(A)),	
+         ach(exec_action(Action, A)),
+         tlg(go_move)         
+    ]
+   ).
 
-goal(ach,go,[[]]).
+
+plan(ach, exec_action(Action, a), [],
+	[                           
+	 act(printfg("Provadim akci ~w~n",[Action])),
+         act(task_maze, Action)
+	]
+).
+
+
+plan(ach, exec_action(Action, _), [],
+	[                           
+	 act(printfg("Neprovadim akci ~w~n",[Action]))
+	]
+).
+
+
 
 
 plan(ach, go, [task(Stone1, Stone2, Stone3)],

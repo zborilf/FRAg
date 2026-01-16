@@ -1,253 +1,55 @@
+:- module(miconic,[
+     miconic/2,
+     miconic/4
+   ]).
+
+:- use_module('../py2pl').
+% :- use_module(library(janus)).
 
 
-:-module(miconic10,
-    [                
-% two or three arity clauses of the module name
-% see documentation for FRAg environment realizations
-	miconic10 / 2,
-	miconic10 / 3,
-	miconic10 / 4
-    ]
-).	
+/** <module> miconic environment bridge for FRAg
 
+This module
 
-/** <module>  Miconic10 Environment for FRAg 
-
-This module 
-
-@author Frantisek Zboril
+@author David Kanocz
 @license GPL
 */
-
-
-:- dynamic situated_agents /1.  % Agents in this environment or clone
-:- dynamic clone_situated /2.	% Clone, Agent
-:- dynamic clone /2.		% Clone, Belief
-
-
-:- dynamic number_of_floors /1.
-:- dynamic no_access /2.
-:- dynamic travelled_distance /1.
-
-
-
-:-use_module('../FRAgPLEnvironmentUtils').   % interface to environments
-
-
-/*
-  Model Example
-*/
-
-lift_at(f0).
-origin(p1,f2).
-origin(p2,f2).
-origin(p3,f1).
-origin(p4,f7).
-origin(p5,f7).
-origin(p6,f6).
-origin(p7,f7).
-destin(p1,f4).
-destin(p2,f6).
-destin(p3,f4).
-destin(p4,f2).
-destin(p5,f3).
-destin(p6,f7).
-destin(p7,f1).
-position(f0,0).
-position(f1,1).
-position(f2,2).
-position(f3,3).
-position(f4,4).
-position(f5,5).
-position(f6,6).
-position(f7,7).
-
-
-
-floors_distance(Floor1,  Floor2, Distance):-
-    position(Floor1, Position1),
-    position(Floor2, Position2),
-    Distance is abs(Position2 - Position1).
-
-
-
-
-init_beliefs(Agents):-
-    query_environment(miconic10, Agent, lift_at(Lift_Floor)),
-    add_beliefs_agents(Agents, [lift_at(Lift_Floor)]),
-    query_environment(miconic10, Agent, 
-                      travelled_distance(Travelled_Distance)),
-    findall_environment(miconic10, Agent, origin(Passenger, Floor), Beliefs1),
-    findall_environment(miconic10, Agent, destin(Passenger, Floor), Beliefs2),
-    findall_environment(miconic10, Agent, boarded(Passenger, Floor), Beliefs3),
-    findall_environment(miconic10, Agent, served(Passenger, Floor), Beliefs4),
-    add_beliefs_agents(Agents, [travelled_distance(Travelled_Distance)]),
-    add_beliefs_agents(Agents, Beliefs1),
-    add_beliefs_agents(Agents, Beliefs2),
-    add_beliefs_agents(Agents, Beliefs3),
-    add_beliefs_agents(Agents, Beliefs4).
 
 /*
     Exported clauses
 */
 
+miconic(set_attributes, _).
 
-miconic10(add_agent, Agent):-
-    situate_agent_environment(Agent, miconic10),
-    init_beliefs([Agent]).
-
-miconic10(add_agent, Agent, Clone):-
-    situate_agents_clone([Agent], miconic10, Clone),
-    init_beliefs([Agent]).
+miconic(add_agent, AgentName) :-
+    py_call(miconic:get_environment_by_name("miconic"), Env),
+    py_call(miconic:situate_agent_modenv_g(AgentName, Env)).
 
 
-
-miconic10(perceive, Agent , Add_List, Delete_List):-
-     retreive_add_delete(Agent, Add_List, Delete_List).
-          
-   
-miconic10(set_property, Property_List).
-
-
-	              
-/*
-	Acting
-*/
-
-	
-    
-exit_lift( _, []).
+miconic(perceive, AgentName, Add, Del) :-
+    py_call(miconic:get_environment_by_name("miconic"), Env),
+    py_call(Env:get_agent_by_name(AgentName), Agent),
+    py_call(Agent:percept(true), [RawAdd, RawDel]),
+    py2pl:normalize_pairs(RawAdd, Add),
+    py2pl:normalize_pairs(RawDel, Del).
 
 
-exit_lift(Agent, [boarded(Person, Floor)| Persons]):-
-    delete_facts_beliefs(miconic10, Agent, [boarded(Person, Floor)]),
-    add_facts_beliefs(miconic10, Agent, [served(Person)]),
-    format("Vystupuje mi pasazer ~w~n", [Person]),
-    exit_lift(Agent, Persons).
+miconic(act, AgentName, move(Floor), Reward) :-
+    py_call(miconic:get_environment_by_name("miconic"), Env),
+    py_call(Env:get_agent_by_name(AgentName), Agent),
+    py_call(Agent:travel(Floor), Reward).
 
 
-process_transported(Agent, Floor, Result):-
-    findall_environment(miconic10, Agent, boarded(_ , Floor), To_Exit),
-    length(To_Exit, Processed),
-    get_result(Processed, Result),
-    exit_lift(Agent, To_Exit).
-
-
-get_result(0, true).
-
-get_result(Processed, reward(Processed)).
-
-
-    
-enter_lift( _, []).
-
-
-enter_lift(Agent, [origin(Person, Floor) | Persons]):-
-    delete_facts_beliefs(miconic10, Agent, [origin(Person, Floor), 
-			   destin(Person, Floor_Destination)]),
-%    format("Nastupuje mi pasazer ~w~n",[Person]),
-    add_facts_beliefs(miconic10, Agent, [boarded(Person, Floor_Destination)]),
-    enter_lift(Agent, Persons).                                  
-
-
-process_waiting(Agent, Floor):-
-    findall_environment(miconic10, Agent, origin(_, Floor), On_Board),
-    enter_lift(Agent, On_Board).
- 
-
-
-%!  miconic10(act, +Agent, +Action, -Result) is det
-%   Situates agent to an environment. Agent will percieve the environment and
-%   may act in it
-%  @arg Agent: agent name / identifier
-%  @arg  Action: 
-%	      go(+Floor_Destination)
-%  @arg Result: action result (see results)
-
-
-miconic10(act, Agent, go(Destination), true):-
-    query_environment(miconic10, Agent, lift_at(Destination)),
-    query_environment(miconic10, Agent, travelled_distance(Distance)).
-%    format("~w: Nemusim nikad jezdit, uz jsem na poschod¡ ~w, 
-%            celkem najeto ~w~n", [Agent, Destination, Distance]).
-
-miconic10(act, Agent, go(Destination), Result):-
-    position(Destination, _),
-    !,    
-    query_environment(miconic10, Agent, lift_at(Floor_Actual)),
-    process_waiting(Agent, Floor_Actual),
-    floors_distance(Floor_Actual, Destination, Distance), % static beliefs
-    delete_facts_beliefs_all(miconic10, Agent, 
-                             [travelled_distance(Travelled_Distance)]),
-    Travelled_Distance2 is Travelled_Distance + Distance,
-    add_facts_beliefs_all(miconic10, Agent, 
-                          [travelled_distance(Travelled_Distance2)]),	                   
-%    format("~w: Pojedu z poschodi ~w do poschodi ~w, coz je ~w poschodi,
-%    	    celkem najeto ~w ~n",
-%	       [Agent, Floor_Actual, Destination, Distance, 
-%               Travelled_Distance2]),
-    process_waiting(Agent, Destination),
-    delete_facts_beliefs_all(miconic10, Agent, [lift_at(Floor_Actual)]),
-    add_facts_beliefs_all(miconic10, Agent, [lift_at(Destination)]),
-    process_transported(Agent, Destination, Result).
-
-
-miconic10(act, Agent, silently_(go(Destination)), Result):-
-    miconic10(act, Agent, go(Destination), Result).
-
-miconic10(act, _, _, false).
-
-/*
-	Kopie prostredi pro specifikovane agenty
-	Udela kopii modelu a s tou pracuje, pokud act nebo percieve vola
- 	uvedeny agent.
-	Zruseni kopie -> smazani vsech klauzuli kopie (+ garbage collector?)
-*/
-
-
-miconic10(clone, Clone):-
-    clone_environment(miconic10, Clone).
-    
-
-miconic10(remove_clone, Clone):-
-    remove_environment_clone(miconic10, Clone).
- 
-
-miconic10(reset_clone, Clone):-
-    reset_environment_clone(miconic10, Clone),
-    get_all_situated(miconic10, Clone, Agents),   
-    init_beliefs(Agents).  
-
-
-miconic10(miconic10, Instance, State):-
-    save_environment_instance_state(simple_counter, Instance, State).
-
-
-miconic10(miconic10, Instance, State):-
-    load_environment_instance_state(simple_counter, Instance, State).
-
-
-miconic10(miconic10, Instance, State):-
-    remove_environment_instance_state(simple_counter, Instance, State).
-
-
+miconic(act, AgentName, stop, Reward) :-
+    py_call(miconic:get_environment_by_name("miconic"), Env),
+    py_call(Env:get_agent_by_name(AgentName), Agent),
+    py_call(Agent:leave_lift(), Reward),
+    py_call(Agent:onboard()).
 
 
 % Initialization
-% miconic10(init, Agent_Name):-
-
 :-
-    env_utils:register_environment(miconic10),
-    add_facts(miconic10, [travelled_distance(0)]),
-    findall(lift_at(Floor), lift_at(Floor), Facts1),
-    findall(position(Floor, Position), position(Floor, Position), Facts2),
-    findall(origin(Passenger, Floor), origin(Passenger, Floor), Facts3),
-    findall(destin(Passenger, Floor), destin(Passenger, Floor), Facts4),
-    env_utils:add_facts(miconic10, Facts1),
-    env_utils:add_facts(miconic10, Facts2),
-    env_utils:add_facts(miconic10, Facts3),
-    env_utils:add_facts(miconic10, Facts4).
-    
-
-
-                  
+    prolog_load_context(directory, Dir), % absolute path
+    py_add_lib_dir(Dir),
+    py_import(miconic, []),
+    py_call(miconic:initialize_environment()).

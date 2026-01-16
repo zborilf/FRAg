@@ -43,7 +43,6 @@ Main module of the FRAg system.
 
 */
 
-
 :- use_module('FRAgSync').
 :- use_module('FRAgAgent').
 
@@ -155,7 +154,7 @@ load_same_agents(Agent, Program, Number, Attributes, [Thread| THT]):-
 %   agent 'root' name, Number is number of agents that should be created from 
 %   given Program - then the names contains indexes from 1 to Number, and 
 %   Attributes are attribudes specified for the agent type
-%  @Agent_Threads: List of threads of each created agent
+%  @arg Agent_Threads: List of threads of each created agent
 
 load_agents([],[]).
 
@@ -209,9 +208,22 @@ set_default_attribute(bindings ,early):-
 set_default_attribute(reasoning_params , Parameters):-
     fRAgAgent:set_reasoning_params(Parameters).
 
+set_default_attribute(python_interpreter, true):-
+    fRAgAgent:set_python_interpreter(true).
+
 set_default_attribute(environment, Environment):-
     fRAgAgent:set_default_environment(Environment).
 
+set_default_attribute(external_mcts_type , Parameters):-
+    fRAgAgent:set_external_mcts_type(Parameters).
+
+% bind_python_interpreter:-
+%    ( python_interpreter(true) ->
+%            writeln('Python interpreter is initialized'),
+%            py_call(print("Initializing Python interpreter\n"))
+%        ;
+%            writeln('Python interpreter is not initialized')
+%        ).
 
 
 %!  frag(+Filename) is det
@@ -228,6 +240,7 @@ frag(Filename):-
     open(Absolute_Mas2FP, read, Stream, [close_on_abort(true)]),
     thread_setconcurrency(_ , 1000),
     load_multiagent(Stream, Agents),
+  %  bind_python_interpreter,
     !,
     close(Stream),
     fa_sync:sync_init,
@@ -238,7 +251,8 @@ frag(Filename):-
 %    run (unblock) agents
 %    assert(go(1)),
 %    wait_agents(Threads),
-    join_threads(Threads).
+    join_threads(Threads),
+    fRAgAgent:reset_python_interpreter.
 
 frag(Filename):-
     format("[MAS2FP] Metafile ~w.mas2fp does not exists.~n", [Filename]).
@@ -374,6 +388,22 @@ frag_choice(49):-
     read(File),
     frag(File).
 
+frag_choice(50,45):-
+    set_default_reasoning(all, mcts_reasoning_external_service_sequential),
+    frag.
+
+frag_choice(50,46):-
+    set_default_reasoning(all, mcts_reasoning_external_service_parallel),
+    frag.
+
+frag_choice(50,47):-
+    set_default_reasoning(all, mcts_reasoning_q_learning),
+    frag.
+
+frag_choice(50,48):-
+    set_default_reasoning(all, mcts_reasoning_integrated_python),
+    frag.
+
 frag_choice(50,49):-
     set_default_reasoning(all, mcts_reasoning),
     frag.
@@ -387,10 +417,14 @@ frag_choice(50,51):-
     frag.
 
 frag_choice(50,52):-
-    set_default_reasoning(intention_selection, biggest_joint_reasoning),
+    set_default_reasoning(all, random_reasoning_learning),
     frag.
 
 frag_choice(50,53):-
+    set_default_reasoning(intention_selection, biggest_joint_reasoning),
+    frag.
+
+frag_choice(50,54):-
     set_default_reasoning(plan_selection, robin_reasoning),
     frag.
 
@@ -470,14 +504,12 @@ join_threads([Thread| Threads]):-
 %   parameters
 
 main_frag:-
-    set_prolog_stack(global, limit(8 000 000 000)),
-    set_prolog_stack(trail, limit(5 000 000 000)),
-    set_prolog_stack(local, limit(5 000 000 000)),
-		
+    set_prolog_flag(stack_limit, 10000000000),
+
     nl,
     version(Version),
     format(
-'FRAg version ~w, 2021 - 2024, by Frantisek Zboril & Frantisek Vidensky,
+'FRAg version ~w, 2021 - 2026, by Frantisek Zboril & Frantisek Vidensky,
 Brno University of Technology ~n~n',
 	   [Version]),
     frag('fraginit'),

@@ -431,7 +431,7 @@ workshop(act, Agent, drop, true):-
     !,
     env_utils:query_environment(workshop, Agent, location(Agent, hall)),
     !,
-writeln(produktDroped),
+    writeln(product_droped), % TODO, delete this
     env_utils:delete_facts_agent(workshop, Agent, 
 				   [carry(Agent, product(Machine, Material))]),
     env_utils:delete_beliefs(Agent, [carry(product(Machine, Material))]),

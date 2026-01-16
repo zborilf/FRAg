@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="210mm"
+   viewBox="0 0 210 210"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="template.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1"
+     inkscape:cx="218"
+     inkscape:cy="519.5"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="159"
+       y="89"
+       width="164"
+       height="31"
+       id="rect20" />
+    <rect
+       x="128"
+       y="343"
+       width="205"
+       height="83"
+       id="rect19" />
+    <linearGradient
+       id="swatch16"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop16" />
+    </linearGradient>
+    <rect
+       x="106.78439"
+       y="361.84265"
+       width="314.23178"
+       height="64.614754"
+       id="rect14" />
+    <linearGradient
+       id="swatch14"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop14" />
+    </linearGradient>
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect14"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,12.678024,0,1 @ F,0,0,1,0,13.640799,0,1 @ F,0,0,1,0,11.913204,0,1 @ F,0,0,1,0,13.505831,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <linearGradient
+       id="swatch13"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop13" />
+    </linearGradient>
+    <linearGradient
+       id="swatch1"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:0.01376147;"
+         offset="0"
+         id="stop1" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch14"
+       id="linearGradient14"
+       x1="159.98245"
+       y1="138.38753"
+       x2="185.54198"
+       y2="138.38753"
+       gradientUnits="userSpaceOnUse" />
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect14-5"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,12.678024,0,1 @ F,0,0,1,0,13.640799,0,1 @ F,0,0,1,0,11.913204,0,1 @ F,0,0,1,0,13.505831,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch16"
+       id="linearGradient16"
+       x1="8.360465"
+       y1="145.84586"
+       x2="127.73406"
+       y2="145.84586"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(8.2020833,-40.745833)" />
+  </defs>
+  <g
+     inkscape:label="Vrstva 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g15"
+       transform="rotate(180,178.66288,126.29266)">
+      <path
+         style="fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient14);stroke-width:1.065;stroke-dasharray:none"
+         id="rect13"
+         width="25.554003"
+         height="114.81306"
+         x="159.98245"
+         y="80.980995"
+         inkscape:path-effect="#path-effect14"
+         sodipodi:type="rect"
+         d="m 172.66048,80.980995 a 13.263903,13.263903 46.652117 0 1 12.87598,13.640799 v 89.259056 a 11.913204,11.913204 135 0 1 -11.91321,11.9132 h -0.13497 A 13.505831,13.505831 45 0 1 159.98245,182.28822 V 93.659019 a 12.678024,12.678024 135 0 1 12.67803,-12.678024 z"
+         transform="translate(1.7995777,8.2780573)" />
+      <text
+         xml:space="preserve"
+         transform="matrix(0,-0.96628157,0.96628157,0,-181.55173,275.05032)"
+         id="text14"
+         style="text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect14);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.0252;stroke-dasharray:none"><tspan
+           x="106.78516"
+           y="372.78976"
+           id="tspan1">Prostředí</tspan></text>
+    </g>
+    <rect
+       style="fill:#000000;fill-opacity:0;stroke:url(#linearGradient16);stroke-width:1.09;stroke-dasharray:none"
+       id="rect15"
+       width="119.3736"
+       height="141.06978"
+       x="16.562548"
+       y="34.565125" />
+    <rect
+       style="fill:none;fill-opacity:0;stroke:none;stroke-width:1.09;stroke-dasharray:none"
+       id="rect17"
+       width="134.96832"
+       height="37.79113"
+       x="24.834171"
+       y="30.232904" />
+    <g
+       id="g19-5"
+       transform="matrix(-1.4905307,0,0,-1,280.69518,102.98397)">
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.235559;stroke-dasharray:none"
+         id="rect18-2"
+         width="36.71138"
+         height="2.8793237"
+         x="70.723404"
+         y="37.431217" />
+      <path
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.824068;stroke-dasharray:none"
+         d="m 107.43461,43.717306 v -9.692481 l 11.83316,4.800773 z"
+         id="path19-7" />
+    </g>
+    <g
+       id="g19-5-2"
+       transform="matrix(1.4905307,0,0,1,-2.0440337,110.54878)">
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.235559;stroke-dasharray:none"
+         id="rect18-2-3"
+         width="36.71138"
+         height="2.8793237"
+         x="70.723404"
+         y="37.431217" />
+      <path
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.824068;stroke-dasharray:none"
+         d="m 107.43461,43.717306 v -9.692481 l 11.83316,4.800773 z"
+         id="path19-7-2" />
+    </g>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.5391226,0,0,0.5391226,1.9496666,-124.89644)"
+       id="text19"
+       style="text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect19);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.11969;stroke-dasharray:none"><tspan
+         x="128"
+         y="353.94796"
+         id="tspan2">Senzory</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.53853008,0,0,0.53853008,-21.124398,97.635347)"
+       id="text20"
+       style="text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect20);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.11969;stroke-dasharray:none"><tspan
+         x="159"
+         y="99.947964"
+         id="tspan3">Akční členy</tspan></text>
+  </g>
+</svg>

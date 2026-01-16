@@ -1,6 +1,6 @@
                                        
 
-include_environment("environments/maze/maze.pl").
+include_environment("/environments/maze/maze.pl").
 
 set_agents([(bindings, late),  (reasoning, mcts_reasoning), 
                 % (reasoning, random_reasoning),

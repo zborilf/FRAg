@@ -1,0 +1,13 @@
+
+
+goal(ach,lets_chat,[[]]).
+
+plan(ach,lets_chat,[],	
+	[
+%		act(llm_environment, chat(chat_gpt, "Nahod nejakej pozdrav v Brnenskem hantecu", A)),
+		act(read(A)),
+		act(printfg(A)),
+		act(read(X))
+	]).
+
+

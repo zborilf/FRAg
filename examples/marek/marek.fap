@@ -16,6 +16,8 @@ goal(ach,go,[[]]).
 
 plan(ach, go, [a(X,Y)],
     [
+         act(basic, get_bb(Beliefs)),
+         act(printfg(Beliefs)),
          act(printfg(hw(X,Y))),
          test(b(X,Y)),
 	 act(reward(2))

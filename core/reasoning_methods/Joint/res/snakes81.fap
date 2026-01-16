@@ -1,0 +1,29 @@
+% 4 10 5
+% 1753642900.945925 
+% 1753642900.954138 
+
+% [a,c,a,c,b,a,c,b,a,c,a] / 11 
+% ASTAR Optimum 11
+goal(ach,a,null,[[]],active).
+plan(ach,a,[], [act(do(a)),act(do(c))]).
+
+goal(ach,b,null,[[]],active).
+plan(ach,b,[], [act(do(a)),act(do(c)),act(do(a)),act(do(c)),act(do(a)),act(do(c)),act(do(a)),act(do(c)),act(do(a))]).
+
+goal(ach,c,null,[[]],active).
+plan(ach,c,[], [act(do(c)),act(do(a)),act(do(b)),act(do(a)),act(do(c)),act(do(b)),act(do(a)),act(do(c))]).
+
+goal(ach,d,null,[[]],active).
+plan(ach,d,[], [act(do(b))]).
+
+goal(ach,e,null,[[]],active).
+plan(ach,e,[], [act(do(c)),act(do(a)),act(do(c)),act(do(a)),act(do(c)),act(do(b)),act(do(c)),act(do(a))]).
+
+% size=28
+% Snake solution [4,5,2,3,1] / 16 
+% nejklubko(81,0,16,[[sb(4,1,5,6),sb(5,6,2,0)],[sb(5,1,2,2),sb(2,2,3,1),sb(3,1,1,0)],[sb(5,2,2,3),sb(2,3,3,2),sb(3,2,1,1),sb(1,1,x,0)],[sb(5,3,2,4),sb(2,4,3,0)],[sb(5,4,2,5),sb(2,5,3,4),sb(3,4,1,0)],[sb(5,5,2,6),sb(2,6,3,5),sb(3,5,1,2),sb(1,2,x,0)],[sb(5,7,2,8),sb(2,8,3,8),sb(3,8,1,-1)],[sb(5,8,2,9),sb(2,9,3,0)],[sb(2,7,3,7),sb(3,7,1,-1)]]).
+
+
+% 1753642900.963957
+% casy(0.008213043212890625,0.00981903076171875).
+

@@ -26,8 +26,6 @@ is_relational_operator(Atom):-
 
 
 
-
-
 membervo(A, [B=_|_]):-
     A==B.
 
@@ -103,7 +101,7 @@ evolve_context(A, _, Context, Context):-
 evolve_context(_, B=C, Context, [B=C| Context]).
 
 
-%!  aloprel(+Operator, +Operand1, +Operand2, +Context_In, -Context_Out) is det
+%  !aloprel(+Operator, +Operand1, +Operand2, +Context_In, -Context_Out) is det
 %   RELATIONS (as a part of arithmetical / relational operations)
 %   Performs the operation for all term instances by Context, the output
 %   context corresponds to the operation performed For example, for a
@@ -118,7 +116,7 @@ evolve_context(_, B=C, Context, [B=C| Context]).
 
 %   Context is empty, and then it remains empty
 
-aloprel(_,_,_,[],[]).
+aloprel( _, _, _,[],[]).
 
 %   Relation is valid for Substitution (alopreltry succeeded) ... survives this
 %   operation

@@ -1,0 +1,5 @@
+Propojeni s Pythonem
+v 2024/25 na tom delali Nanocz a Misar
+Problemy (prvni pokus o propojeni)
+  ... je treba dat cestu k python3.dll, pokud se instaluje z Microsoft Store, nemozne, musi se rucne
+  ... Python asi potrebuje nahrat numpy (pip install numpy)

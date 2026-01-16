@@ -1,0 +1,11 @@
+include_environment("./environments/miconic/miconic.pl").
+
+set_environment(miconic, [ (episoding, sim_time) ]).
+
+set_agents([ (control,   terminate(timeout, 500)),
+             (bindings,  early),
+             (reasoning, simple_reasoning),
+             (environment, miconic)
+           ]).
+
+load("lift","./examples/miconic/miconic",1,[(debug, systemdbg), (debug, reasoningdbg)]).

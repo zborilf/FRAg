@@ -1,20 +1,21 @@
 import sys
-from pathlib import Path
+from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
+from agentspeak.frag_generator import FragGenerator
+from agentspeak.asl.AgentSpeakLexer import AgentSpeakLexer
+from agentspeak.asl.AgentSpeakParser import AgentSpeakParser
 
-from .agentspeak.compiler import compile_mas
 
+def main(argv):
+    input_stream = FileStream(argv[1] if len(argv) > 1 else 'agentspeak/examples/factorial.asl')
+    lexer = AgentSpeakLexer(input_stream)
+    stream = CommonTokenStream(lexer)
+    parser = AgentSpeakParser(stream)
+    tree = parser.agent()
 
-def main(mas_file, target_dir):
-    # Convert both paths to absolute
-    mas_file_path = Path(mas_file).resolve()
-    target_dir_path = Path(target_dir).resolve()
-
-    # Create target directory
-    target_dir_path.mkdir(parents=True, exist_ok=True)
-
-    # Convert to string paths
-    compile_mas(mas_file_path.as_posix(), target_dir_path.as_posix())
+    frag_generator = FragGenerator()
+    walker = ParseTreeWalker()
+    walker.walk(frag_generator, tree)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv)

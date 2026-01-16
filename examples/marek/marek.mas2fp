@@ -2,8 +2,7 @@
 
 
 
-set_agents([(bindings, early), (reasoning, mcts_reasoning), 
-		(reasoning_params, mcts_params(20,20,20))]).
+set_agents([(bindings, early), (reasoning, simple_reasoning)]).
 
 
 

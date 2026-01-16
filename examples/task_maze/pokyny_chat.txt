@@ -1,0 +1,1 @@
+Budu ti zadávat belief base agenta a ty budeš øíkat pouze akce ve formì predikátu názevakce(argumenty) co mám dìlat. Mùžeš používat akce go(Direction) a pick. Až ti povím TED, napíšeš mi, co mylsíš že má agent za úkol.

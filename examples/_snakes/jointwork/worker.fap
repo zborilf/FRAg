@@ -1,0 +1,62 @@
+
+%
+%	One joint action satisfies both goals
+%
+
+
+fact(object(wooden, square, blue)).
+fact(object(wooden, square, gray)).
+fact(object(wooden, square, red)).
+fact(object(wooden, circle, blue)).
+fact(object(wooden, circle, gray)).
+fact(object(wooden, circle, red)).
+fact(object(wooden, triangle, blue)).
+fact(object(wooden, triangle, gray)).
+fact(object(wooden, triangle, red)).
+fact(object(metal, square, blue)).
+fact(object(metal, square, gray)).
+fact(object(metal, square, red)).
+fact(object(metal, circle, blue)).
+fact(object(metal, circle, gray)).
+fact(object(metal, circle, red)).
+fact(object(metal, triangle, blue)).
+fact(object(metal, triangle, gray)).
+fact(object(metal, triangle, red)).
+fact(object(plastic, square, blue)).
+fact(object(plastic, square, gray)).
+fact(object(plastic, square, red)).
+fact(object(plastic, circle, blue)).
+fact(object(plastic, circle, gray)).
+fact(object(plastic, circle, red)).
+fact(object(plastic, triangle, blue)).
+fact(object(plastic, triangle, gray)).
+fact(object(plastic, triangle, red)).
+
+fact(position(object(metal, square, red),garage)).
+fact(position(object(metal, circle, blue),workshop)).
+fact(position(object(plastic, triangle, blue),park)).
+fact(position(object(wooden, triangle, gray),shed)).
+fact(position(object(plastic, triangle, gray),park)).
+fact(position(object(wooden, square, gray),shed)).
+fact(position(object(wooden, triangle, gray),garage)).
+fact(position(object(plastic, circle, red),workshop)).
+fact(position(object(plastic, triangle, red),workshop)).
+fact(position(object(plastic, square, blue),shed)).
+fact(position(object(wooden, square, blue),pool)).
+
+
+
+goal(ach,work(X,Y,blue),[[]]).
+
+goal(ach,work(plastic, Z, X),[[]]).
+
+
+plan(ach,work(X,Y,Z),[object(X,Y,Z)],[
+			test(position(object(X,Y,Z),P)),	
+			act(jprintfg(object(X,Y,Z)))
+				
+		]).
+
+
+
+		                                        	

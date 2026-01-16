@@ -1,0 +1,475 @@
+\chapter{Základy programování agentů}
+Když se řekne programovací jazyk, drtivá většina programátorů si představí jazyky jako Java, Python, C a jim podobné. Tyto jazyky se od sebe samozřejmě liší, ale stále spadají pod jedno a to samé paradigma, kterým je imperativní programování. To znamená, že k dosažení chtěného chování programu musí být problém rozdělen na atomické instrukce. Tyto instrukce provedené za sebou vedou k úspěšnému vykonání cíle. Jazyk Prolog však neoperuje v paradigmatu imperativním, ale v deklarativním, konkrétně v logickém. Jedná se tedy o logický jazyk, odtud se bere i jeho název, kterým je zkratka francouzského \textbf{Pro}{grammation en }\textbf{Log}{ique}, tedy česky \textbf{Pro}{gramování} v \textbf{log}{ice}.
+%Implementací jazyka prolog je několik, tato práce pracuje s verzí SWI-prolog, kterou využívá multiagentní systém FRAg.
+
+\section{Jak se programování v jazyce Prolog liší od imperativních jazyků}
+Jak již bylo zmíněno, u imperativních jazyků musí programátor korektně popsat kompletní postup, kterým má program postupovat, aby dosáhl kýženého výsledku. U deklarativních jazyků to je \textbf{přesně naopak}. Tyto jazyky si postup vymýšlí samy. Úkolem programátora tedy není vymyslet postup, ale správně -- jak syntakticky, tak sémanticky -- popsat výsledek, který požaduje. Jazyk Prolog je jak jazykem deklarativním, tak logickým. Hodně programátorů pravděpodobně již přišlo do styku s některým deklarativním jazykem, který jim pravděpodobně nedělal nijak větší potíže s pochopením. Konkrétním příkladem by mohl být databázový jazyk SQL (Structured Query Language).
+\newline
+Pokud programátor například chce vybrat všechny uživatele z tabulky \texttt{users} v jazyce SQL, nenapíše imperativně
+\newline
+\newline
+\texttt{for each user in users:
+\newline
+\hspace*{1em} save user to userlist
+\newline
+return userlist}
+\newline
+\newline
+Namísto toho deklaruje, že chce všechny uživatele, tedy: 
+\newline
+\newline
+\texttt{FROM users SELECT *} 
+\newline
+\newline
+a nechá jazyk SQL, aby si postup vymyslel co nejefektivněji sám.
+Přestože jazyky SQL a Prolog jsou oba jazyky deklarativními, Prolog je často jazykem, který se ukazuje jako problematický pro velké množství nových programátorů. Čím to je? Náročnost Prologu je mnohostranná. Na rozdíl od jazyka SQL, který má předem definované příkazy a jeho doménu tvoří interakce s databází, se v jazyce Prolog dá vytvořit široká škála programů. Zároveň je jazyk Prolog jazykem logickým, konkrétně je založen na predikátové logice prvního řádu, ještě přesněji na Hornových klauzulích. Kvůli tomu jsou jeho stavebními kameny unifikace, rekurze a zpětné vyhledávání, neboli anglický termín backtracking, který tato práce bude využívat od této chvíle. Tato kapitola si dává za cíl dostatečně, snadno a rychle seznámit programátory s jazykem Prolog -- s teorií nutnou pro pochopení, s programováním a praktickými radami, které pomohly mně.
+
+\section{Programování v jazyku Prolog}
+Dříve, než se tato kapitola zaměří na jazyk Prolog jako takový, je třeba vysvětlit koncepty, na kterých staví. Jimi jsou Hornovy klauzule, rekurze, backtracking a unifikace.
+
+\subsection{Teoretické minimum logického programování}
+
+\subsection*{Predikáty a Hornovy klauzule}
+Vše, co je v Prologu napsané, je napsané pomocí hornových klauzulí. Hornovy klauzule jsou matematické formule, které se využívají k definici pravidel či faktů v Prologu. Standardně jsou to implikace, mající formu $(C_1 \land C_2 \land \dots \land C_3) \Rightarrow C$. V Prologu se využívá obrácená forma, kde kombinace znaků :- figuruje jako operátor místo znaku implikace a čárka oddělující jednotlivé [here] nahrazuje znak $\land$. Ekvivalentní formule by napsaná v Prologu vypadala jako $C$ :- $ C_1, C_2, C_3, \dots , C_n$.
+\newline
+V Prologu se těmto klauzulím říká predikáty. Predikátem definujeme jak fakta, tak pravidla.
+Predikát má tři části. Hlavičku, která se také nazývá funktor, nacházející se na levé straně výrazu, která je oddělena znakem operátoru a tělem.
+\newline
+\textbf{Faktem} je predikát obsahující pouze hlavičku. Funkčně je to ekvivalentní k implikaci, kdy na levé straně je pouze 0, tedy implikace platí vždy.
+\textbf{Pravidlem} se nazývá predikát mající jak hlavičku, tak i operátor a tělo. Tato pravidla slouží k redukci, kterou Prolog používá k dokazování.
+
+\subsection*{Rekurze}
+\textbf{Rekurze} je asi nejjednodušší koncept objevující se v Prologu a který je jeho základním kamenem. Rekurze umožňuje kódu opakovaně volat sám sebe -- začne se zanořovat -- dokud nedosáhne základního případu. V ten moment se začne postupně vynořovat, dokud nedosáhne kódu, který rekurzi spustil, a tím skončí. Klasickým příkladem rekurze je počítání faktoriálů. Zde je ukázka kódu psaného v jazyce C.
+ 
+\begin{lstlisting}[language=C]
+int factorial(int n) {
+    if (n == 0)
+        return 1; // Zakladni prikaz
+    else
+        return n * factorial(n - 1); // Rekurzivni krok
+}
+\end{lstlisting}
+\noindent \textbf{Příklad výpočtu faktoriálu pro číslo 4:}
+\noindent \textbf{Příklad výpočtu faktoriálu pro číslo 4:}\\[1ex]
+\noindent \texttt{factorial(4):}\\
+$\rightarrow$ 4 $\times$ \texttt{factorial(3)}\\
+$\rightarrow$ 4 $\times$ (3 $\times$ \texttt{factorial(2)})\\
+$\rightarrow$ 4 $\times$ (3 $\times$ (2 $\times$ \texttt{factorial(1)}))\\
+$\rightarrow$ 4 $\times$ (3 $\times$ (2 $\times$ (1 $\times$ \texttt{factorial(0)})))\\
+$\rightarrow$ 4 $\times$ (3 $\times$ (2 $\times$ (1 $\times$ 1))) -- dosažen základní případ, návrat z rekurze\\
+$\rightarrow$ 4 $\times$ (3 $\times$ (2 $\times$ 1))\\
+$\rightarrow$ 4 $\times$ (3 $\times$ 2)\\
+$\rightarrow$ 4 $\times$ 6\\
+$\rightarrow$ 24
+
+\subsection*{Backtracking}
+Dalším důležitým konceptem je backtracking. Nejjednodušším příkladem pro vysvětlení je bludiště. Pokud člověk nebo algoritmus hledá cestu ven z bludiště, vybere si jednu cestu z možných cest na každém rozcestí. V momentě, kdy se dostane do slepé uličky, musí se otočit, jít zpátky na poslední rozcestí (backtracking) a vybrat si jinou cestu. Pokud všechny cesty z daného rozcestí byly slepé, vrátí se ze současného rozcestí na rozcestí předchozí.
+\newline
+V Prologu je backtracking základní součástí vyhodnocování dotazů -- pokud Prolog narazí na nesplnitelnou podmínku, automaticky se vrací zpět a zkouší jinou možnost.
+\subsection*{Unifikace}
+Unifikace, neboli sjednocení, je proces, při kterém se dva výrazy porovnávají a, pokud je to možné, přiřazují se jim hodnoty tak, aby byly ekvivalentní. Pokud unifikace uspěje, proměnné nabydou hodnot, které se budou používat při dalším odvozování. Pokud ale selže, může nastat backtracking, pokud je daná větev vyhodnocena jako nesplnitelná.
+\newline
+V následujícím příkladu proměnné začínají velkými písmeny. Následující pravidla a fakta budou používána i v dalších příkladech.
+\newline
+\begin{verbatim}
+%Pravidla:
+syn(X,Y) :- otec(Y,X), muz(X).
+dcera(X,Y) :- otec(Y,X), zena(x).
+dite(X,Y) :- syn(X,Y).
+dite(X,Y) :- dcera(X,Y).
+
+%Fakta:
+zena(tereza).
+muz(pavel).
+otec(pavel, tereza).
+
+Otázka: dite(tereza, pavel) (je Tereza dítě Pavla?):
+1. dite(tereza(X), pavel(Y)) :- syn(X, Y).
+    1.1  Unifikace: syn(tereza, pavel)
+2. syn(tereza(X), pavel(Y)) :- otec(Y, X), muz(X).
+    2.1. Unifikace: otec(pavel, tereza)
+    2.2. Unifikace: muz(tereza) [Neexistuje takový fakt, tedy unifikace selhává]
+    2.3. Backtracking
+3. dite(tereza(X), pavel(Y)) :- dcera(X, Y).
+    3.1  Unifikace: dcera(tereza, pavel)
+4. dcera(tereza(X), pavel(Y)) :- otec(Y, X), zena(X).
+    4.1. Unifikace: otec(pavel, tereza)
+    4.2. Unifikace: zena(tereza)
+    4.3. True
+5. dite(tereza, pavel) :- True
+6. True
+\end{verbatim}
+
+\subsection{Základní prvky jazyka Prolog}
+V Prologu se nepopisuje postup, jak danou úlohu vyřešit krok za krokem, ale naopak se definuje logická souvislost mezi tvrzeními a pravidly, které reprezentují znalostní bázi. Následně se pomocí dotazů ověřuje, zda určitý vztah platí, nebo neplatí, a jaké konkrétní objekty do dotazu spadají. Celý program napsaný v Prologu se dá členit na dva celky, jimiž jsou fakta a pravidla.
+\newline
+Fakta a pravidla jsou \textbf{klauzule}, které jsou tvořeny \textbf{predikáty}. Predikáty určují vlastnost nebo relaci mezi entitami. Například \texttt{otec(pavel,tereza).} je fakt, tedy klauzule. Predikát vyjadřuje relaci, kterou tento zápis reprezentuje. Definuje, že mezi dvěma objekty existuje určitý vztah -- v tomto případě, že první objekt je otcem druhého.
+\newline
+Program se provádí tak, že Prolog na základě dotazu/cíle zadaného uživatelem prohledává znalostní bázi, která se sestává z tvrzení a pravidel, a hledá tak možné důkazy. Tím určuje, zda dotaz platí, a pokud ano, vrací příslušné substituce proměnných. Nyní k bližšímu představení pojmů .
+
+\begin{enumerate}
+    \item \textbf{Fakta} popisují vztahy, bez jakýchkoliv podmínek. Fakta se zapisují jako klauzule.\newline
+    Z předchozího příkladu jsou jimy: 
+    \begin{itemize}
+        \item \texttt{zena(tereza).}
+        \item \texttt{muz(pavel).}
+        \item \texttt{otec(pavel,tereza).}
+    \end{itemize}
+    \item \textbf{Dotazy} se zjišťuje, zdali vztah mezi objekty platí. Pokud se provede dotaz:
+    \begin{itemize}
+        \item[] \texttt{otec(pavel,tereza).}
+    \end{itemize}
+    Ptáme se, jestli tento vztah mezi objekty platí. V tomto případě vztah platí a dotaz se vyhodnotí jako pravda.
+\end{enumerate}
+
+\subsubsection{Proměnné}
+Proměnné v logickém programování jsou rozdílné od programování deklarativního. V deklarativním programování je obsahem proměnné hodnota, nebo odkaz do paměti. V Prologu se používají proměnné na to, aby se odpověď získala jedním dotazem, aniž bychom museli psát sérii jednotlivých dotazů pro každý možný případ. 
+\begin{itemize}
+    \item[] \texttt{otec(pavel,X).}
+\end{itemize}
+Prolog se v tomto dotazu pokusí najít všechny situace, kdy je \texttt{pavel} něčím otcem. Z faktů víme, že \texttt{otec(pavel,tereza)} a výsledkem dotazu by byla substituce \texttt{X = tereza}. Tím se ušetří nutnost zkoušet opakovaně různé konkrétní hodnoty. Proměnná X automaticky reprezentuje všechny možné kandidáty, dokud nenajde ten, který splňuje podmínku. Zároveň, proměnná je proměnná pouze do té doby, než dojde k unifikaci/sloučení. Proměnná se dokáže unifikovat s jakýmkoliv termem.
+\subsection*{Term}
+Term je další dílek skládačky programu Prologu. Stejně jako klauzule jsou tvořeny z predikátů, predikáty jsou tvořeny jednotlivými termy. Jinak řečeno, z termů se skládají predikáty. V Prologu se termy dělí na tři typy.
+\begin{enumerate}
+    \item \textbf{Konstanta:} Nejjednodušší term, který je pouze konstanta. Unifikace dvou a více konstant je možná pouze pokud jsou konstanty identické.
+    \item \textbf{Proměnná:} Term, který se Prolog snaží unifikovat s nějakou konstantou. Proměnné mohou být: 
+    \begin{itemize} 
+    \item \textbf{Nevázaná proměnná:} Proměnná, která dosud nemá přiřazenou žádnou hodnotu -- není unifikovaná. Je volná a může se sjednotit s jakýmkoli termem. 
+    \item \textbf{Vázaná proměnná:} Jakmile dojde k unifikaci, proměnná se stane vázanou. Její hodnota se stane pevnou v daném kontextu.
+    \end{itemize}
+    \item \textbf{Složené termy:} Jedná se o termy, které se skládají z funktoru a jednoho či více argumentů. Pro úspěšnou unifikaci složených termů je nutné, aby: 
+    \begin{itemize} 
+    \item Měly shodný název hlavičky, neboli funktor. \item Měly stejný počet argumentů. 
+    \item Jejich argumenty se vzájemně také unifikovaly a to rekurzivně. 
+    \end{itemize} 
+    Příklad: term \texttt{otec(pavel, tereza)} je složený term s funktorem \texttt{otec} a dvěma argumenty \texttt{pavel} a \texttt{tereza}. Předchozí příklad dotazu \texttt{otec(pavel, X)}, řešením unifikace by bylo \texttt{X = tereza}.
+\end{enumerate}
+
+\subsubsection*{Seznamy}
+Seznamy v Prologu jsou \textbf{n-tice}, se kterými se, jak už by se dalo v Prologu čekat, pracuje rekurzivně. Spoustu nováčků má se seznamy problém, že se list snaží napřímo modifikovat. Snaží se využívat postupy, které znají z imperativních jazyků, změnit pouze syntaxi příkazů, aby zajistili stejnou sémantiku. Tento přístup je však chybný a často vede k frustraci. V Prologu se totiž seznam nemodifikuje. Místo toho se popisuje, jaký by měl být výsledný seznam. Prolog poté na základě unifikace vyhledává takové uspořádání prvků, které tomuto popisu odpovídá. Není to o popisu \textbf{jak} změnu provést, ale \textbf{co} má být výsledkem.
+\newline
+Při práci se seznamem se seznam dělí na hlavičku a tělo. Toto dělení se provádí následujícím způsobem \texttt{[H|T]}. \texttt{H} a \texttt{T} jsou zažitými názvy ze zkratek pro \texttt{head} a \texttt{tail}, avšak je možné použít názvy jiné, nebo i vybírat více prvků, než pouze jeden \texttt{[H1,H2|T]}. Důležité však je uvést mezi hlavičku a tělo znak \texttt{|}, který popisuje, jakým způsobem seznam rozdělit. Při práci se seznamem se pracuje v každém kroku vždy s hlavičkou. Tento způsob práce často vede k rekurzivním definicím operací nad seznamy.
+\subsection*{Vestavěné predikáty}
+Predikáty si samozřejmě mohou programátoři vytvářet sami. Prolog však nabízí i řadu vestavěných predikátů. Predikáty nabízejí řadu operací, které by v čistě logickém programovacím jazyce udělat buď nešly, nebo by byly kvůli rekurzi příliš neefektivní při schopnostech současného hardwaru. Z tohoto důvodu není Prolog čistě logický programovací jazyk. Dříve, než se uvedou některé důležité vestavěné predikáty, je důležité znát konvenci zápisu pro argumenty predikátů.
+\subsubsection*{Konvence zápisu argumentů}
+[TODO citovat IZU skripta p289 na konvenci]
+\begin{itemize}
+    \item \textbf{+ARG:} Argument musí být navázán na term (vstupní proměnná).
+    \item \textbf{-ARG:} Argumentem musí být volná proměnná (výstupní proměnná).
+    \item \textbf{?ARG:} Argumentem musí být term příslušného typu (buď „vstupní“, nebo „výstupní“ argument).
+\end{itemize}
+Následující seznam predikátů -- rovněž s jejich definicí -- je taktéž uveden z přednášek k předmětu IZU.
+\subsubsection*{Predikáty pro práci s databází}
+\begin{itemize}
+    \item \texttt{consult(+Filename):} Čte klauzule ze souboru a přidává je na konec databáze.
+    \item \texttt{assert(+Clause):} Přidá klauzuli na konec databáze.
+    \item \texttt{asserta(+Clause):} Přidá klauzuli na začátek databáze.
+    \item \texttt{retract(+Clause):} Odstraní první výskyt klauzule z databáze.
+    \item \texttt{retractall(+Clause):} Odstraní všechny výskyty klauzule z databáze.
+    \item \texttt{listing:} Vypíše aktuální databázi.
+\end{itemize}
+\subsubsection*{Vstupní/Výstupní predikáty}
+\begin{itemize}
+    \item \texttt{tell(+Filename)}: Otevírá soubor pro zápis.
+    \item \texttt{told}: Uzavírá soubor otevřený pro zápis.
+    \item \texttt{write(+Term)}: Zapíše term do souboru otevřeného pro zápis (standardně na obrazovku).
+    \item \texttt{nl}: Přejde na nový řádek (v zápisu!).
+    \item \texttt{see(+Filename)}: Otevírá soubor pro čtení.
+    \item \texttt{seen}: Uzavírá soubor otevřený pro čtení.
+    \item \texttt{read(-Term)}: Čte term ze souboru otevřeného pro čtení (standardně z klávesnice).
+\end{itemize}
+\subsubsection*{Predikáty -- Operátory}
+\textbf{Operátor vyhodnocení:}
+\newline
+Pokud je potřeba do volné proměnné uložit nějaký výsledek, nepoužije se operátor \texttt{=} jako v jiných jazycích, ale použije se operátor \texttt{is}. Operátor \texttt{=} se používá k unifikaci.
+\begin{itemize}
+    \item \texttt{X is  4 + 2} -- Obsahem \texttt{X} je \texttt{6}.
+    \item \texttt{X = 4 + 2} -- Obsahem \texttt{X} je \texttt{4 + 2}!
+\end{itemize}
+\textbf{Porovnávání aritmetických výrazů:}
+\newline
+Při porovnávání výrazů se nejprve vyhodnotí aritmetické výrazy \(E_1\) a \(E_2\) a poté se porovnají pomocí následujících operátorů:
+\begin{itemize}
+    \item \texttt{\(E_1\) < \(E_2\):} Uspěje, pokud \(E_1\) je menší než \(E_2\).
+    \item \texttt{\(E_1\) =< \(E_2\):} Uspěje, pokud \(E_1\) je menší nebo rovno \(E_2\).
+    \item \texttt{\(E_1\) > \(E_2\):} Uspěje, pokud \(E_1\) je větší než \(E_2\).
+    \item \texttt{\(E_1\) >= \(E_2\):} Uspěje, pokud \(E_1\) je větší nebo rovno \(E_2\).
+    \item \texttt{\(E_1\) =:= \(E_2\):} Uspěje, pokud \(E_1\) a \(E_2\) jsou aritmeticky rovny.
+    \item \texttt{\(E_1\) =\textbackslash= \(E_2\):} Uspěje, pokud \(E_1\) a \(E_2\) nejsou aritmeticky rovny.
+\end{itemize}
+\textbf{Ztotožnění a porovnání termů:} 
+\begin{itemize}
+    \item \texttt{\(T_1\) = \(T_2\):} Uspěje, pokud lze termy ztotožnit (tj. volné proměnné se naváží na odpovídající termy).
+    \item \texttt{\(T_1\) == \(T_2\):} Uspěje, pokud jsou termy identické (tj. mají stejnou strukturu a obsah).
+    \item \texttt{\(T_1\) \textbackslash= \(T_2\):} Uspěje, pokud termy nelze unifikovat.
+    \item \texttt{\(T_1\) \textbackslash== \(T_2\):} Uspěje, pokud termy nejsou identické.
+\end{itemize}
+\subsubsection*{Další užitečné predikáty}
+\begin{itemize}
+    \item \texttt{bagof(?T,+G,-B)}: Vrací seznam B všech instancí termu T, pro které uspěje cíl G.
+    \item \texttt{Řez !}: Uspěje, ale nepovolí návrat. Používá se na optimalizaci, aby Prolog neprozkoumával zbytečné možnosti.
+    \texttt{
+    \newline
+    girl(susan).
+    \newline
+    girl(ann).
+    \newline
+    boy(john).
+    \newline
+    boy(george).
+    \newline
+    pair(B,G) :- boy(B), !, girl(G).
+    \newline
+    }
+    V tomto příkladu, pokud uspěje \texttt{boy}, je zbytečné zkoušet jiné možnosti a nebude potřeba se vracet. Tyto řezy se rozlišují na dva typy. Zelené, které odstraní pouze ty výpočetní cesty, které nevedou k novým řešením, tedy bez operátoru ! by tyto programy měly stejný počet řešení. Červené řezy mohou některá řešení odstranit a je třeba vysoké míry opatrnosti.
+    [TODO (red/green cuts): cite the art of prolog s.194/195]
+\end{itemize}
+\subsection{Ukázky kódu a praktické rady}
+Cílem této sekce je dát čtenáři představu o úskalích a užitečných radách, které pomohou v začátku programování s Prologem. Obzvlášť stojí za to upozornit na tyto problémy při programování.
+\begin{itemize}
+    \item Chybějící tečky, čárky.
+    \item Prohození teček a čárek. Obzvláště při zakomentování a odkomentování části kódu, kdy je na to jednoduché zapomenout.
+\end{itemize}
+Ačkoliv jsou to jednoduché, syntaktické chyby, lze je jednoduše přehlédnout. Je tedy vhodné zkontrolovat tyto symboly, pokud něco \textit{z ničeho nic} přestalo fungovat.
+
+\subsection*{Rodinné vztahy}
+Asi nejčastějším příkladem uváděným v úvodu do programování v jazyce Prolog jsou rodinné vztahy. Na tomto příkladu se ukáže nejjednodušeji práce s fakty, pravidly a dotazy.
+
+\begin{lstlisting}[language=Prolog]
+% Fakta:
+parent(alice, bob).
+parent(alice, cecil).
+parent(bob, diana).
+parent(cecil, evzen).
+
+% Pravidla -- oba dva zpusoby zapisu
+% tj. s odradkovanim ci bez, jsou spravne:
+grandparent(X, Y) :- 
+    parent(X, Z),
+    parent(Z, Y).
+
+sibling(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
+\end{lstlisting}
+Nyní se můžeme programu dotazovat.
+\begin{lstlisting}[language=Prolog]
+% ma alice deti?
+parent(alice, Child).
+Child = bob;
+Child = cecil.
+
+% je bob rodicem diany?
+parent(bob, diana).
+true.
+
+% kdo je prarodicem evzena?
+grandparent(X, evzen).
+X = alice.
+
+% jake ma alice vnoucata?
+grandparent(alice, X).
+X = diana;
+X = evzen.
+
+% jsou zde nejaci sourozenci?
+sibling(X,Y).
+X = bob,
+Y = cecil;
+X = cecil,
+Y = bob.
+\end{lstlisting}
+\subsection*{CSP}
+Prolog je vhodný k řešení problému splňování podmínek, často označovaných jako CSP z anglického `constraint satisfaction problem.` Sudoku, problém N dam a podobné jsou časté příklady CSP problémů. CSP problém řešený v této sekci je jednoduchý rébus, kde je úkolem nalézt správnou kombinaci k odemčení zámku.[TODO: link https://kvizy.qizy.cz/matematicke/logicky-rebus-se-zamkem/]
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{obrazky-figures/lock.png}
+\caption{Zadání rébusu}
+\end{figure}
+
+\begin{lstlisting}[language=Prolog]
+% cisla 2,7,9 se v kombinaci nevyskytuji
+viable_digit(0).
+viable_digit(1).
+viable_digit(3).
+viable_digit(4).
+viable_digit(5).
+viable_digit(6).
+viable_digit(8).
+
+% 245 - Dve cisla jsou spravna a obe jsou na spravnych pozicich:
+rule245(_, 4, 5).
+
+% 146 - jedno cislo je spravne a je i na spravne pozici:
+rule146(1, _, _).
+rule146(_, 4, _).
+rule146(1, _, 6).
+
+% 394 - jedno cislo je spravne, ale na spatne pozici:
+rule394(_, 3, _).
+rule394(_, _, 3).
+rule394(_, 4, _).
+rule394(4, _, _). 
+
+% 457 - dve cisla jsou spravna, ale jen jedno je na spravne pozici
+rule457(4, _, 5).
+rule457(_, 5, 4).
+
+result(X,Y,Z) :-  viable_digit(X),
+                   viable_digit(Y),
+                   viable_digit(Z),
+                   Sum is X + Y + Z,
+                   Sum =:= 13,
+                   Product is X * Y * Z,
+                   Product =:= 80,
+                   rule245(X,Y,Z),
+                   rule146(X,Y,Z),
+                   rule394(X,Y,Z),
+                   rule457(X,Y,Z).
+\end{lstlisting} %to odřádkování nechat, jinak to vypadá jinak
+A nyní jediné, co stačí, je provést dotaz.
+\begin{lstlisting}[language=Prolog]
+result(X,Y,Z).
+X = Y, Y = 4,
+Z = 5.
+\end{lstlisting}
+Výsledkem je trojice číslic 445, která je skutečně jediným řešením.
+
+
+
+\subsection*{Práce nad seznamy a rekurze}
+Rekurze v Prologu lze asi nejjednodušeji demonstrovat na seznamech. Zároveň bývají pro začátečníky obtížné, a proto je na ně kladen důraz v této sekci. Zároveň je třeba být opatrný s levě rekurzivními pravidly. Takováto pravidla totiž nikdy neskončí, dostanou-li například nekonečně dlouhý seznam. Je tedy vhodné levě rekurzivní pravidla odstranit, nebo si být jistý, že se bude pracovat pouze s konečnými vstupy.
+\subsubsection*{Zjištění, je-li prvek členem}
+\begin{lstlisting}[language=Prolog]
+member(X, [X|_]).
+member(X, [_|Tail]) :- member(X, Tail).
+\end{lstlisting}
+Program pracuje rekurzivně, vždy se podívá, jestli je na začátku seznamu prvek, který hledá. Pokud ano, je hledání u konce a vrátí \texttt{true.} Pokud se však liší, tak první pravidlo predikátu selže a spustí se pravidlo druhé, které rekurzivně zavolá predikát \texttt{member} se zbytkem seznamu. Tento cyklus se opakuje do té doby, než se nalezne prvek, nebo dokud seznam není prázdný.
+Je \textbf{důležité} si uvědomit, že pravidla predikátů se testují odshora dolů. Program, ve kterém jsou pravidla predikátu otočená, není ekvivalentní! S modifikací programu to lze vidět.
+\begin{lstlisting}[language=Prolog]
+% program 1
+member(X, [X|_]) :- write(X).
+member(X, [Y|Tail]) :- write(Y), member(X, Tail).
+
+% program 2
+member(X, [Y|Tail]) :- write(Y), member(X, Tail).
+member(X, [X|_]) :- write(X).
+\end{lstlisting}
+Výstup programu 1 a programu 2 se vstupními parametry \texttt{member(2,[1,2,3,4,5])}.
+\begin{table}[h!]
+\centering
+\begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+\textbf{Výstup programu 1} & \textbf{Výstup programu 2} \\
+\begin{lstlisting}[language=Prolog]
+member(2,[1,2,3,4,5]).
+12
+true.
+\end{lstlisting} &
+\begin{lstlisting}[language=Prolog]
+member(2,[1,2,3,4,5]).
+123452
+true.
+\end{lstlisting} \\
+\end{tabular}
+\caption{Výstupy rekurzivních programů s vyměněným pořadím identických predikátů}\end{table}
+\newline
+Lze tedy vidět, že program 2 nalezl hledaný prvek až poté, co prošel celý seznam a vrchní pravidlo predikátu selhalo. Kdyby tento seznam byl nekonečně dlouhý, program by nikdy neskončil.
+
+\subsubsection*{Spojení seznamů}
+\begin{lstlisting}[language=Prolog]
+% vysledny seznam obsahuje prvky seznamu L1 (prvni argument)
+% predchazeji prvkum seznamu L2 (druhy argument)
+preppend([], L2, L2).
+preppend([H1|T1], L2, [H1|T3]) :- preppend(T1, L2, T3).
+\end{lstlisting}
+Výsledný seznam obsahuje prvky seznamu L1 (první argument) předcházející prvkům seznamu L2 (druhý argument).
+
+\begin{comment} 
+TODO Nejsem si jistý, zdali je to T3 korektní
+\noindent
+Uvažujme dotaz v Prologu:
+\newline
+\texttt{preppend([a, b], [c, d], X)}.
+
+\begin{enumerate}
+    \item První pravidlo neplatí, protože první argument není prázdný seznam \texttt{[]}.
+
+    \item Použije se druhé pravidlo:
+    \newline
+    \texttt{H1 = a}, \texttt{T1 = [b]}, \texttt{L2 = [c,d]}.
+    Zavolá se \texttt{preppend([b], [c,d], [a|T3])}.
+
+    \item Znovu se použije druhé pravidlo:
+    \newline
+    \texttt{H1 = b}, \texttt{T1 = []}, \texttt{L2 = [c,d]}.
+    Zavolá se \texttt{preppend([], [c,d], [a,b|T3])}.
+
+    \item Použije se první pravidlo:
+    \newline
+    \texttt{L2 = [c,d]}. 
+    Tímto se unifikuje proměnná \texttt{T3} se seznamem \texttt{L2}.
+
+    \item Nyní se zpětně dosazuje:
+    \newline
+    \texttt{T3 = L2 = [c,d]} 
+    \newline
+    \texttt{T3 = [b|c,d]} 
+    \newline
+    \texttt{T3 = [a|b,c,d]} 
+    \newline
+    \texttt{T3 = [a,b,c,d]} 
+    \newline
+    \texttt{X = T3 = [a,b,c,d]} 
+\end{enumerate}
+
+\subsection*{Výsledek}
+
+\begin{verbatim}
+X = [a, b, c, d].
+\end{verbatim}
+\end{comment}
+
+\subsubsection*{Rozdělení seznamu na dva seznamy podle kritéria}
+\begin{lstlisting}[language=Prolog]
+% B - below or equal pivot
+% A - above pivot
+divide([], _, [], []).
+divide([H1|T1], Pivot, B, [H1|A]) :- H1 > Pivot, divide(T1, Pivot, B, A).
+divide([H1|T1], Pivot, [H1|B], A) :- H1 =< Pivot, divide(T1, Pivot, B, A).
+\end{lstlisting}
+
+\subsubsection*{Vybrání N-tého prvku ze seznamu}
+Vybrání N-tého prvku v Prologu může představovat výzvu. Žádný for cyklus v tomto jazyce neexistuje. Musí se tedy upravit pravidla predikátu, aby rekurze měla 'zarážku.' Toho se docílí opět pomocí sjednocení.
+\begin{lstlisting}[language=Prolog]
+chooseNth([H|_],Match,Match,H).
+chooseNth([_|T],Nth,Cnt,Found) :- New_count is Cnt+1,
+                                      chooseNth(T,Nth,New_count,Found).
+\end{lstlisting}
+Mějme například seznam [1,2,3,4] a chtěli bychom jeho 2. prvek -- číslováno od 0. Použije se tedy dotaz \texttt{chooseNth([a,b,c,d,e], 2, 0, DruhyPrvek)}. Dokud se bude iterátor \texttt{Cnt} a požadovaný index \texttt{Nth} lišit, bude se používat pravidlo druhé, které pouze inkrementuje iterátor a volá rekurzivně dotaz chooseNth se zbytkem seznamu bez hlavičky. Z toho vyplývá, že až když se iterátor a index rovnají, použije se pravidlo první, které unifikuje současnou hlavičku seznamu s volnou proměnnou DruhyPrvek. V tomto případě bude dotaz vyhodnocen jako \texttt{DruhyPrvek = C.}
+
+\subsubsection*{Největší společný dělitel}
+\begin{lstlisting}[language=Prolog]
+gcd(X,0,X) :- X > 0.
+gcd(X,Y,Res) :- Z is mod(X,Y), gcd(Y,Z,Res).
+\end{lstlisting}
+Euklidův algoritmus na nalezení největšího společného dělitele. Z mé zkušenosti je tento jednoduchý algoritmus velmi dobrý prostředek k pochopení Prologu. Doporučuji tedy, pokud čtenář tápe, zkusit si na papír krokovat průběh tohoto algoritmu. Například s parametry \texttt{gcd(18,12,X)}. [TODO cite p95 the art of prolog]
+
+\subsubsection*{Quick Sort}
+Na závěr této kapitoly je zde uveden řadicí algoritmus quick sort. Pro zajímavost je doporučeno porovnat počet řádků implementace algoritmu v Prologu s jiným jazykem, který je imperativní.
+\begin{lstlisting}[language=Prolog]
+quick_sort([],[]).
+quick_sort([H|T],Sorted):-
+	pivoting(H,T,L1,L2), quick_sort(L1,Sorted1), quick_sort(L2,Sorted2), 
+	append(Sorted1,[H|Sorted2]).
+   
+pivoting(H,[],[],[]).
+pivoting(H,[X|T],[X|L],G):-X=<H,pivoting(H,T,L,G).
+pivoting(H,[X|T],L,[X|G]):-X>H,pivoting(H,T,L,G).
+\end{lstlisting}
+%[TODO: Cite Roman Barták https://kti.mff.cuni.cz/~bartak/prolog/sorting.html]
+Zjednodušený pseudokód na vysvětlení by mohl vypadat následovně.
+\begin{enumerate}
+    \item První prvek seznamu se vybere jako pivot.
+    \item Podle pivotu se rozdělí zbytek seznamu na seznam obsahující větší prvky a seznam obsahující menší prvky.
+    \item Na tyto nově vzniklé seznamy se rekurzivně zavolá quick sort.
+    \item Nakonec se sloučí seznam obsahující menší prvky se seznamem obsahující větší prvky, přičemž původní pivot je přesně mezi nimi.
+\end{enumerate} 

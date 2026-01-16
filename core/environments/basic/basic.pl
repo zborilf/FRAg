@@ -4,7 +4,7 @@
 FragPL, basic environment / ... internal actions
        
 @author Frantisek Zboril jr. 
-@version 2021 - 2023
+@version 2021 - 2025
 @licence
 */
 
@@ -33,6 +33,7 @@ action(basic, bcast,1).
 action(basic, sendfg,2). 		% sendFrag ?
 action(basic, printfg,1).
 action(basic, printfg,2).
+action(basic, get_bb,1).
 action(basic, foo,1).		% pro ladeni decision, k nicemu
 action(basic, foo,2).		% pro ladeni decision, k nicemu
 action(basic, foo,3).		% pro ladeni decision, k nicemu
@@ -99,7 +100,7 @@ foo(A,B,C,D):-
     printfg(String).
 
 
-silently_(_).
+silently_( _ ).
 
 me(X):-
     thread_self(X).
@@ -148,6 +149,10 @@ jprintfg(String):-
     printfg(String).	
 
 
+basic(act, Agent, get_bb(BeliefsS), true):-
+    fRAgAgent:findall(Belief, fact(Belief), Beliefs),  % Agent??
+    term_string(Beliefs, BeliefsS).
+
 % basic(act, _, Act, true):-
 %    is_exclusive_action(basic, Act),
 %    Act.
@@ -190,3 +195,4 @@ basic(act, _, Act, true):-
 basic(act, _, _, fail).
 
 
+                    	

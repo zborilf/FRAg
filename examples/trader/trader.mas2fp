@@ -1,9 +1,9 @@
 
 
-include_environment("environments/shop/shop.pl").
+include_environment("/environments/shop/shop.pl").
 
 
-set_agents([ (control, terminate(timeout, 1000)),
+set_agents([ (control, terminate(timeout, 200)),
              (bindings, early),
              (reasoning, robin_reasoning),
              (environment, card_shop)]).		
@@ -15,8 +15,8 @@ set_environment(card_shop, [(closing, 750), (s_lambda, 0.1), (b_lambda, 0.1),
                             (episoding, sim_time) ]).
 
 
-load("paul","../examples/trader/trader",1,[(debug, systemdbg), (debug, reasoningdbg)]).
-load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
+load("paul","../examples/trader/trader",1,[(debug, systemdbg)]). %, (debug, reasoningdbg)]).
+% load("peter","../examples/trader/trader",1,[(debug, systemdbg), (bindings, late), (debug, reasoningdbg)]).
 
 
 % load("paul","../examples/trader/trader",1,[(debug, systemdbg)]).

@@ -53,6 +53,13 @@ and environments
 :-dynamic agent_environment /3.
 
 
+garbage_all:-
+    garbage_collect,
+    garbage_collect_atoms,
+    garbage_collect_clauses,
+    trim_stacks.
+
+
 
 is_exclusive_action(Environment, Action):-
     functor(Action, Term, Arity),
@@ -204,7 +211,6 @@ get_agent_environments(_, []).
 %  @arg Clone, where the Agent is. If it is the same as Envronment, Agent is in
 %   the original instance of Environment
 
-% TODO better instance?
 get_agent_instance(Agent, Environment, Instance):-
     agent_environment(Agent, Environment, Instance).
 
@@ -507,7 +513,9 @@ remove_instance_state(Environment, Instance, State):-
 %  @arg Agent: Agent name
 %  @arg State: Name of the states
 
-remove_all_instances_state2( _, [], _).
+remove_all_instances_state2( _, [], _):-
+    !,
+    garbage_all.
 
 remove_all_instances_state2(Agent, [Environment | Environments], State):-
     get_agent_instance(Agent, Environment, Instance),

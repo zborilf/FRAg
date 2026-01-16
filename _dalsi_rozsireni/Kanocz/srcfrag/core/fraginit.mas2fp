@@ -1,0 +1,12 @@
+include_reasoning("./reasoning_methods/Basic/FRAgPLReasoningSimple.pl").
+include_reasoning("./reasoning_methods/Basic/FRAgPLReasoningRandom.pl").
+
+%include_environment("./environments/shop/shop.pl").
+%include_environment("./environments/miconic/miconic.pl").
+%include_environment("./environments/stalker/stalker.pl").
+%include_environment("./environments/assembly/assembly.pl").
+
+set_default([(bindings, late), (reasoning, random_reasoning)]).
+
+
+%load("fragagent","fragagent",1,[(reasoning, simple_reasoning), (debug, error)]).

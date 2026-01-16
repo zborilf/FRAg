@@ -1,7 +1,7 @@
 # FRAg=PL
 Flexibly Reasoning BDI Agent in ProLog
-September 2021- January 2024,
-v0.10
+September 2021- July 2025,
+v0.50
 
 Progrmammed in SWI Prolog
 

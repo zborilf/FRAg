@@ -1,0 +1,4 @@
+
+set_agents([(bindings, late), (reasoning, snakes_reasoning)]).
+
+load("snake","../examples/_snakes/snakes1",1,[(debug, reasoningdbg)]).

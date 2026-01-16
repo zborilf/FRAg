@@ -1,0 +1,93 @@
+% all agents start in workshop
+% improvements could be made by pruning empty picks and drops
+%        these do not make an action fail or anything, just do nothing
+
+% Goal
+goal(ach, complete_tasks, [[]]).
+
+% delivered N prods (cant be simply N since if 2 agents deliver at the same time
+%                                                        it would NOT terminate)
+plan(ach, complete_tasks, [delivered(N), N >= 100], 
+    [
+        act(printfg("more than N"))
+    ]
+).
+
+% located in workshop -> if it CAN make a product, do it
+plan(ach, complete_tasks, [
+      item('Wood',_,_,_,_),
+      item('Stone',_,_,_,_),
+      not(available_machines(0))], 
+    [
+        act(assembly, create),
+        ach(complete_tasks)
+    ]
+).
+
+% if product exists, make a delivery and return with wood
+plan(ach, complete_tasks, [item('Product',_,_,_,_), not(item('Stone', _, _, _, _))],
+    [
+        act(assembly, pick('Product')),
+        act(assembly, go('Hall')),
+        act(assembly, go('Shipment')),
+        act(assembly, drop('')),
+        act(assembly, go('Hall')),
+        act(assembly, go('Warehouse_A')),
+        act(assembly, pick('')),
+        act(assembly, go('Workshop')),
+        act(assembly, drop('')),
+        ach(complete_tasks)
+    ]
+).
+
+% if product exists, make a delivery and return with wood
+plan(ach, complete_tasks, [item('Product',_,_,_,_), not(item('Wood', _, _, _, _))],
+    [
+        act(assembly, pick('Product')),
+        act(assembly, go('Hall')),
+        act(assembly, go('Shipment')),
+        act(assembly, drop('')),
+        act(assembly, go('Hall')),
+        act(assembly, go('Warehouse_B')),
+        act(assembly, pick('')),
+        act(assembly, go('Workshop')),
+        act(assembly, drop('')),
+        ach(complete_tasks)
+    ]
+).
+
+% Stone is missing for production
+plan(ach, complete_tasks, [not(item('Stone', _, _, _, _))],
+    [
+        act(assembly, go('Hall')),
+        act(assembly, go('Warehouse_A')),
+        act(assembly, pick('')),
+        act(assembly, go('Workshop')),
+        act(assembly, drop('')),
+        ach(complete_tasks)
+    ]
+).
+
+% wood missing
+plan(ach, complete_tasks, [not(item('Wood', _, _, _, _))],
+    [
+        act(assembly, go('Hall')),
+        act(assembly, go('Warehouse_B')),
+        act(assembly, pick('')),
+        act(assembly, go('Workshop')),
+        act(assembly, drop('')),
+        ach(complete_tasks)
+    ]
+).
+
+% everything is ready, but no machines are available, might as well get wood
+plan(ach, complete_tasks, [],
+    [
+        act(assembly, go('Hall')),
+        act(assembly, go('Warehouse_B')),
+        act(assembly, pick('')),
+        act(assembly, go('Workshop')),
+        act(assembly, drop('')),
+        ach(complete_tasks)
+    ]
+).

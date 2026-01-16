@@ -2,19 +2,23 @@
 :-module(env_utils,
     [
         register_environment /1,
-        clone_environment /2,
 	environment_registered /2,
+
+        clone_environment /2,
+	reset_environment_clone /2,
+	remove_environment_clone /2,
+
         situate_agent_environment /2,
         situate_agents_clone /3,
 	agent_situated_environment /3,
         get_all_situated /3,
         situated_number /3,
-	reset_environment_clone /2,
-	remove_environment_clone /2,
+
         query_environment /2,
         query_environment /3,
         findall_environment_template /4,
         findall_environment /4,
+
         add_beliefs /2,
 	add_beliefs_agents /2,
         add_beliefs_all /2,
@@ -31,7 +35,9 @@
         delete_facts_beliefs /3,
         delete_facts_beliefs_all /3,
         retreive_add_delete /3,  
+
 	new_episode /1,
+
 	save_environment_instance_state /3,
         load_environment_instance_state /3,
 	remove_environment_instance_state /3
@@ -43,7 +49,7 @@
 Work with environment instances, facts, beliefs, agents
  
 
-@author Frantisek Zboril 2023 - 2024
+@author Frantisek Zboril 2023 - 2025
 @license GPL
 */
 
@@ -63,6 +69,13 @@ Work with environment instances, facts, beliefs, agents
 episode_list([]).
 
 
+garbage_all:-
+    garbage_collect,
+    garbage_collect_atoms,
+    garbage_collect_clauses,
+    trim_stacks.
+
+
 
 %!  register_environment(Environment) is det
 %   Registers Environment or Clone of the Environment. System can then use 
@@ -75,6 +88,15 @@ register_environment(Environment):-
 register_environment(Environment):-
     assert(environment(Environment, Environment)).
 
+
+
+%!  environment_registered(Environment, Instance) is det
+%   Retreives registered Environment and possible Clone
+%  @arg Environment: environment name
+%  @arg Instance: instance name
+
+environment_registered(Environment, Instance):-
+    environment(Environment, Instance).
 
 
 %!  clone_environment(Environment, Clone) is det
@@ -97,49 +119,35 @@ register_clone(Environment, Clone):-
 
 
 
+%! reset_environment_clone(+Environment, +Clone) is det
+%  Resets the clone, actualize it to the actual state of the original instance of 
+%  the environment
+%@arg Environment: name of environment
+%@arg Clone: environment clone name
+
+reset_environment_clone(Environment, Clone):-
+    get_all_situated(Environment, Clone, Agents),
+    remove_environment_clone(Environment, Clone),
+    clone_environment(Environment, Clone),
+    situate_agents_clone(Agents, Environment, Clone).
+
+
 
 %!  remove_environment_clone(Environment, Clone)
-%Removes all the facts of the clone and registration of agens to the clone
-%* Environment: environment name
-%* Clone: clone name
+%   Removes all the facts of the clone and registration of agens to the clone
+%  @Environment: environment name
+%  @Clone: environment clone name
 
 remove_environment_clone(Environment, Clone):-
     retractall(fact(Environment, Clone, _)),
     retractall(add(Clone, _)),
     retractall(delete(Clone, _)),
-    retractall(situated_agent(_, Environment, Clone)).
-
-
-
-%!  environment_registered(Environment, Clone) is det
-%   Retreives registered Environment and possible Clone
-%  @arg Environment: environment name
-%  @arg Clone: clone name
-
-environment_registered(Environment, Clone):-
-    environment(Environment, Clone).
+    retractall(situated_agent(_, Environment, Clone)),
+    !,
+    garbage_all.
        
 
  
-%!  situate_agents_clone(+Agents, +Environment, +Clone) is det
-%   Situates Agent in Environment, if Clone differs from Environment, then
-%   the agent is virtual and interacts with Environment's Clone
-%  @arg Agent: list of agent names / identifiers 
-%  @arg Environment: name of environment
-%  @arg Clone: a possible clone of Environment
-
-situate_agents_clone([], _, _).                    
-                  
-situate_agents_clone([Agent| Agents], Environment, Clone):-
-    situated_agent(Agent, Environment, _),
-    situate_agents_clone(Agents, Environment, Clone).
-
-situate_agents_clone([Agent| Agents], Environment, Clone):-
-    assert(situated_agent(Agent, Environment, Clone)),
-    situate_agents_clone(Agents, Environment, Clone).
-
-
-
 %!  situate_agent_environment(+Agent, +Environment) is det
 %   Situates Agent in Environment original instance 
 %  @arg Agent: agent name / identifier 
@@ -166,6 +174,25 @@ get_clone_query(Environment, Agent, Query, fact(Environment, Clone, Query)):-
 
 
 
+%!  situate_agents_clone(+Agents, +Environment, +Clone) is det
+%   Situates Agent in Environment, if Clone differs from Environment, then
+%   the agent is virtual and interacts with Environment's Clone
+%  @arg Agent: list of agent names / identifiers 
+%  @arg Environment: name of environment
+%  @arg Clone: a possible clone of Environment
+
+situate_agents_clone([], _, _).                    
+                  
+situate_agents_clone([Agent| Agents], Environment, Clone):-
+    situated_agent(Agent, Environment, _),
+    situate_agents_clone(Agents, Environment, Clone).
+
+situate_agents_clone([Agent| Agents], Environment, Clone):-
+    assert(situated_agent(Agent, Environment, Clone)),
+    situate_agents_clone(Agents, Environment, Clone).
+
+
+
 %!  get_all_situated(+Environment, +Instance, -Agents) is det
 %   Finds all Agents situated in Instance of Environment
 %  @arg Environment: name of environment
@@ -186,22 +213,7 @@ get_all_situated(Environment, Instance, Agents):-
 situated_number(Environment, Instance, Number):-
     get_all_situated(Environment, Instance, Agents),
     length(Agents, Number).
-
-
-
-%! reset_environment_clone(+Environment, +Clone) is det
-%Resets the clone, actualize it to the actual state of the original instance of 
-%the environment
-%* Environment: name of environment
-%* Clone: some clone of Environment
-
-reset_environment_clone(Environment, Clone):-
-    get_all_situated(Environment, Clone, Agents),
-    remove_environment_clone(Environment, Clone),
-    clone_environment(Environment, Clone),
-    situate_agents_clone(Agents, Environment, Clone).
     
-
 
 
 findall_facts(Environment, Query, Facts):-
@@ -264,7 +276,7 @@ findall_environment_template(Environment, Template, Query, Answers):-
 
 
 %
-%	ADD and DELETE lists for agents
+%   ADD and DELETE lists for agents
 % 
 
 
@@ -380,7 +392,10 @@ add_fact(Fact):-
 %  @arg Instance: instance name 
 %  @arg Facts: list of atoms or formulas
 
-add_facts_clone( _, _, []).
+add_facts_clone( _, _, []):-
+    bagof(fact(Environment, Instance, Fact), fact(Environment, Instance, Fact), EFC),
+    length(EFC, EFCL),
+    format("Pocet faktu ve vsech instancich ~w je ~w~n", [Instance, EFCL]).
 
 add_facts_clone(Environment, Instance, [Fact| Facts]):-
     add_fact(fact(Environment, Instance, Fact)),
@@ -433,7 +448,7 @@ delete_facts(Environment, [Fact| Facts]):-
     delete_facts(Environment, Facts).
 
 
-delete_fac(Fact):-
+delete_fact(Fact):-
     not(Fact).
 
 delete_fact(Fact):-
@@ -614,8 +629,8 @@ add_facts_state(Environment, Instance, State, [Fact| Facts]):-
 %   situated in the Instance. Fails when there does not exist saved State for the
 %   Environment Instance 
 %  @arg Environment 
-%  @arg Instance
-%  @arg State
+%  @arg Environment instance
+%  @arg State, name of saved environment state
 
 load_environment_instance_state(Environment, Instance, State):-
     % get any agent in the instance
@@ -634,18 +649,17 @@ load_environment_instance_state(Environment, Instance, State):-
 %!  remove_environment_instance_state(+Environment, +Instance, +State) is det
 %   Removes state of Instance of Environment
 %  @arg Environment 
-%  @arg Instance
-%  @arg State
+%  @arg Environment Instance
+%  @arg State, name of saved environment state
 
 remove_environment_instance_state(Environment, Instance, State):-
     retractall(fact(Environment, Instance, State, _)),
-    garbage_collect.
+    garbage_all.
 
 md:-
     use_module(library(pldoc/doc_library)),
  %   doc_load_library,
     doc_save('FRAgPLEnvironmentUtils.pl',[format(html), recursive(true), 
                                           doc_root('../../doc')]).
-
 
                                                   

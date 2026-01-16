@@ -2,10 +2,11 @@
 
 include_environment("environments/task_maze/task_maze.pl").
 
-set_agents([(bindings, early), (reasoning, mcts_reasoning), 
-                % (reasoning, random_reasoning),
-		(reasoning_params, mcts_params(1,75,40)), 
-	        (control, terminate(timeout, 12)), 
+set_agents([(bindings, late),
+        (reasoning, mcts_reasoning_external_service_parallel),
+		(reasoning_params, mcts_params(10,10,40)),
+		(python_interpreter, true),
+	        (control, terminate(timeout, 15)),
                 (environment, task_maze)]).
 		
 

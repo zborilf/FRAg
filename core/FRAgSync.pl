@@ -1,6 +1,5 @@
                         
 
-% :-module(fRAgBlackboard,[
 
 :-module(fa_sync,[ 
 			frag_debug / 1,

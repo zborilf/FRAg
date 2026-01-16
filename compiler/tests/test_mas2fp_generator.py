@@ -2,9 +2,9 @@ import unittest
 
 from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 
-from compiler.agentspeak.mas2fp_generator import Mas2fpGenerator
-from compiler.agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
-from compiler.agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
+from agentspeak.mas2fp_generator import Mas2fpGenerator
+from agentspeak.mas2j.MAS2JavaLexer import MAS2JavaLexer
+from agentspeak.mas2j.MAS2JavaParser import MAS2JavaParser
 
 from examples import get_example_file_path
 
@@ -16,7 +16,7 @@ def _compile(example_name: str) -> str:
     parser = MAS2JavaParser(stream)
     tree = parser.mas()
 
-    mas2f_generator = Mas2fpGenerator("<PATH>")
+    mas2f_generator = Mas2fpGenerator()
     walker = ParseTreeWalker()
     walker.walk(mas2f_generator, tree)
 
@@ -34,7 +34,7 @@ def _get_example(example_name: str) -> tuple[str, str]:
     return output, expected_output
 
 
-_examples = ('do_it', 'call_loud', 'factorial', 'count', 'worker')
+_examples = ('ex1', 'adam')
 
 
 class TestMas2fpGenerator(unittest.TestCase):

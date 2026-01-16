@@ -14,6 +14,10 @@
 :-dynamic dirs /3. % direction from one position to another
 :-dynamic item /3. % items in a position
 
+:- discontiguous task_maze:task_maze/2.
+:- discontiguous task_maze:task_maze/3.
+:- discontiguous task_maze:task_maze/4.
+
 coords(a,[1,1]).
 coords(b,[2,1]).
 coords(c,[3,1]).
@@ -121,7 +125,7 @@ size_y(6).
 
 
 path_direction([X,Y], left, [X2, Y]):-
-    size_x(X_Max),
+    size_x( _ ),
     X>0,
     X2 is X-1.
 
@@ -131,7 +135,7 @@ path_direction([X,Y], right, [X2, Y]):-
     X2 is X+1.
 
 path_direction([X,Y], up, [X, Y2]):-
-    size_y(Y_Max),
+    size_y( _ ),
     Y>0,
     Y2 is Y-1.
 
@@ -176,7 +180,7 @@ init_tasks:-
 get_percepts_position(Position, Agent, [item(Position, Item, Price) | 
 					Percepts]):-
     env_utils:findall_environment(task_maze, Agent, 
-				  (direction(Position, Position2, Direction)),
+				  (direction(Position, _, _)),
                                   Directions),
     assign_items_positions(Agent, Directions, Doors),
     env_utils:query_environment(task_maze, Agent, item(Position, Item, Price)),
@@ -191,7 +195,7 @@ assign_items_positions(_, [],[]).
 
 assign_items_positions(Agent, [direction(_, Position2, Direction)| Directions],
 		       [door(Direction, Item)| Doors]):-
-    env_utils:query_environment(task_maze, Agent, item(Position2, Item, Price)),
+    env_utils:query_environment(task_maze, Agent, item(Position2, Item, _)),
     assign_items_positions(Agent, Directions, Doors).
 
 
@@ -244,7 +248,7 @@ task_maze(act, Agent, go(Direction), true):-
     add_beliefs(Agent, [my_position(New_Room)]),
     change_room_percepts(Agent, Position, New_Position).
 
-task_maze(act, Agent, go(Direction), false).
+task_maze(act, _, go( _ ), false).
 
 
 task_maze(act, Agent, pick, Result):-
@@ -265,7 +269,7 @@ task_maze(act, Agent, pick, Result):-
     get_result(Pointer, Agent, Item, Result).
 
 
-task_maze(act, Agent, pick, false).
+task_maze(act, _, pick, false).
 
 
 
@@ -300,7 +304,7 @@ get_result(Pointer, Agent, Item, true):-
 get_result2(Items, Tasks, reward(1)):-
    check_list_match(Items, Tasks).
 
-get_result2(Items, Tasks, reward(0)).
+get_result2( _, _, reward(0)).
 
 
 check_list_match(L1, [L2 | _]):-
@@ -347,9 +351,9 @@ task_maze(remove_clone, Clone):-
 
 
 task_maze(reset_clone, Clone):-
-    reset_environment_clone(task_maze, Clone),
-    get_all_situated(task_maze, Clone, Agents),   
-    init_beliefs(Agents).
+    reset_environment_clone(task_maze, Clone).
+ %   get_all_situated(task_maze, Clone, Agents),   
+ %   init_beliefs(Agents).
 
 
 task_maze(save_state, Instance, State):-

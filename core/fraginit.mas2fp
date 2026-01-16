@@ -1,10 +1,16 @@
 
 
+include_reasoning("reasoning_methods/MCTS-advanced/FRAgPLReasoningMCTSOnlineLearning.pl").
+include_reasoning("reasoning_methods/MCTS-advanced/FRAgPLReasoningMCTSIntegratedPython.pl").
+include_reasoning("reasoning_methods/MCTS-advanced/FRAgPLReasoningMCTSExternalServiceParallel.pl").
+include_reasoning("reasoning_methods/MCTS-advanced/FRAgPLReasoningMCTSExternalServiceSequential.pl").
 include_reasoning("reasoning_methods/Basic/FRAgPLReasoningSimple.pl").
 include_reasoning("reasoning_methods/Basic/FRAgPLReasoningRandom.pl").
+include_reasoning("reasoning_methods/Basic/FRAgPLReasoningRandomOnlineLearning.pl").
 include_reasoning("reasoning_methods/Basic/FRAgPLReasoningRobin.pl").
 include_reasoning("reasoning_methods/MCTS/FRAgPLReasoningMCTS.pl").
 include_reasoning("reasoning_methods/Joint/FRAgPLReasoningBiggestJoint.pl").
+include_reasoning("reasoning_methods/Joint/FRAgPLReasoningSnakes.pl").
 
 % include_environment("/environments/shop/shop.pl").
 

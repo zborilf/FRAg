@@ -1,0 +1,1 @@
+MCTS je puovdni, rozsireno o MCTS-advanced

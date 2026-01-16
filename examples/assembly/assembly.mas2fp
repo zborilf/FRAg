@@ -1,0 +1,14 @@
+include_environment("environments/assembly/assembly.pl").
+
+set_environment(assembly, [ (episoding, sim_time) ]).
+
+set_agents([ (control,   terminate(timeout, 5)),
+             (bindings,  early),
+             (reasoning, simple_reasoning),
+             (environment, assembly)
+           ]).
+
+load("robot_a","../examples/assembly/assembly",1,[(bindings, late)]).
+load("robot_b","../examples/assembly/assembly",1,[(bindings, late)]).
+load("robot_c","../examples/assembly/assembly",1,[(bindings, late)]).
+load("robot_d","../examples/assembly/assembly",1,[(bindings, late)]).

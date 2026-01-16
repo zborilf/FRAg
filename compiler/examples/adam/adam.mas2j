@@ -1,0 +1,4 @@
+MAS adam {
+    infrastructure: Centralised
+	agents:	adam adam.asl;
+ }

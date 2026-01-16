@@ -1,0 +1,24 @@
+fact(pepa(4)).
+fact(pepa(5)).
+fact(pepa(6)).
+
+fact(ales(1,1)).
+fact(ales(3,3)).
+fact(ales(5,2)).
+fact(ales(4,4)).
+
+
+fact(bob(1,5)).
+fact(bob(3,3)).
+fact(bob(5,5)).
+
+goal(ach,go,[[]]).
+
+plan(ach, go, [a(X,Y)],
+    [
+         act(basic, get_bb(Beliefs)),
+         act(printfg(Beliefs)),
+         act(printfg(hw(X,Y))),
+         test(bob(X,Y)),
+	 act(reward(2))
+    ]).

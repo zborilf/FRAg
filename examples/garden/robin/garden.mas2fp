@@ -1,0 +1,17 @@
+                                       
+
+include_environment("environments/garden/garden.pl").
+
+set_agents([(bindings, late),
+        (reasoning, robin_reasoning),
+	        (control, terminate(timeout, 25)),
+                (environment, garden)]).
+		
+
+load("garden","../examples/garden/garden",1,[(debug, reasoningdbg),
+		(debug, mctsdbg_path),
+		(debug, mctsdbg),
+	        (debug, actdbg),
+		(debug, interdbg), (debug, systemdbg)]).
+			   
+			  

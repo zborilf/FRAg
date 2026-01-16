@@ -1,0 +1,36 @@
+goal(ach, do_something, [[]]).
+
+plan(ach,
+     do_something,
+     [],        
+     [
+       act(stalker, go(down)),
+       act(stalker, examine("Ball")),
+       act(stalker, go("down")),
+       act(stalker, pick("Ball")),
+       act(stalker, go("down")),
+       act(stalker, go("down")),
+       act(stalker, go("down")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, go("down")),
+       act(stalker, go("down")),
+       act(stalker, go("down")),
+       act(stalker, go("left")),
+       act(stalker, go("left")),
+       act(stalker, go("left")),
+       act(stalker, drop("")), % selling to trader, item disappears
+       act(stalker, go("down")),
+       act(stalker, go("right")),
+       act(stalker, go("right")),
+       act(stalker, pick("")), %picking up binoculars - increasing viewrange
+       act(stalker, go("right")),
+       act(stalker, go("up")),
+       act(stalker, go("up")),
+       act(stalker, go("up")),
+       act(stalker, go("up"))
+     ]).

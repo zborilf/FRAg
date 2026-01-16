@@ -8,7 +8,7 @@ intentions, plans and substitutions. MCTS reasoning performs selection of
 actions, plans and substitutions based on Monte Carlo Tree Search simulations.
 
 @author Frantisek Zboril
-@version 2022 - 2024
+@version 2022 - 2025
 @license GPL
 
 */
@@ -76,8 +76,6 @@ set_reasoning_method_params(mcts_params(Expansions, Simulations, Steps)):-
 %  tree -> act, children acts
 %  act -> plan selection for an intentin od plan act
 %
-
-
 
 
 %
@@ -858,12 +856,10 @@ get_intention(mcts_reasoning, Intentions,
     member(intention(Intention_ID, Content, active),Intentions).
 
 
-
 rename_substitution_vars([],[],[]).
 
 rename_substitution_vars([ _=C | T1], [B | T2], [B=C | T3]):-
     rename_substitution_vars(T1,T2,T3).
-
 
 
 get_model_act(Model_Act, Substitution):-
@@ -964,8 +960,6 @@ get_plan(mcts_reasoning, _, _, []).
 
 
 
-
-
 %!  init_reasoning(mcts_reasoning) is det
 %   initializes reasoning according to parameters, sets whether the agent works
 %   in late or early bindings, the number of expansions and simulations
@@ -982,7 +976,3 @@ init_reasoning(mcts_reasoning):-
     assert(mcts_expansions(Expansions)),
     assert(mcts_number_of_simulations(Simulations)),
     mcts_model_init.
-
-
-
-

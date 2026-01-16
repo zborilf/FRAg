@@ -122,7 +122,6 @@ plan(ach, complete_task(Machine, Material), [not(carry( _ ))],
 
 
 
-
 plan(ach, complete_task( _, _), [carry(product( _, _))],
 	[
 		act(writeln(cosi_nesu))
@@ -168,4 +167,3 @@ plan(ach, go_to(Location), [not(location(Location)), location(Location_Now)],
 		ach(do_walk(Path))
 	]
     ).
-

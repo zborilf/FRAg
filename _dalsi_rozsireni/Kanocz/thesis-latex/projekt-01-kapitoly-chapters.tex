@@ -1,0 +1,1140 @@
+% Autor: David Kanócz
+
+\chapter{Úvod}
+V posledních letech se v oblasti umělé inteligence a distribuovaných výpočetních systémů čím dál více prosazují agentní a multiagentní přístupy. Agent je samostatná jednotka, která dokáže vnímat své okolí, rozhodovat se a plnit předem stanovené úkoly. Když jich v prostředí spolupracuje či soupeří více, hovoříme o multiagentních systémech (MAS). Abychom mohli zhodnotit, jak dobře se „myšlení“ těchto agentů vyrovná skutečným situacím, je nepostradatelné pečlivě navrhnout testovací úlohy i samotné prostředí. Hledá se přitom zejména, jak efektivně agenti dokážou plánovat, přizpůsobovat se změnám a spolupracovat bez centrálního systému řízení.
+
+Cílem této bakalářské práce je navrhnout a implementovat sadu testovacích úloh pro multiagentní systém FRAg (Flexibly Reasoning BDI Agent), který je vyvíjen na Ústavu inteligentních systémů Fakulty informačních technologií VUT v Brně. V rámci práce byl vytvořen systém pro simulaci prostředí PES (Python Environment System), který umožňuje rychlé a pohodlné vytváření nových testovacích scénářů v jazyce Python, přičemž zachovává kompatibilitu se systémem FRAg. Používá k tomu knihovnu janus pro komunikaci mezi jazyky Prolog a Python. Výstupem práce jsou tři reprezentativní testovací úlohy – výrobní linka, výtah inspirovaný výtahem Miconic 10 a prostředí stalker – které jsou detailně klasifikovány a popsány z hlediska chování, které mají ověřovat.
+
+Druhá kapitola této práce se věnuje základním pojmům v oblasti agentů a agentních systémů, včetně motivace k jejich nasazení, jaké výhody přináší a jakou formu nebezpečí mohou představovat. Popsány jsou jednotlivé architektury agentů a motivace pro jejich nasazení v reálných aplikacích, od jednoduchých, reflexních agentů, až po učící se a BDI agenty. Kapitola třetí pak krátce rozšiřuje agentní paradigma na multiagentní systémy. Objasňuje širší spektrum jejich využitelnosti v porovnání s pouze agentními systémy, možnosti organizace agentů v rámci MAS a poskytuje krátký přehled současných programovacích frameworků, platforem pro modelování a simulaci a knihoven pro multiagentní posilované učení (MARL -- Multi-Agent Reinforcement Learning). V neposlední řadě popisuje způsob evaluace MAS, které používá tato bakalářská práce. Ve čtvrté kapitole je popsána problematika návrhu testovacích prostředí pro vyhodnocení výkonu agentů, včetně parametrů, zodpovědností prostředí a standardu EIS (Environment Interface Standard), který využívá systém FRAg a zajišťuje interoperabilitu mezi agentní platformou a prostředím. Pátá kapitola podrobně představuje systém PES – jeho komunikaci se systémem  FRAg, možnosti konfigurace prostředí (mřížka, struktura), a obsahuje technickou dokumentaci systému včetně návodu na tvorbu a parametrizaci nových prostředí. Následující šestá kapitola pak popisuje jednotlivé implementované testovací úlohy, analyzuje jejich cíle, detaily realizace a způsob vyhodnocení chování agentů. Práci uzavírá shrnutí dosažených výsledků, zhodnocení omezení navrženého řešení a návrh možných směrů dalšího rozvoje systému PES.
+
+Výsledné prostředí PES rozšiřuje funkcionalitu systému FRAg o rychlou a intuitivní tvorbu testovacích scénářů v Pythonu, s možností simulace a animace chování agentů. Tím přispívá k usnadnění experimentů s různými parametry BDI agentů jako brzké versus pozdní vázání proměnných a k jejich důkladnějšímu testování v různorodých úlohách, což je nezbytný krok k posouvání a vylepšování systému FRAg.
+
+\chapter{Agent a agentní systémy}
+Co je to agent? Definice agenta jako entity může být složitá, zvláště kvůli tomu, co do definice zahrnout, a co ne. Různá odvětví používají jiné definice slova agent, například v oblasti umělé inteligence pojem agent většinou zahrnuje více vlastností. Proto se základní definice agenta nachází až o pár řádků později, poté co se nejdříve definují jeho nutné vlastnosti a požadavky, aby se této entitě dalo říkat agent. Tímto způsobem se tato sekce snaží o rychle pochopitelnou, ale dostatečnou definici, která poslouží k pochopení, jak obecně agent funguje a která bude rozšířená a doplněná podle potřeby později. Nejdůležitějšími vlastnostmi, co dělá agenta agentem, je tato čtveřice vlastností, která je převzatá z \cite{95_IATP_WooldridgeJennings}, ačkoliv dílčí části definice pochází z jiných zdrojů.
+
+\section{Vlastnosti agentů}
+Na začátek upozornění. Agent nemusí splňovat všechny následující vlastnosti, aby to byl agent. Některé typy agentů například nekomunikují s ostatními prvky prostředí (agenty/lidmi). Obecně platí, že pouze autonomie a reaktivita jsou vlastnosti, které najdeme v každém typu agenta.
+
+\begin{itemize}
+    \item \textbf{Autonomie:} Autonomie je vlastnost agenta, spočívající v samostatnosti rozhodování o svém chování v rámci daného systému, bez implicitní závislosti na jakýchkoliv jiných prvcích tohoto systému.\cite{disertzb}
+    \item \textbf{Schopnost socializace:} Agenti mají schopnost komunikovat s ostatními agenty, případně s lidmi, aby dosáhli svých cílů. 
+    \item \textbf{Reaktivita:} Agenti vnímají prostředí ve kterém působí, které může nabývat různého charakteru (fyzický/reálný svět, internet, uživatel skrze uživatelské grafické rozhraní, simulované prostředí, ...). Zavčasu reagují na změny prostředí a přizpůsobují se jim.
+    \item \textbf{Pro-aktivita:} Agenti nereagují na změnu prostředí, ale jsou proaktivní jednotkou v systému, \textbf{kde přebírají iniciativu}. Mají své cíle a vykazují chování, které vede k dosažení jejich cílů.
+\end{itemize}
+
+V této chvíli se může zdát, že objekt v kontextu objektově orientovaného programování může sám o sobě být agent. Vskutku, pokud dotyčný objekt obohatíme o vlastnosti, které normálně nemá, jako je autonomie, můžeme ho brát jako agenta. Objekt by ale bylo potřebné rozšířit například tak, že při zavolání metody objektu se ne vždy metoda vyplní. Objekt danou metodu provede pouze za podmínky, že ji vyhodnotí jako výhodnou pro splnění jeho plánu, jinak ji neprovede. Rozšíření objektů na agenty se však obecně nepoužívá, protože objekt a agent jsou z podstaty rozdílné entity. U agenta jako takového autonomii vyžadujeme, kdežto objekt často bereme pouze jako entitu, která obsahuje nějaká svá data a metody. Ve zkratce by se dalo říci, že objekt je pasivní entita, která nemyslí, nemá záměry či cíle a nemá svou vlastní vůli. Agent je pravý opak. Autonomie/svévole je pro agenta podstatou. \cite{Wooldridge2009IntroMAS}
+
+Agentem můžeme tedy nazývat nějakou entitu, splňující tyto vlastnosti. Z předchozí definice pro-aktivity -- a z čistě logického pohledu -- je patrné, že agent musí být umístěn v nějakém prostředí, které musí být schopen vnímat a nějakým způsobem s ním interagovat. Detailní rozebrání problematiky prostředí se nachází ve čtvrté kapitole.
+
+\subsection*{Agent jako programovací paradigma}
+Jak už bylo řečeno dva odstavce výše, koncepce agenta a objektu od sebe nejsou tak vzdálené. Můžeme agenta vnímat jako pokračování evoluce programovacího paradigmatu na obrázku~\ref{para}, převzatého z \cite{NormsDecay}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{obrazky-figures/parashift.pdf}
+\caption{Přehled a vývoj programovacích paradigmat rozšířený agenty.}
+\end{figure}
+\label{para}
+\noindent
+
+
+\subsection*{Definice pojmu agent}
+Agent je nějaký systém, který se nachází v nějakém prostředí, které vnímá, a je v tomto prostředí schopen nezávisle provádět akce svými efektory, kterými splní své cíle. \cite{Wooldridge2009IntroMAS}\cite{Zizka2004}
+
+
+\section{Motivace pro používání agentů}
+V dnešní době informatika ovlivnila takřka všechna odvětví, ať už profesní, zábavní, nebo z osobního života. Ovšem existují oblasti, kde je lidský operátor stále vyžadován, protože problém je tak složitý, že prostý program založený na algoritmech nestačí. Například autopilot nemůže být pouhou knihovnou příkazů. Občas bychom totiž jako uživatelé či programátoři chtěli, aby program vykazoval nějaké chytřejší chování, jako jsou touhy, cíle nebo schopnost se přizpůsobit konkrétnímu prostředí, ve kterém je nasazen. Vzhledem ke schopnosti agentních a multiagentních systémů řešit náročnější problémy, je důležité mít na paměti i potenciální problémy související s jeho selháním.
+
+\subsection*{Jak může vypadat selhání agenta}
+Jako příklad může být uvedena smrtelná nehoda testovacího autonomního vozidla firmy Uber. Řidič měl kontrolovat tento autonomní systém, agenta, ale kvůli nepozornosti nezasáhl včas. Agent selhal, nejprve klasifikoval chodce jako neznámý objekt, poté jako vozidlo a následně jako jízdní kolo, přičemž měl různá očekávání ohledně jeho budoucí trajektorie. 1,3 vteřiny před nárazem vyhodnotil, že se musí provést nouzové brzdění, aby se zabránilo kolizi. Tato funkce však byla vypnuta, aby se předešlo nevyzpytatelnému chování při testování. \cite{crashreport}
+
+\subsection*{Úspěšně nasazené agentní systémy}
+
+\begin{itemize}
+    \item \textbf{Chytré vysavače: } 
+        Vysavač Roomba od společnosti iRobot je velice populárním autonomním agentem. Jako své prostředí má místnost, kterou vysává. V závislosti na modelu se jedná buď o jednoduchý reflexní agent, který reaguje na podněty z prostředí jako 'narazil jsem do zdi, změním směr', nebo u novějších modelů, například i7 \cite{Roomba}, už využívají i učení, aby svoje vysávání zefektivnili.\cite{ieee4209283}
+    \item \textbf{Perseverance rover: }
+        Systém AutoNav roveru Perseverance od agentury NASA, který zajišťuje autonomní řízení byl v prvním roce na Marsu použit 88\% z celkových 17.7 ujetých kilometrů. „AutoNav získal několik rekordů planetárních roverů, včetně nejdelší ujeté vzdálenosti bez lidského zásahu (699.9m)"\cite{perseverance}
+\end{itemize}
+Poznámka: Tato kapitola pojednává o agentech. O využití multiagentních systémů, které mají širší využití, pojednává následující kapitola.
+
+\section{Druhy/Architektury agentů}
+Jako u všech technologií, i agenty můžeme rozdělit podle mnoha vlastností.\cite{tpoint} Můžeme je rozdělovat například:
+
+\begin{itemize}
+    \item {Podle schopnosti učení:}
+    \begin{itemize}
+        \item učící se,
+        \item neučící se (fixní).
+    \end{itemize}
+    \item {Podle fyzikální podoby: }
+    \begin{itemize}
+        \item softwarový agent,
+        \item fyzický robot.
+    \end{itemize}
+    \item {Podle účelu: }
+    \begin{itemize}
+        \item organizace křižovatek,
+        \item autopilot,
+        \item obchodní agent, ...
+    \end{itemize}
+\end{itemize}
+Rozdělení, kterému tato práce věnuje větší pozornost, je však rozdělení podle míry vnímané inteligence a schopnosti -- zvolená architektura implikuje schopnosti a limity agenta.
+\section*{Rozdělení typů agentů podle architektury}
+\subsection*{Jednoduchý reflexní agent}
+Asi nejjednodušší, ale i tak využitelná a často využívaná architektura agentního systému. Reflexní agent si neudržuje žádné vnitřní stavy, vlastní představu o prostředí, či historii. Místo toho reaguje (proto se tomuto typu agenta říká i \textit{reaktivní}) čistě na podněty prostředí, kterými jsou výstupy senzorů. Z toho vyplývá, že nemá jakýkoliv prostředek pro tvorbu plánů.\cite{Hajkova2012}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/ratagent.pdf}
+\caption{Jednoduchý reflexní agent -- Russell, Norvig\cite{RussellNorvig}.}
+\label{refagent}
+\end{figure}
+\noindent
+Jak je vidět z obrázku~\ref{refagent}, reflexní agent pouze reaguje na momentální vstup senzorů.
+Příkladem asi nejvíce využívané aplikace této architektury jsou jednoduché inteligentní vysavače jako vysavače Roomba od společnosti iRobot, kterých se prodalo přes 50 milionů jednotek během 22 let od vydání prvního vysavače Roomba.\cite{sales} (Ačkoliv do těchto 50 milionů spadají i ty modely, které by byly klasifikovány jako učící se, a tedy nebyly v kategorii pouhého reflexního agenta.)
+\subsection*{Agent založený na modelu}
+V nějakých situacích nám pouhé současné sledování světa k vybrání vhodné akce nestačí. K příkladu si můžeme uvést situaci, kdy máme auto s autonomním řízením -- autopilotem. Vysvětlování příkladů na autopilotu/taxi v této kapitole pochází taktéž z knihy \textit{Artificial Intelligence - A Modern Approach}\cite{RussellNorvig}. Pokud autopilot nemá senzory pokrývající celou svoji zornou plochu, a tedy nemusí vždy ostatní auta vidět, musí si o ostatních autech a dopravních prostředcích na vozovce udržovat vlastní vnitřní stav. Aby se tento vnitřní stav dal aktualizovat, potřebujeme dva druhy znalostí. \textbf{První znalost} -- jak se svět chová nezávisle na agentovi. V příkladu autopilota by to znamenalo vědět takové věci, jako:
+\begin{itemize}
+\item Auto které k nám zkracuje vzdálenost nás možná bude chtít předjet.
+\item Pokud nějaké auto zapne ukazatel směru (blinkr), s největší pravděpodobností změní směr jízdy.
+\end{itemize}
+Je to tedy nějaká znalost o tom, jak se okolní svět chová.
+\textbf{Druhá znalost}, co agent potřebuje, je znalost, jak jeho akce ovlivní okolní svět. Například sešlápnutí brzdového pedálu má za následek snížení rychlosti.
+Tyto dvě znalosti pro agenta tvoří \textbf{vnitřní stavový model}. Proto se tomuto typu agenta říká \textit{založený na modelu}.
+Tento vnitřní stavový model však zřídka odpovídá současnému a úplnému stavu prostředí. Jednak to nemusí být vůbec možné u částečně pozorovatelných prostředí (senzory autopilota například nevidí skrz překážky). A za druhé, někdy kvůli množství dat, či nedokonalosti senzorů musí agent pracovat pouze s abstrakcí daného prostředí a tedy nějaké důležité informace nemá přístupné (senzory nemusí detekovat ledovku). I přes nedokonalý stav znalostí však musí nějakou akci vybrat. Struktura agenta je vidět na obrázku~\ref{modagent}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{obrazky-figures/modbagent.pdf}
+\caption{Agent založený na modelu -- Russell, Norvig\cite{RussellNorvig}.}
+\label{modagent}
+\end{figure}
+\newpage
+\subsection*{Agent zaměřený na cíl}
+I dokonalý model světa by však agentům nemusel stačit. V případě autopilota by agent nedokázal pasažéry dopravit tam, kam oni chtějí, kdyby neznal cíl cesty. V armádním pojetí sebevražednému dronu, který by měl za úkol zasáhnout tank při ztrátě signálu, často způsobenou rušičkami, nestačí vědět, kde co ve světě je nebo jak pomocí ovládání rotorů pilotovat dron. I tu agent potřebuje cíl, tank. V případě, kdy žádný nedetekuje, tak je jeho možným cílem RTB (return to base -- vrácení se na základnu). V tomto případě je tedy agent rozšířen i o cíl, jak je k vidění v jeho struktuře~\ref{goalagent}.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/goalagent.pdf}
+\label{goalagent}
+\caption{Agent zaměřený na cíl-- Russell, Norvig\cite{RussellNorvig}.}
+
+\end{figure}
+
+\newpage
+\subsection*{Užitkově zaměřený agent}
+Agenti zaměření na cíl mají jednu nevýhodu. Dosáhnutí cíle je pro ně binární, tedy buď ho dosáhnou, nebo ne. V duchu příkladů z minulých typů agentů se bude vysvětlovat i tento rozdíl na autopilotu, v tomto případě rozšířeném o vícero typů vozidel dle jejich funkce (civilní auto a policejní auto). Pokud by oba typy vozidel využívala jako autopilota agenta zaměřeného na cíl, obě vozidla by zvolila tu samou trasu. To je nežádoucí, protože ne každý dopravní prostředek chce jet tím samým způsobem. Autopilot civilního automobilu se musí striktně držet zákonů a předpisů jako přikázaný směr jízdy či maximální povolená rychlost. Autopilot policejního či hasičského automobilu si však nemůže dovolit ztrácet čas, když jede k zásahu. Tedy ačkoliv by měly tyto automobily stejný cíl cesty, způsob dosažení této cesty by měl být jiný. Tomuto říkáme užitek. Užitek je  tedy nějaké vnitřní výkonnostní ohodnocení -- \textbf{užitková funkce}\cite{RussellNorvig} -- která říká, jak ohodnocené jsou různé plány akcí, které vedou k dosáhnutí toho samého výsledku. Tato vlastnost dává agentovi mnohem větší škálu přizpůsobivosti, kdy například u již zmíněného osobního automobilu si pasažér může vybrat, zda preferuje cestu, která bude šetrnější k životnímu prostředí, bude rychlejší, bezpečnější, nebo ve které nebude stát v koloně.
+
+U agentů se zaměřením na cíl byl problém, pokud existovali cíle, které se vzájemně vylučovaly. Oproti tomuto typu mají užitkově zaměření agenti~\ref{utilagent} právě onu užitkovou funkci, která je de facto návod na to, jaký kompromis by agent měl udělat.\cite{RussellNorvig}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/utilagent.pdf}
+\label{utilagent}
+\caption{Užitkově zaměřený agent -- Russell, Norvig\cite{RussellNorvig}.}
+\end{figure}
+
+
+
+
+\subsection*{Učící se agent}
+Schopnost učení se poskytuje agentovi další, významný výkonnostní skok. Agenti se často nacházejí v prostředích, u kterých nemají možnost nabýt všechny informace. Například učící se vysávající roboti bývají vypouštěni do prostředí, které svými senzory typicky nedokáží mít v jeden moment celkový přehled o místnosti, protože se musí vyhýbat překážkám. Tyto překážky zabraňují tomu, aby roboti -- agenti -- měli v jeden moment přehled o celé místnosti a tedy mohli vymyslet ideální plán. Schopnost učení u těchto vysavačů umožňuje vědět informace jako "pokud udělám akci A, v minulosti jsem za to dostal vyšší ohodnocení, než za akci B. Tedy provedu akci A."\ To u vysávacího robota může znamenat, že místnost bude vysávat kratší dobu.\cite{RussellNorvig}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/learningagent.pdf}
+\caption{Učící se agent -- Russell, Norvig\cite{RussellNorvig}.}
+\label{learningagent}
+\end{figure}
+\noindent
+\noindent
+Z obrázku~\ref{learningagent} lze vidět, že jeho struktura je zcela jiná. Struktura je nyní rozdělena na 4 části, z nichž se jedna nazývá výkonnostní prvek. Výkonnostní prvek je původní celý agent, viz například obrázek ~\ref{utilagent}. Tento prvek má své senzory, akční prvky a vybírání akce. Schopnost agenta učit se tedy není rozšířením jeho struktury jako takové, ale přidáním zcela nových prvků.
+\textbf{Nové prvky agenta:}
+\begin{itemize}  
+    \item \textbf{Kritik:} Sleduje a hodnotí, jak si agent počíná v porovnání s předem daným, pevně stanoveným, výkonnostním standardem. Na základě kritikovy zpětné vazby se učícímu se prvku vrací informace o následcích jím provedených akcí.
+    
+    \item \textbf{Generátor problémů/úkolů:} Navrhuje experimentální akce, které agentovi mohou přinést nové zkušenosti, tedy potenciál lepšího plánování akcí v budoucnu, na úkor krátkodobě neoptimálních akcí.
+
+    \item \textbf{Učící se prvek: } Na základě zpětné vazby od kritika upravuje rozhodovací algoritmus výkonnostního prvku. Díky těmto úpravám v rozhodování se agent učí a postupem času dosahuje lepších výsledků.
+    
+    
+\end{itemize}
+
+
+
+
+
+\section{BDI architektura agenta}
+BDI agent, neboli belief - desire - intention (přesvědčení - touha - záměr), je typ agentů zaměřených na cíl.
+K vysvětlení pojmů přesvědčení, touha a záměr je užitečné znát více specifické vlastnosti často přisuzované agentům v oblasti umělé inteligence. Podle práce Wooldridge a Jenningse,\cite{95_IATP_WooldridgeJennings} se pro popis agenta často používají jiné, spíše mentalisticky popisované vlastnosti.
+
+\subsection*{Další vlastnosti agentů}
+Sem samozřejmě spadají i BDI vlastnosti, které jsou však popsány o dvě stránky níže ve větším detailu.
+\begin{itemize}
+\item \textbf{Pravdivost: } Agent nebude vědomě šířit nepravé informace. 
+\item \textbf{Shovívavost: } Agent nemá konfliktní cíle. Agent se tedy bude vždy snažit dosáhnout jemu daného cíle.
+\item \textbf{Racionalita: } Agent bude racionální. Bude konat tak, aby dosáhl svých cílů a nebude konat tak, že způsobí, že jeho cíle se stanou nedosáhnutelné. 
+\end{itemize}
+Agent samozřejmě není vševědomý, bude tedy konat podle jeho vnitřního přesvědčení.
+K lepší ilustraci, člověk je z ekonomického hlediska racionální agent. Dělá rozhodnutí, o kterých je přesvědčen, že jsou správná, i přesto, že ve skutečnosti to správná rozhodnutí nejsou. Například lidé, kteří naletí podvodům \textbf{jsou stále racionální}. Dělali to, co je pro ně nejvhodnější akce, na základě jejich vnitřního přesvědčení. Problém tedy nebyl ve výběru akce, tu zvolili racionálně správnou. Problém byl v jejich modelu světa, který byl mylný. Stejně tak, i agent, který bude mít nesprávnou představu o světě, nebude dělat optimální akce.
+\subsection*{Sumarizace vlastností BDI agenta}
+K sumarizaci je potřeba ještě jeden termín, kterým je deliberativní agent. Podle disertační práce docenta Zbořila\cite[s.~8]{disertzb} je definice následující.
+\\
+\\
+\textit{Na rozdíl od reaktivního agenta má deliberativní (rozvážný) agent schopnost plánovat postup svých akcí vedoucích k dosažení zvolených nebo zadaných záměrů/cílů. To znamená, že agent musí mít schopnost různých výpočtů, což bude později v textu chápáno jako druh vnitřní činnosti agenta. K dosažení svých záměrů pak agent ovlivňuje okolní prostředí tak, aby získal nějakou výhodu. Toto jednání je další z často uváděných vlastností agentů a nazývá se proaktivita.}
+\newline
+\newline
+BDI agentem je tedy \textbf{deliberativní} (na rozdíl od reaktivních agentů si udržuje symbolickou představu o světě), \textbf{racionální}, \textbf{na cíl zaměřený} agent.
+
+\subsection*{Vysvětlení struktury BDI agenta}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{obrazky-figures/bdi.png}
+\caption{BDI agent architektura.\cite{msoft}}
+\label{bdistruct}
+\end{figure}
+
+BDI agent na obrázku~\ref{bdistruct} má odlišnou strukturu, než agenti před ním. Rozrostl se o několik částí, které budou teď popsány.\cite{FITVUT_IZU_1819}\cite{95_IATP_WooldridgeJennings}
+
+\subsubsection*{Beliefs - přesvědčení, víra}
+Množina znalostí, co o světě "ví", přesněji řečeno, v co věří, o stavu světa. Na základě této v některých případech neúplné a neaktuální báze znalostí se rozhoduje a vytváří plány.
+\subsubsection*{Desires - přání, touhy}
+Množina potenciálních přání agenta, neboli stavů světa, kterých by chtěl agent docílit. Těchto přání může být veliké množství a mohou se i navzájem vylučovat. Přání se zpravidla rozdělují na krátkodobá a dlouhodobá, přičemž dlouhodobá přání se označují jako cíle - Goals. BDI agent se tedy dá klasifikovat jako speciální typ agenta zaměřeného na cíl.
+\subsubsection*{Intentions - záměry}
+[TODO cite JENNINGS, str3]
+Záměr je přání nebo cíl z množiny \texttt{Desires}, které se agent rozhodl provést. Agent má omezené zdroje, tedy nemůže stále vyhodnocovat svoje mezi sebou soutěžící touhy. V nějakém bodu se musí rozhodnout, o které z těchto cílů bude usilovat. Tím si vytvoří závazek, že vybraný záměr bude dokonán do konce, nebo do bodu, ve kterém se jeho splnění ukáže jako neproveditelné. Na základě záměrů se plánují budoucí akce.
+
+\subsection*{Plánovač}
+Jednou z důležitých částí BDI agenta je plánovač. Plánovač je systém, který ze vstupu (ze záměrů), stavu světa a dostupných akcí, jako výstup sestaví plán.\cite{Wooldridge2009IntroMAS} Plánovač je k vidění na obrázku~\ref{planner}.
+Prvním plánovačem byl systém Stanford Research Institute Problem Solver, neboli STRIPS, vyvinut dvěma autory, kterými byli Richard Fikes a Nils Nilsson.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{obrazky-figures/planner.pdf}
+\caption{Plánovač -- Wooldridge.\cite{Wooldridge2009IntroMAS}}
+\label{planner}
+\end{figure}
+
+\noindent
+STRIPS si postupně rozebírá hlavní cíl na menší podcíle, které si ukládá na zásobník. Když je něco potřeba (predikát není v databázi), najde se akce, která tento predikát dokáže přidat. Všechny akce mají své podmínky, které je nutné splnit. Kvůli tomu se rekurzivně řeší  tyto podmínky, dokud nejsou v databázi.
+Tímto způsobem se vytvoří postup (sekvence operátorů) pro dosažení cíle. Ačkoliv se v dnešní době stejnojmenný algoritmus STRIPS již nevyužívá, jeho formalizmy akcí lze najít v téměř všech implementacích plánovačů.\cite{Wooldridge2009IntroMAS}
+\\
+\\
+Na závěr této kapitoly bych rád upozornil, že problematika BDI agentů je rozhodně mnohem širší a komplikovanější. Například BDI logika, a s ní logiky, ze kterých vychází, v této práci popsány nejsou. Pro více informací a detailnější popis bych čtenáře rád odkázal na disertační práci\cite{disertzb} pana docenta Zbořila mladšího, konkrétně na třetí kapitolu disertační práce nazvanou \textit{Nástroje pro návrh racionálních agentů}.
+
+
+\chapter{Multiagentní systémy}
+Doposud se tato práce zabývala pouze agenty samotnými, případně systémy, kde je umístěn jeden agent. Tato kapitola pojednává o multiagentních systémech (MAS), co multiagentní systémy poskytují za funkčnost oproti systémům s jedním agentem, jak se agenti mohou v prostředí chovat vůči sobě, reálné případy užití multiagentních systémů, prostředky k jejich programování a nakonec i samotný MAS FRAg vyvíjený na VUT.
+
+\section{Multiagentní systém - definice}
+Definice agenta v kapitole první byla složitá, nicméně to neplatí u definice multiagentního systému. V multiagentním systému musí platit, že v prostředí působí více než jeden agent. Každý agent je entita, která myslí samostatně a plní své vlastní přání, respektive přání jeho uživatele/majitele. Každý agent má nekompletní informace nebo schopnosti pro řešení problému. Není zde centralizovaný systém řízení, data jsou decentralizovaná a výpočty probíhají asynchronně.\cite{roadmap}
+\newline
+\newline
+\textbf{Definice: } Multiagentní systém (MAS) je systém, ve kterém působí alespoň dva agenti, kteří mezi sebou mohou soupeřit nebo spolupracovat.\cite{roadmap}
+\newline
+\newline
+Co se týče mezi-agentní komunikace, je zde opět spousta možností, jak agenty v prostředí propojit.\cite{LangGraphMultiAgent}
+\begin{itemize}
+    \item \textbf{Propojení každý s každým:} Nejjednodušší typ propojení, kdy každý agent má schopnost komunikace s každým jiným agentem v prostředí.
+    \item \textbf{Propojení s vedoucím:} Každý agent komunikuje pouze s jedním agentem, vedoucím, který je společný pro všechny agenty v prostředí.
+    \item \textbf{Hierarchické propojení:} Rozšíření propojení s vedoucím. Agenti komunikují se svým lokálním vedoucím, který sám má svého vedoucího. Těchto vedoucích může být několik a zároveň může být také několik hierarchických úrovní. Výsledný systém propojení tedy vypadá jako pyramida.
+    \item \textbf{Propojení na míru:} Manuálně definovaná propojení mezi jednotlivými agenty pro specifické aplikace. Možnost vytvořit pouze jednostranné propojení mezi agenty.
+\end{itemize}
+
+\subsection*{Chování agentů v rámci MAS}
+V MAS se agenti mohou chovat různě. To, jakým způsobem se chová jeden agent, ovlivňuje akce ostatních agentů, ať už přímo, nebo nepřímo. Proto je možné zaškatulkovat jejich chování vůči sobě do dvou skupin. \cite{disertzb}
+\begin{itemize}
+    \item \textbf{Kompetitivní/Soupeřící: }
+    Cíle jednoho agenta jsou přímo v rozporu s cíli jiného agenta. Nemohou uspět společně a každý z nich se snaží vyhrát na úkor druhého.
+    \item \textbf{Spolupracující: }
+    U spolupracujících agentů -- se v extrémním případě -- jejich cíle shodují. Tedy akci, kterou vykoná jeden agent, bude ve shodě s agentem druhým. Ve většině případů se však takovéto kompletní krytí cílů nestává.
+\end{itemize}
+\textbf{Kooperativní agent} je agent, který v konkrétní situaci zvažuje, zda se vyplatí spolupracovat, nebo soutěžit, a to na základě shody jeho cílů s jiným agentem. Mějme hypotetický příklad dvou agentů, agenta A a agenta B, jejichž množiny cílů mají neprázdný průnik. Cíle v tomto průniku představují takové cíle, ve kterých je výhodné spolupracovat (neboť je chtějí dosáhnout oba agenti). Naopak cíle, které se v průniku nenacházejí, mohou vést ke konfliktu či konkurenci, pokud jsou vzájemně neslučitelné nebo pokud prosazování jednoho z nich poškozuje či omezuje druhého.
+
+\section{Příklady užití multiagentních systémů}
+Množství aplikací multiagentních systémů (MAS) je širší, než u pouhých systémů s jedním agentem. Pokud bychom měli rozdělit oblasti, ve kterých se MAS dají využít, mohlo by být například následující (a určitě existují i další oblasti využití).
+\begin{itemize}
+    \item \textbf{Hraní her}
+    Asi nejznámějším využitím je hraní her, které jsou často takzvané zero-sum, česky hra s nulovým součtem. Tento termín z teorie her znamená, že pokud si strana A zlepší svoji pozici o X, straně B se zhorší její pozice přesně o -X. Tedy, pokud se zisk jedné strany a ztráta strany druhé sečtou, výsledný součet vychází přesně nula. Typicky se jedná o hry, jako šachy, poker a jim podobné, kde nejsou \textit{další ambice} těchto hráčů. V realitě tento typ her moc neexistuje, protože i ve válce obě strany pravděpodobně budou chtít zvítězit, aniž by přitom zničily celý svět, nebo si svým výběrem strategie poštvali zbytek světových zemí proti sobě.
+    \item \textbf{Optimalizace a organizace}
+    Prvním příkladem je organizace semaforů na křižovatkách ve městech, aby pokud možno město mělo co nejméně zatížené uzly a auta tedy měla nejrychlejší možné cesty. Největší překážkou u dopravy je, že hustota a konfigurace se neustále mění. Problém tedy není až tak doménou optimalizace, ale adaptace. \cite{traffic} Využitím agentů se dá dosáhnout lepších výsledků, než pouze “chytrým algoritmem.” Ze studie Gehersyna bruselské univerzity vykázala nejlepší metoda oproti metodám bez schopnosti adaptace průměrné 30\% zrychlení průměrné rychlosti, snížení zastavených aut na polovinu a snížení času čekání zastavených aut na jednu sedminu.
+    \newline
+    Dalším příkladem je systém, který se využívá již od roku 1995. Systém OASIS\cite{oasis} (Optimal Aircraft Sequencing using Intelligent Scheduling - Optimální řazení letadel pomocí inteligentního plánování) je systém, který zajišťuje co možná největší využití vzletových a přistávacích dráh. Využívá MAS implementovaný pomocí BDI agentů. Vytváří sekvenci přistání a odletů pro letadla tak, aby bylo jejich zpoždění co nejmenší. Každé letadlo je v tomto systému agentem, kterému je přidělena runway, ze které má vzlétnout, nebo přistát a v jaký čas.
+    Mezi zajímavé vlastnosti systému OASIS například patří:
+    \begin{itemize}
+        \item Schopnost reagovat na změny počasí a chování letadel v okamžiku detekce těchto změn.
+        \item Dokáže měnit plány v případě náhlého požadavku na přistání od neplánovaného letadla.
+        \item Rychlé přepočítání, aby se přizpůsobil změnám na vzletových a přistávacích plochách.
+        \item Zbytek vlastností je k dispozici na \cite{oasis}.
+    \end{itemize}
+    \item \textbf{Krizové řízení}
+    Po proběhlé katastrofě jde o minuty. Složky záchranných sborů se snaží využít všechny prostředky, které mají k dispozici, k záchraně co nejvíce životů a minimalizaci škod. Nasazení multiagentního systému k simulaci může státu poskytnout cenné informace ohledně strategií vedoucích k největšímu užitku -- nejvíce zachráněných životů -- o potenciálních nedostatcích týkajících se množství personálu či vybavení a řadě dalších. Simulace může být detailní, modelující různé stroje či lidi jako agenty, šíření ohně v průběhu času nebo kolabující či přetíženou infrastrukturu. Simulace jsou dlouhou dobu cenným nástrojem pro získávání informací v doménách, kde je experimentování v realitě nemožné nebo nevýhodné, ale takto komplexní systém bez multiagentních systémů simulovat nelze.\cite{robocop}
+    
+    \item \textbf{Bojové nasazení}
+    V této oblasti se multiagentní systémy vyvíjejí hojně právě v této chvíli. Asi veřejnosti nejznámějšími jsou takzvané swarm (rojové) systémy dronů. Do jaké míry autonomie dokáží tyto roje svoji práci vykonávat, je teď samozřejmě utajované. Ovšem je snadné si představit, že například pokud jeden dron identifikuje zbraň proti dronům, či identifikuje cíl, schopnost poslat tuto informaci skupině, která na to společným způsobem autonomně zareaguje, je ohromným navýšením výkonnosti dronových systémů.\cite{drones}
+    
+    Jako druhý známý příklad by mohl být uveden program amerického letectva NGAD (Next Generation Air Dominance - Nová generace vzdušné nadvlády). Tento program má nahradit stíhací letouny zaměřené na leteckou převahu, kterými teď jsou F-22 Raptor. Generačním skokem stíhacího letounu F-22 byla technologie stealth (obtížná zjistitelnost). Generačním skokem letounu z programu NGAD by měl mimo jiné být právě MAS. V tomto případě se jedná o to, že na piloty jsou kladeny stále větší požadavky. Žádného člověka však nelze vycvičit tak, aby jeho tělo vydrželo přetížení 13 G. Tento problém, stejně jako spoustu dalších, jako sdílení detekovaných cílů, vyšší počet nesených střel a leteckých pum, aniž by došlo k navýšení radarového průřezu. To vše je možné díky MAS, který v tomto příkladu umožňuje změnu paradigmatu. Umožňuje mít skupinu letounů, kterou řídí jeden pilotovaný stíhací letoun, kolem kterého je skupina bezpilotních letounů, které se pilotovi podřizují a pomáhají mu. \cite{airforcengad}
+    Během psaní této práce vyhrála společnost Boeing kontrakt na zhotovení letounu, dnes již známého pod názvem F-47, který z programu NGAD vzešel.
+\end{itemize}
+\newpage
+\section{Příklady softwarových nástrojů pro vytváření a simulaci multiagentních systémů}
+\subsection*{Agentní programovací frameworky}
+\begin{itemize}
+    \item \textbf{JADE (Java):} Napsán kompletně v jazyce Java, používající middleware splňující FIPA\footnote{\url{http://www.fipa.org/specifications/}} specifikaci ke zjednodušení vývoje MAS. Možnost distribuce napříč počítači.\cite{JADE}
+    \item \textbf{Jason (Java):} BDI struktura, interpretace vylepšené, rozšířené verze jazyka AgentSpeak(L). Napsán kompletně celý v Javě. Lze snadno distribuovat po síti.\cite{Jason}
+    \item \textbf{SPADE (Python):} Narozdíl od JADE používá místo FIPA komunikační protokol XMPP. Umožňuje jak mezi-agentní komunikace, tak komunikaci mezi agentem a člověkem, takzvané human-in-the-loop (do procesu práce je zapojen člověk).\cite{SPADE}
+    \item \textbf{FRAg (Prolog):} Interpretuje jazyk AgentSpeak(L) s možností pozdního vázání proměnných. Aktivně vyvíjen fakultou informatiky VUT, momentálně v alfa verzi.\cite{FRAg}
+\end{itemize}
+\subsection*{Platformy pro agentní modelování a simulaci}
+Nástroje integrující jazyk, vykonávací jádro i vizualizaci. Umožňují spíše "klikací" tvorbu a běh velkých simulací bez nutnosti psaní nízkoúrovňového kódu.
+\begin{itemize}
+    \item \textbf{GAMA Platform}: Grafické IDE, využití platformy i lidmi, kteří nejsou počítačový vědci za použití vysokoúrovňového jazyka GAML.\cite{GAMA}
+    \item \textbf{MASON}: Navrženo jako základ pro rozsáhlé simulace v jazyce Java. Jednoduchost a rychlost jsou hlavními přednostmi.\cite{MASON}
+\end{itemize}
+\subsection*{Knihovny pro multiagentní posilované učení (MARL)}
+MARL knihovny poskytují standardizovaná prostředí a API pro trénink samoučících se agentů. 
+\begin{itemize}
+    \item \textbf{Pettingzoo}: Python rozhraní obsahující obecné MARL úlohy. Mnoho referenčních prostředí jako šachy nebo pong, s možností vytváření vlastních prostředí. 
+    \item Podobnými pak jsou například \textbf{Gymnasium}\footnote{\url{"https://gymnasium.farama.org/"}}, dříve OpenAI’s Gym library, nebo \textbf{BenchMARL}\footnote{\url{"https://arxiv.org/abs/2312.01472"}}.
+\end{itemize}
+\section{Způsoby evaluace výkonnosti multiagentních systémů}
+Stejně jako různé druhy algoritmů, například řadících, nám binární výsledek řazení -- seřazeno, neseřazeno, nestačí. Zajímá nás, jak rychle dokáže řadit, na jakou náturu dat se hodí, jaké jsou jeho paměťové požadavky, a tak dále. Stejně tak multiagentní systémy mají spoustu metrik, které udávají výkonnost, ať už MAS systému jako je FRAg, nebo schopnost agentů plnit jejich úkoly v prostředí. Metriky, které nás zajímají, závisí na schopnostech a účelech používání MAS.
+
+Metriky se mohou rozdělit do následujících kategorií\cite{Ramachandran}:
+\begin{itemize}
+    \item funkční testování,
+    \item behaviorální a scénářové testování,
+    \item Výkonnostní testování,
+    \item testování zaměřené na posilované učení,
+    \item ověřování uvažování a validace rozhodnutí,
+    \item odolnost, nepřátelské strojové učení,
+    \item integrace v reálném čase a externí systémy,
+    \item a další, které jsou k nalezení na\footnote{\url{https://www.linkedin.com/pulse/comprehensive-methodologies-metrics-testing-ai-agents-ramachandran-mkxne}}.
+\end{itemize}
+\noindent
+Pro tuto práci jsou podstatné hlavně kategorie ověřování uvažování a validace rozhodnutí, a behaviorální a scénářové testování.
+\subsection*{Behaviorální a scénářové testování}
+Pro behaviorální testování, neboli testování týkající se chování, je podstatné prozkoumávání nejen pouhé splnění cílů, ale i průběh chování, který ke splnění cílů vedl. Zde se pozoruje, často doslovně -- (pozorovatel) sleduje chování agentů v systému -- a odvozuje z toho efektivitu spolupráce, způsob řešení konfliktů a objevuje případné emergentní strategie, které agentům nebyly explicitně naprogramovány.
+
+K tomu pozorovateli poslouží záznamové výstupy, případně animace, pokud to daný systém umožňuje. U pozorovaného prováděného člověkem je jak testování, tak i výsledná analýza chování kvalitativní. Kvantitativní testování používá místo lidského pozorovatele vyhodnocovací skript, který dokáže vyhodnocovat z řádově více simulačních běhů. Na rozdíl od kvantitativní však sama nedokáže klasifikovat strategii jako \textit{dobrou}, \textit{špatnou} nebo snad \textit{morální}.
+
+\subsection*{Ověřování uvažování a validace rozhodnutí}
+Halucinace ve světě generativní umělé inteligence způsobují u uživatelů zaslouženou nedůvěru vůči AI. To samé se děje i v případě multiagentního systému, kdy jde o komplexní systém s mnoha agenty. Pokud uživatel nerozumí rozhodnutím a vybraným strategiím agentů, vzbuzuje to nedůvěru v celý MAS.\cite{ExplainableMAS} V ideálním případě lze všechno agentovo chování logicky vysvětlit, s vědomím odměn za akce, seznamem vjemů a agentovou touhou maximalizovat odměnu. Pokud však je nějaké chování nejasné, může pomoci například agentně-lidský dialog, který nabízí některé implementace BDI agentů, například SimpleBDI.\cite{simpleBDI}
+
+Příklad dialogu v implementaci SimpleBDI.\cite{simpleBDI}
+\newpage
+\begin{verbatim}
+human: Why Not move2 at 17
+robot: Why move2 at 17
+human: Selected at_waypoint,goal_move_to_location,safe_terrain, ->
+do(move2),-goal_move_to_location,-at_waypoint,+at_location,+goal_take_sample, at 16
+robot: Why select at_waypoint,goal_move_to_location,safe_terrain, ->
+do(move2),-goal_move_to_location,-at_waypoint,+at_location,+goal_take_sample, at 16
+human: +at_waypoint at time 14 and it remained so until at least 16
+robot: I agree +at_waypoint between 14 and 16
+human: +goal_move_to_location at time 11 and it remained so until at least 16
+robot: I agree +goal_move_to_location between 11 and 16
+human: +safe_terrain at time 6 and it remained so until at least 16
+robot: -safe_terrain at time 15 and it remained so until at least 16
+human: Why -safe_terrain at 15
+robot: I perceived -safe_terrain at 15
+\end{verbatim}
+Možnost dotazování se a komunikace s agentem je způsob ověření, případně k vysvětlení důvodů jeho chování. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Návrh a parametry vhodných prostředí pro evaluaci výkonu agentů}
+Prostředí jsou nedílnou součástí agentního či multiagentního systému (MAS). Zároveň je to jedna z jeho nejdůležitějších částí, protože právě podle prostředí, ve kterém se bude systém nacházet, se pro daného agenta budou jinak definovat cíle, plány a akce. Ať už se jedná o reálná prostředí, kde mají agenti fyzickou reprezentaci a interagují s hmatatelnými objekty, nebo o simulované prostředí, které umožňuje testovat a ladit chování systémů v kontrolovaných podmínkách, volba vhodného prostředí je nezbytná pro správnou evaluaci výkonu agentů. Evaluace agentů je úzce spjata s prostředím, ve kterém se \mbox{agenti nacházejí -- například} je zřejmé, že metriky pro chytré křižovatky budou zcela odlišné od metrik pro autonomní drony.
+\newline
+\newline
+Prostředí si lze představit jako kontejner, ve kterém jsou agenti situováni. Zároveň prostředí mají zodpovědnosti.
+\section{Zodpovědnosti prostředí}
+Výčet zodpovědností prostředí\cite{eis}:
+\begin{itemize}
+    \item \textbf{Strukturování:} 
+    Prostředí vytváří sdílený rámec, který určuje, jak bude celý systém organizován.
+    \item \textbf{Správa zdrojů a služeb:}
+    Prostředí funguje jako kontejner, který umožňuje přístup k různým zdrojům (objekty s definovaným stavem) a službám (reaktivním entitám, jež zapouzdřují určitou funkcionalitu). Zajišťuje řízení a kontrolu přístupu k těmto zdrojům a službám.
+    \item \textbf{Udržování dynamiky prostředí:}
+    Kromě aktivit samotných agentů může prostředí iniciovat a spravovat vlastní procesy, jako je například agregace či difuze digitálních signálů, evoluce lokálních podmínek. Těmi mohou například být teplota, nebo obecněji odstraňování zastaralých dat.
+    \item \textbf{Umožnění komunikace:} 
+    Prostředí definuje konkrétní kanály a metody, prostřednictvím kterých mohou agenti komunikovat.
+    Nejčastější formou je přímé posílání zpráv mezi agenty. V některých případech však mohou agenti využívat nepřímou komunikaci, například vytvářením a konzumováním komunikačních objektů v prostředí.
+    \item \textbf{Řízení interakcí v systému:} Prostředí může stanovovat pravidla a zákony, které omezují nebo usměrňují přístup k určitým zdrojům či službám, případně určují, jaké důsledky mají akce agentů.
+    \item\textbf{Zajištění pozorovatelnosti:}
+    Na rozdíl od agentů musí být prostředí vždy pozorovatelné. Agenti potřebují přístup k informacím o zdrojích a službách, a často i možnost sledovat činnost ostatních agentů.
+\end{itemize}
+
+\section{Možné parametry, odlišnosti a specifika prostředí}
+\begin{table}[ht]
+\label{tab}
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Vlastnosti} & \textbf{Pátrání a záchrana} & \textbf{Fotbal} & \textbf{Šachy} \\
+\hline
+Počet agentů             & 100 a více           & 11 v každém týmu  & -         \\
+\hline
+Agenti v týmu            & Heterogenní          & Homogenní         & -         \\
+\hline
+Logistika                & Závažný problém      & Ne                & Ne         \\
+\hline
+Dlouhodobé plánování     & Závažný problém      & Méně zdůrazněné   & Zapojeno   \\
+\hline
+Emergentní spolupráce    & Závažný problém      & Ne                & Ne         \\
+\hline
+Hostilita                & Prostředí            & Protější tým      & Protihráč  \\
+\hline
+Čas na rozhodnutí        & Sekundy -- Minuty    & Milisekundy       & -         \\
+\hline
+Dostupnost informací     & Velmi špatná         & Přiměřeně dobrá   & Kompletní  \\
+\hline
+Reprezentace             & Hybridní             & Nesymbolické      & Symbolické \\
+\hline
+Řízení                   & Distribuované /      & Distribuované     & Centrální  \\
+                         & Polo-Centrální       &                   &            \\
+\hline
+\end{tabular}
+
+\caption{Vlastnosti pátrání a záchrany, fotbalu a šachu}
+\label{tab:features}
+\end{table}
+\noindent
+
+Další parametry rozdělení prostředí\cite{FITVUT_IZU_1819}, které v tabulce~\ref{tab} nejsou uvedeny, jsou rozdělení dle:
+\begin{itemize}
+    \item \textbf{Určitosti}:
+    \begin{itemize}
+        \item \textbf{stochastické},
+        \item \textbf{deterministické}.
+    \end{itemize}
+    \item \textbf{Spojitosti}:
+    \begin{itemize}
+        \item \textbf{diskrétní},
+        \item \textbf{spojité}.
+    \end{itemize}
+    \item \textbf{Časové závislosti}:
+    \begin{itemize}
+        \item \textbf{statické},
+        \item \textbf{dynamické}.
+    \end{itemize}
+    \item \textbf{Návaznosti}:
+    \begin{itemize}
+        \item \textbf{episodické},
+        \item \textbf{sekvenční}.
+    \end{itemize}
+    
+\end{itemize}
+
+Z tabulky~\ref{tab}~\cite{robocop}, si lze všimnout, že prostředí se od sebe mohou lišit ve spoustě věcí. Ačkoliv jsou všechny tyto parametry důležité, tak jedny z nejdůležitějších jsou dostupnost informací a čas na rozhodnutí. Pokud každý agent má pouze znalost pouze svého okolí a nikoliv celého prostředí, může být vhodné řízení centrální -- více informací na jednom místě pro lepší plánování akcí. Avšak záleží na typu prostředí a akcí, které od agentů v prostředí chceme. Na některé události musí agenti reagovat co nejrychleji a centrální řízení by mohlo být příliš pomalé.
+
+Zároveň každé prostředí může mít své vnitřní parametry, které se mohou nastavovat a měnit, ať už počáteční, nebo jejich vývoj. V příkladu s obchodem by to mohly být parametry jako kolik zákazníků přichází, zdražování produktů v čase a podobné.
+
+\section{Komunikační standard EIS používaný systémem FRAg}
+V technologických odvětvích razících cestu vpřed není výjimkou pozorovat, že každý autor implementuje něco po svém. To má řadu výhod, jako rychlejší prozkoumání možností implementací, zjištění, jaké cesty vývoje jsou slepé, a tak dále. Opačnou stranou mince je však častá nekompatibilita. Standard \textbf{EIS} (\textbf{E}nvironment \textbf{I}nterface \textbf{S}tandard) je tímto případem. Jak autoři standardu EIS sami uvádějí, mnoho prostředí je navrženo a je kompatibilní jen s jednou vývojovou platformou (2APL, Jason, Jadex, ...)\cite{eis}.
+Byla tedy vyvinuta prostředí založená na stejném principu -- jako jsou různé 2D světy, ve kterých agenti pracují. Mezi sebou však nebyly kompatibilní. Cílem EIS tedy bylo navrhnout standard mezi \textbf{APLs} (agent programming language) a prostředím samotným. EIS tím usnadňuje vývoj, sdílení a znovupoužití prostředí napříč více agentovými platformami, testování výkonnosti agentních systémů ve stejném prostředí a usnadní tvorbu rozsáhlých multiagentních systémů. EIS je přitom pouhý prostředník, popisující způsob komunikace mezi agentní platformou a prostředím, jak je vidět na obrázku~\ref{eisstruct}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{obrazky-figures/eis-struct.png}
+\caption{Komponenty meta-modelu.\cite{eis}}
+\label{eisstruct}
+\end{figure}
+
+\subsection*{Princip standardu EIS}
+Standard zavádí dva termíny, se kterými bude tato práce dále pracovat, nebude-li uvedeno jinak. Jsou jimi \textbf{entita} a \textbf{kontrolovatelná entita}. Entitou se rozumí "něco" v prostředí. Může to být auto, dům, předmět, cokoliv. Kontrolovatelná entita je pak taková entita, která \textbf{má možnost být agentem kontrolovaná}. Kontrolovatelné entity zajišťují spojení mezi agentem -- který operuje v nějaké agentní platformě, a prostředím samotným skrze identifikátor, výčtem dostupných akcí a schopností vnímání -- senzory.\cite{eis} Propojení kontrolovatelných entit a agentů je k vidění na obrázku ~\ref{eisinter}.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/eis-prop.png}
+\caption{Propojení agentů a entit prostředí.\cite{eis}}
+\label{eisinter}
+\end{figure}
+\noindent
+\subsection*{Jazyk IIL}
+\textbf{IIL (Interface Intermediate Language)} je jazyk, který EIS používá pro výměnu dat mezi agenty a prostředím. Reprezentuje akce i vjemy/percepty stromově strukturovaným způsobem a tato struktura může být vypsaná prologovským nebo XML stylem, k vidění na obrázku~\ref{iil}. Díky stejnému rozhraní mohou agentní platformy zpracovat tytéž informace a napojit se na libovolné prostředí splňující standard EIS. Prvky vyskytující se v jazyce EIS jsou:
+\begin{itemize} 
+    \item \textit{DataContainer} je buď \textit{Action}, nebo \textit{Percept}. \item \textit{Action} se skládá z: 
+    \begin{itemize} 
+        \item řetězce \texttt{name}, který udává název akce, 
+        \item uspořádané kolekce \texttt{parameters} obsahující instance \textit{Parameter} (tedy parametry akce), 
+        \item celočíselného \texttt{timeStamp}, který zachycuje čas vzniku objektu akce. \end{itemize} 
+    \item \textit{Percept} se skládá z: 
+    \begin{itemize} 
+        \item řetězce \texttt{name}, který udává název perceptu, 
+        \item uspořádané kolekce \texttt{parameters} obsahující instance \textit{Parameter} (tedy parametry perceptu), 
+        \item celočíselného \texttt{timeStamp}, který zachycuje čas vzniku objektu perceptu. 
+    \end{itemize} 
+    \item \textit{Parameter} může být typu \textit{Numeral}, \textit{Identifier}, \textit{ParameterList} nebo \textit{Function}. 
+    \item \textit{Numeral} zapouzdřuje numerickou (číselnou) hodnotu. 
+    \item \textit{Identifier} zapouzdřuje řetězcovou hodnotu. 
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\linewidth]{obrazky-figures/IIL-tree.png}
+\caption{Ukázková struktura stromu v jazyce IIL.\cite{eis}}
+\label{iil}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Seznámení se systémem spravujícím prostředí (PES), návod na tvorbu nových prostředí v systému}
+V zájmu pokračujícího vývoje systému FRAg byl naprogramován systém, který umožňuje vývojáři naprogramovat prostředí nová, na míru, bez nutnosti zdlouhavého programování celého prostředí a všech jeho podpůrných funkcí. Jádro všech prostředí této práce se tedy neodehrává v prostředích napsaných v jazyce Prolog, ale v systému spravujícím prostředí v jazyce Python (dále jen \textbf{PES} -- \textbf{P}ython \textbf{E}nvironment \textbf{S}ystem). Vyhnout se Prologu ze sta procent v systému, který je na něm postaven, nelze. Následující část proto představí komunikační mezivrstvu mezi systémy FRAg a PES, ve které se nachází veškerý Prolog této práce.
+
+\section{Prolog, knihovna janus a komunikace mezi FRAgem a PES}
+Komunikaci lze rozlišit do dvou částí. Té první, jednodušší, ve které se posílají z FRAgu akce, které má daný agent vykonat v prostředí, a samotné vytvoření prostředí. Druhé, ve které se z PES posílají vjemy prostředí zpět agentovi do FRAgu. Komunikaci mezi těmito systémy zajišťuje knihovna janus projektu SWI-Prolog, což je jedna z populárních implementací jazyka Prolog.
+\subsection*{Knihovna janus}
+Knihovna janus implementuje rozhraní mezi jazyky Python a Prolog. Je to jedna z řady knihoven, které nabízí SWI-Prolog, implementujících rozhraní mezi programovacími jazyky. Existuje řada dalších knihoven, které realizují rozhraní mezi těmito jazyky, ale právě janus je jako jediná vestavěná a v rámci snížení bariér ke zprovoznění byla vybrána. \textbf{Verze SWI-Prologu, obsahující knihovnu janus jsou 9.2.X}\footnote{\url{https://www.swi-prolog.org/versions.md}} 
+\newpage
+K ověření funkčnosti knihovny je možné použít sadu příkazů:
+\begin{itemize}
+    \item \texttt{swipl},
+    \item \texttt{use\_module(library(janus)), janus:py\_vesrion()}
+\end{itemize}
+Pokud je vše v pořádku, vypíše se verze knihovny janus a jakou verzi vestavěného jazyka Python obsahuje.
+
+Jsou dvě verze knihovny janus, jedna pro Python, která spouští SWI-Prolog, a druhá, která spouští vestavěnou instanci Pythonu z SWI-Prologu -- případ této práce.
+Zodpovědností obou verzí však je datová konverze a obousměrná komunikace. Následující strany popíší využití knihovny k propojení systému, následně ke komunikaci ze strany agenta (FRAgu) k entitě v PES, a nakonec vracení vjemů, které agent, lépe řečeno entita, kterou v prostředí ovládá, obdržela.
+
+\subsection*{Kroky k propojení systémů FRAg a PES}
+\begin{enumerate}
+    \item \textbf{use\_module(library(janus))}: Importování knihovny janus.
+    \item \textbf{prolog\_load\_context(directory, Dir)}: Získání absolutní cesty z relativní cesty \texttt{directory}.
+    \item \textbf{py\_add\_lib\_dir(Dir)}: Načtení adresáře Dir, ve kterém se nachází soubor popisující prostředí. 
+    \item \textbf{py\_import(module, [])}: Načtení modulu obsahující Python prostředí.
+\end{enumerate}
+I přesto mohou nastat problémy, většinou jsou tvořeny na straně SWI-Prologu. Pokud nemůže SWI-Prolog (dále jen swipl) knihovnu janus vůbec najít, je pravděpodobné, že verze používaného swipl je neaktuální (verze swipl musí být alespoň 9.2.X). Pokud je janus nainstalovaný, ale při importování modulu janus dojde k chybě, pravděpodobné je buď chybějící Python jako takový, nebo cesta k němu,  konkrétně cesta k python3.dll. Python se doporučuje instalovat z oficiální stránky\footnote{\url{https://www.python.org/downloads/}} projektu Python. Pokud již Python v systému instalovaný je, ale janus stále nefunguje, pravděpodobně \texttt{python3.dll} není v cestě. K nápravě v operačním systému Windows je možné provést následující příkaz přes PowerShell:\\
+    \small\texttt{setx PATH "\textbackslash\%PATH\%\textbackslash;C: Users\textbackslash<uname>\textbackslash AppData \textbackslash Local \textbackslash Programs \textbackslash Python \textbackslash<version>"}\\
+Poté je třeba mít nainstalovanou knihovnu \texttt{numpy}, instalovanou pomocí \texttt{pip install numpy}.
+\subsection*{Tvoření prostředí a posílání akcí agenta}
+\normalsize
+Nejdříve k ujasnění pojmů v této kapitole. Ačkoli se ve zdrojovém kódu PES pro kontrolovatelnou entitu v prostředí používá označení agent, pro přehlednost slovem agent budeme označovat pouze agenty na straně FRAgu. Standard EIS definoval předměty a obecně všechny nekontrolovatelné entity jako \textit{entity} a agentem kontrolovatelné entity jako \textit{kontrolovatelné entity}. Pro účely této kapitoly, kontrolovatelnou entitou, dále jen entitou, nechť je považován Python objekt, který se nachází v PES. Entita je tedy v python prostředí PES ovládána agentem z FRAgu, kde figuruje jako jeho tělo. Všechny agentem nekontrolovatelné entity se budou nazývat předměty.
+
+K zavolání modulu slouží predikát py\_call. V závislosti na počtu parametrů dokáže zpracovat odpověď funkce nebo metody, kterou v Pythonu volal. Návratovou hodnotu buď může použít jako hodnotu pro Term, nebo jako kontrolu, že akce v Pythonu proběhla v pořádku na základě unifikace s konstantou.
+
+Pro účely PES se volání predikátu py\_call dělí na dva typy. Volání modulu \texttt{py\_call(module:function\_name(args))} a volání objektu \texttt{py\_call(object:method\_name(args))}. Posloupnost volání, k tomu aby se získala z PES entita agenta, je na následujícím obrázku~\ref{fragpes}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\linewidth]{obrazky-figures/comms.pdf}
+\caption{Posloupnost volání predikátu py\_call při posílání akce entitě.}
+\label{fragpes}
+\end{figure}
+\noindent
+Počáteční tvoření prostředí je prosté, stačí jedno zavolání predikátu py\_call na zavolání funkce initialize\_environment.
+
+\subsection*{Posílání vjemů entity agentovi}
+Komplikace vzniká v této části, z důvodu reprezentace dat přicházejících z PES skrze knihovnu janus. Jako příklad jednoho z vjemů, který poslala entita do Prologu, byl\\ \texttt{fact(danger- -(10,9,8));} nebo \texttt{fact(Episode-5);}
+\\
+S pomocí Prolog napsaného modulu py2pl se podařilo přetransformovat tuto reprezentaci na žádoucí, tedy na
+\texttt{fact(danger(10,9,8));} a \texttt{fact(Episode(5));} 
+\\
+Stále by se však nemělo přehánět a je možné, že například při přílišném zanořování python dictionary/slovníků do jiných slovníků a listů, může konverze selhat. Proto je potřeba vždy kontrolovat, jaké vjemy a jak reprezentované agent dostává. Jedním ze způsobů je například prohlédnout si výstupní soubor agenta \texttt{.fap} (je nutno mít zapnutý debugging v \texttt{.mas2fp} v predikátu \textit{load}).
+
+\section{Detailní popis systému PES}
+PES využívá prostředí pracující s buňkami, které se rozlišuje na typ \texttt{Grid} (mřížka) a typ \texttt{Structure} (struktura). Mřížka i struktura mají vestavěnou časovou kontrolu, která jednou za globální cyklus vnímání posune čas dopředu o jednu časovou jednotku. Zároveň mají obě prostředí systém animace, který je však odlišný a bude popsán v jejich samostatných sekcích.
+
+\subsection*{Prostředí s buňkami -- obecně}
+ Z obrázku~\ref{frag_pes_detail} lze vidět, jak FRAg komunikuje s prostředím s buňkami. Na pravé straně obrázku se nachází PES samotný. \texttt{EnvironmentUtils} je meta-prostředí zprostředkovávající vnější vstup do systému. Pokud chceme například posílat akce entitě, musíme nejprve skrze \texttt{EnvironmentUtils} získat objekt, respektive odkaz na objekt, samotného \texttt{ModEnv}. \texttt{ModEnv} (Modular Environment) je schránkou pro jeden objekt typu  \texttt{Grid} -- mřížka, nebo \texttt{Structure} -- struktura. Zároveň si uchovává informace k hledání v prostředí, jako jsou různé předměty a jiné entity, které se v mřížce nebo struktuře nacházejí.
+
+ Předměty, entity i buňky jsou pak samy objekty, nacházející se v jednom ze dvou druhů prostředí. Pro adresaci se používají \texttt{X} a \texttt{Y} koordináty, pokud je prostředí typu mřížka. Pro typ struktura se používá název buňky.
+ \begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{obrazky-figures/pes.pdf}
+\caption{Struktura systému PES, jeho moduly a s čím FRAg komunikuje.}
+\label{frag_pes_detail}
+\end{figure}
+\noindent
+
+\subsubsection*{Předmět (Item)}
+Objekt, který reprezentuje předmět v prostředí. Vždy musí někomu náležet -- buď ležet v buňce, nebo být nesen agentem/entitou. \texttt{Item/předmět} má atributy: název, hodnota, váha, popis a umístění. Předmět může agent skrze entitu zvednout, za předpokladu, že ho unese. Také ho může položit do buňky, ve které se právě nachází. Pokud se předmět položí do speciální buňky (například do buňky s obchodníkem), agent dostane plnou odměnu (závislou na hodnotě předmětu) za položení. V takových případech se poruší pravidlo, že předmět musí někomu náležet, a tím efektivně z prostředí navždy zmizí.
+\subsubsection*{Buňka (Cell/NCell)}
+\texttt{Cell} a \texttt{NCell} jsou podobné, jejich rozdílem je jejich účel. \texttt{Cell} je určena pro typ prostředí \texttt{Grid}, zatímco \texttt{NCell} se používá na typ prostředí \texttt{Structure}. Hlavním programovacím rozdílem je adresování a počet sousedů. Tam, kde \texttt{Cell} využívá koordináty \texttt{X} a \texttt{Y}, využívá \texttt{NCell} název buňky -- její \texttt{UID}. Co se týče počtu sousedů, \texttt{Cell} má čtyři hrany, tedy až čtyři přechody do sousedních buněk. \texttt{NCell} žádná omezení na počet sousedů nemá, může mít <0, N> přechodů v každé buňce.
+Buňka je základním stavebním prvkem obou dvou druhů prostředí. Mezibuněčné přechody lze nastavovat jak jednosměrně, tak obousměrně. Sousední buňky, pokud je dobrý důvod, nemusí být vždy fyzicky vedle sebe. Například je možné z obdélníkové mřížky udělat válec. Stačí nastavení přechodů krajních sloupcových buněk na jejich protější krajní buňky a tím mřížku ohnout. Teoreticky lze vytvářet v mřížkovém prostředí něco jako červí díry, kdy jedním posunutím může efektivně skočit o mnohem více buněk jinam. Následuje přehled ostatních vlastností buněk:
+\begin{itemize}
+    \item \textbf{Dostupnost}: Binární hodnota označující buňku jako aktivní/otevřenou, či neaktivní/uzavřenou. K neaktivním buňkám se systém staví tak, jak kdyby tam nebyly. Entita je nevnímá a i kdyby v nich byly cenné předměty, agent se o těch buňkách nikdy nedozví a do těchto buněk nelze za žádných okolností vstoupit. Primárně určené k formování přesnější podoby mřížkového prostředí, ale lze i použít například na dočasné odstavení cesty. Po reaktivaci buňky jsou její původní vlastnosti nezměněné.
+    \item \textbf{Hodnota nebezpečí}: Pokud je prostředí samo o sobě nebezpečné, mohou mít buňky nastavenou binární hodnotu udávající, že buňka je nebezpečná. V každém takovém prostředí je pak nutné mít definovaný výpočet nebezpečí. Nebezpečnost buňky ovlivňuje penalizace agenta za pohyb.
+\end{itemize}
+\subsubsection*{Generátor}
+Třída zajišťující dynamické generování předmětů v prostředí za běhu. Každý generátor má v této verzi PES následující vlastnosti.
+\subsubsection*{Entita} 
+Entita, jak již bylo zmíněno, je objekt v prostředí, kterému agent posílá příkazy určující, co má daná entita vykonat. Na oplátku entita posílá agentovi seznam vjemů, které dostane od prostředí.
+\\Přehled vlastností entity:
+\begin{itemize}
+    \item \textbf{Váhový limit}: Entity musí mít nastavený váhový limit, určující kolik váhy unesou. Pokud je pro účely prostředí vhodné, je možné měnit váhový limit za běhu.
+    \item \textbf{Umístění}: Každá entita musí mít za všech okolností zaregistrovanou buňku, ve které se nachází. Tato buňka navíc nesmí být neaktivní.
+    \item \textbf{Nesené předměty}: Všechny entity, které nesou předměty, si udržují seznam všech nesených předmětů, společně s jejich celkovou hmotností. Agent vždy zná přesnou váhu, kterou nese, svůj váhový limit a všechny předměty, které právě nese.
+    \item \textbf{Přesvědčení}: Každá entita si udržuje svá přesvědčení, která se posílají agentovi přes \texttt{Add} a \texttt{Delete} listy. Ony listy jsou pak tvořeny porovnáním vjemů z nového vnímacího cyklu se slovníkem přesvědčení, který je na konci cyklu aktualizovaný, aby reflektoval nové vjemy.
+\end{itemize}
+\subsection*{Prostředí s buňkami typu mřížka (Grid)}
+Klasický typ prostředí typu mřížka. Rozšířením systému FRAg touto prací by typ prostředí \texttt{Grid} poskytl stejnou, nebo velmi podobnou funkcionalitu, jako \texttt{GridWorldModel} poskytuje systému Jason.\footnote{\url{https://www.emse.fr/~boissier/enseignement/maop14/DOC/jason/api/jason/environment/grid/GridWorldModel.html}}
+Mřížka jako taková může být jak čtvercového, tak obdélníkového tvaru. Maximálně však může nabývat velikosti 1000 × 1000 políček.
+
+Prostředí se dá dále tvarovat dle potřeb. Na tvarování jsou v prostředí dvě možnosti. První je nastavení buněk na neaktivní. Tím se z prostředí pro účely agenta/entity odstřihnou a nebudou o nich vědět. Druhou možností je tvorba zdí, které zruší přechody mezi sousedními buňkami. Další možností je oddělení různých lokálních prostředí.
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/generic_shaping.png}
+    \caption{Tvarování pomocí neaktivních buněk.}
+    \label{fig:shaping}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/generic_walls.png}
+    \caption{Tvarování bludiště pomocí zdí.}
+    \label{fig:walls}
+  \end{minipage}
+\end{figure}
+\noindent
+Možnost oddělení buněk dává návrháři prostředí další možnosti, pro které existují zajímavá využití. Například možnost současného testování více scénářů v jednom běhu~\ref{simul} či porovnávání výkonnosti agenta s pozdním vázáním proměnných oproti agentovi s včasným vázáním. Stačí přes neaktivní buňky rozdělit prostředí na jednotlivá pod-prostředí, která budou mít identicky nastavené parametry.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/simultaneos.png}
+\caption{Dvě identická pod-prostředí se stejnými parametry a rozdílnými agenty.}
+\label{simul}
+\end{figure}
+\noindent
+Další využití dělení prostředí neaktivními buňkami je například rozdělení herní plochy, které měly starší hry. Jako příklad poslouží hry ze série S.T.A.L.K.E.R. Ve hrách bylo několik menších map, mezi kterými se hráč mohl kdykoliv přesunout skrze koridory, kterými hráčova postava přeskočila během načítání z pozice (X1,Y1) koridoru Z mapy A, na pozici danou druhým koncem koridoru Z, ústícím v pozici(X2,Y2) na mapě B. Takto konfigurované prostředí je k vidění na obrázku~\ref{port}.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{obrazky-figures/gates.png}
+\caption{Dvě pod-prostředí s odlišnou strukturou mezi kterými agent může libovolně přeskakovat skrze koridory, které jsou označené fialovou barvou.}
+\label{port}
+\end{figure}
+\noindent
+Dalšími vlastnostmi, které je vhodné zobrazit graficky, jsou zaprvé tepelná mapa, dále jen `heatmapa`, a buňky v dohledu entity. Heatmapy slouží svým způsobem také ke tvarování prostředí, ale ne skrze fyzické zábrany, ale jako penalizační, měkké zábrany. Agenti by si měli vybírat takové trasy, které se buď nebezpečí vyhýbají, nebo se nebezpečí snaží minimalizovat. Na obrázku~\ref{fig:heatmap} je ukázková heatmapa, kde má agent za úkol nosit z jednoho fialového políčka do druhého předměty. Agent by si měl vybrat nejkratší bezpečnou cestu.
+
+Viditelné buňky entity v prostředí jsou dané jejími parametry, jako je dohled, tak prostředím samotným, jako jsou zdi, neaktivní buňky a hranice prostředí. K ilustraci slouží obrázek~\ref{fig:viewrange}. Vyhodnocení viditelnosti buněk má na starosti algoritmus, kterému bude nyní věnována pozornost.
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/genericHeatmap.png}
+    \caption{Heatmapa představující nebezpečí jednotlivých buněk prostředí.}
+    \label{fig:heatmap}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/generic_viewrange.png}
+    \caption{Ukázka dohledu entity částečně obehnané zdí.}
+    \label{fig:viewrange}
+  \end{minipage}
+\end{figure}
+\noindent
+
+\subsection*{Algoritmus na vyhodnocení viditelnosti buňky}
+Srdcem algoritmu je takzvaný \texttt{supercover line} algoritmus založený na {Bresenhamově} algoritmu, dále jen SLA. Klasický Bresenhamův algoritmus nestačí, kvůli přeskakování buňky X a Y v jednom kroku. PES používá modifikovaný SLA\cite{DeduBresen} napsaný Eugenem Dedu.
+
+Implementace v PES vrací kompletní, nepřerušovanou cestu, tedy i s rohy, které Bresenhamův algoritmus nemá. Když má PES cestu od buňky A do buňky B, vyhodnotí se line of sight (dále jen LoS), česky čára viditelnosti. LoS se pokusí pro každou cestu vygenerovanou SLA ověřit, že buňky na cestě jsou aktivní a všechny přechody existují -- zdi se nevyskytují v cestě. LoS rozlišuje dva případy.
+\begin{itemize}
+    \item \textbf{Čára neprocházející rohy}~\ref{normalline}: Jednoduchý případ, testující možný průchod cestou. Pokud kdykoliv dojde k jakékoliv chybě, cílová buňka viditelná není.
+    \item \textbf{Čára procházející rohy}~\ref{cornerline}: Složitější případ, který vyžaduje v případě selhání:
+    \begin{enumerate}
+        \item ověření, jestli se z buňky bude procházet rohem,
+        \item pokud selhal první přechod, pokusí se udělat krok na alternativní buňku,
+        \item při selhání druhého přechodu, provede se návrat a následně se vyzkouší alternativní cesta.
+    \end{enumerate}
+\end{itemize}
+Cílová buňka může být viditelná i s chybou, pokud proběhlo úspěšné nalezení alternativní cesty u čáry procházející rohy.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.47\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/easypath.png}
+    \caption{Ukázka trasy neprocházející rohy.}
+    \label{normalline}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.47\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{obrazky-figures/cornerpath.png}
+    \caption{Ukázka trasy procházející rohy. Obě oranžové buňky jsou na trase.}
+    \label{cornerline}
+  \end{minipage}
+\end{figure}
+\noindent
+\subsection*{Animace v mřížkovém prostředí (Grid)}
+Animace prostředí jsou realizovány skrze metodu \texttt{draw} třídy \texttt{Grid}. Kreslící metoda na standardní výstup generuje ASCII art prostředí s možností různých režimů. Následuje krátký přehled režimů vykreslování, kterých má metoda v základu pět.
+\begin{itemize}
+    \item \textbf{Strukturální~\ref{sstruct}}: Vykreslí pouze kompletní mřížku, se všemi zdmi a neaktivními buňkami. Vhodné zejména pro validaci, že prostředí je konfigurováno korektně. 
+    \item \textbf{Předmětové}: Vykreslí všechny předměty, nacházející se v prostředí. Předměty jsou reprezentovány v buňce celočíselnou hodnotou, dle jejich četnosti.
+    \item \textbf{Heatmapové nebezpečí~\ref{sheat}}: Vykreslí nebezpečí každé aktivní buňky v prostředí. Nebezpečnost je zobrazována kolečkem barvy. Kolečko nabývá barvy v rozmezí zelené (žádné nebezpečí), plynule až po barvu červenou (maximální nebezpečí v prostředí).
+    \item \textbf{Entitní}: Vykreslí všechny entity, nacházející se v prostředí. Entity jsou reprezentovány v buňce celočíselnou hodnotou, dle jejich četnosti.
+    \item \textbf{Dohledové~\ref{sview}}: Vykreslí všechny předměty v prostředí jako celočíselnou hodnotu červenou barvou. Pokud se však předmět nachází v entitou viditelné buňce, je číslo vypsáno zelenou barvou. U ostatních viditelných buněk, ve kterých nejsou žádné předměty, se vykreslí pouze zelené kolečko. Entita samotná se vykreslí jako kolečko červené. V případě, že by entita sama stála na buňce obsahující předmět, vypíše se místo kolečka opět číslo počtu předmětů v buňce, tentokrát však modrou barvou.
+\end{itemize}
+\noindent
+Pro ukázku, jak některé takové režimy vypadají v praxi, následují snímky obrazovky režimů z prostředí \textbf{stalker}, které bude podrobně představené v další kapitole.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.495\textwidth}
+    \centering
+    \includegraphics[width=1\linewidth]{obrazky-figures/heatmap.png}
+    \caption{Ukázka vykreslení heatmapy nebezpečí.}
+    \label{sheat}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.495\textwidth}
+    \centering
+    \includegraphics[width=1\linewidth]{obrazky-figures/structure.png}
+    \caption{Ukázka strukturálního vykreslení.}
+    \label{sstruct}
+  \end{minipage}
+\end{figure}
+\noindent
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{obrazky-figures/viewrange.png}
+\caption{Ukázka vykreslení dohledového režimu.}
+\label{sview}
+\end{figure}
+\noindent
+Animace pak využívá metodu \texttt{draw} následujícím způsobem. Podle následujících parametrů spouští některý z agentů animaci, a to po dokončení svého vnímacího cyklu.
+\begin{itemize}
+    \item Délka prodlevy animace: Jak dlouhá mezera je mezu jednotlivými vykresleními.
+    \item Režim vykreslení: Jeden z pěti výše uvedených režimů.
+    \item Animátor: Agent, který po dokončení vnímacího cyklu volá kreslící metodu.
+\end{itemize}
+
+\subsection*{Prostředí s buňkami typu struktura (Structure)}
+Jak bylo zmíněno dříve, na rozdíl od mřížky má struktura neomezeně mnoho možných sousedních buněk. Ukázka struktury se nachází na obrázku~\ref{str}. To je nesporná výhoda, která je však vykoupena absencí dohledu entity. Entita může dostávat vjemy pouze z té buňky, ve které je právě v době vnímacího cyklu situována. Dalším rozdílem a ústupkem je systém animací. Animace jako takové by byly problematické, ačkoli ne nemožné. PES v současném stavu řeší animace struktur jako opakované volání metody \texttt{debug}, náležející entitě. Ta přehledně vypisuje veškeré informace, které by mohly výzkumníky zajímat:
+\begin{itemize}
+    \item \textbf{Název sama sebe -- entity.}
+    \item \textbf{Název buňky ve které se nachází.}
+    \item \textbf{Seznam předmětů, které nese.}
+    \item \textbf{Seznam přesvědčení, který zahrnuje:}
+    \begin{itemize}
+        \item váhovou kapacitu a současně nesenou váhu,
+        \item seznam předmětů v buňce,
+        \item seznam ostatních agentů v buňce a
+        \item jeho vlastní pozici.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{obrazky-figures/randstruct.pdf}
+\caption{Ukázka směrového propojení jednotlivých buněk.}
+\label{str}
+\end{figure}
+\noindent
+K verifikaci správnosti struktury se dá po vytvoření zavolat metoda \texttt{debug} třídy \texttt{ModEnv}, která pro všechny buňky zavolá jejich vlastní metodu \texttt{debug}. Ta vypisuje předměty a entity, které se v ní nacházejí, stejně jako seznam přechodů do ostatních buněk (buňky, ze kterých se dá pouze přicházet, se v seznamu neobjeví).
+
+\subsection*{Bonus -- Tvorba abstraktních prostředí}
+Zastupitelem abstraktního prostředí je například shop (jedna z ukázkových úloh systému FRAg, které budou vysvětleny v další kapitole), u kterého nedává smysl, aby kupující, prodávající či zprostředkovatel měli jakoukoli lokalitu. Není podstatné, aby v prostředí existovaly buňky, které postrádají smysl. Takováto prostředí lze v současné implementaci PES tvořit jako jednu buňku, ve které se nacházejí všechny dostupné informace. Kvůli animacím se doporučuje využívat prostředí typu struktura. Celkově je systém PES v současné době orientovaný spíše na práci s prostředím obsahujícím buňky.
+
+\subsection*{Současné limitace a plánovaná rozšíření PES}
+Zde následuje výčet současných limitací PES, které existují, seřazené číselně dle priority jejich budoucího rozšiřování. 
+\begin{enumerate}
+    \item \textbf{Klonování prostředí}: Umožňuje lepší plánování.
+    \item \textbf{Animace struktur}: Vytvoření systému animace pro struktury místo animování skrze zaznamenávání debugovacích funkcí.
+    \item \textbf{Robustnější systém dynamického tvoření předmětů}: V současné verzi se jedná o vlastnost buňěk, které mohou generovat předměty podle manuálně nastavených parametrů.
+\end{enumerate}
+\subsection*{Tvoření prostředí s využitím PES}
+Tato sekce pokrývá spíše teoretický postup, pro více praktický, detailní a programátorský postup odkazuje tato práce na soubor \texttt{guide.md}, který se mimo jiné zabývá už samotnými třídami, metodami a celkově programovacími aspekty systému PES.
+
+Při vytváření nového prostředí je nutné vytvořit minimálně 4 nové soubory. První dva se starají o prostředí PES a jeho komunikaci se systémem FRAg. Zbývající řeší nastavení prostředí z agentního hlediska. Soubor \texttt{.mas2fp}, který určuje, kolik agentů v prostředí bude, jaké budou používat metody uvažování, jejich maximální doba běhu a podobné, a jak se daný agent bude v prostředí chovat (jaké jsou jeho záměry, plány, ...) nacházející se v souboru \texttt{.fap}.
+
+Prvními dvěma soubory zmíněnými v předešlém odstavci se rozumí \texttt{prostredi.pl} a \texttt{prostredi.py}. Je nutné, aby nově vytvořená prostředí zachovávala FRAg strukturování, tedy oba soubory by měly být ve složce \texttt{prostredi}, která se nachází v cestě \newline \texttt{FRAg/core/environments/}. Dále, \texttt{prostredi.pl} spoléhá na to, že jeho sesterský soubor \texttt{prostredi.py} se nachází na jeho úrovni a jeho pomocný soubor \texttt{py2pl.pl} se nachází na úrovni pod ním. Soubor .pl slouží na přemostění ze systému FRAg do PES a zpátky. V každém .pl takového typu je nutné mít:
+\begin{itemize}
+    \item pojmenovaný modul s exportovaným predikátem názvu prostředí, které může agent volat,
+    \item Importovanou knihovnu \texttt{janus},
+    \item Importovaný modul \texttt{py2pl}, který transformuje výstup PES pro FRAg interpretovatelný výstup,
+    \item predikátová pravidla, která musí v souboru existovat. Mezi ně patří \texttt{perceive}, který z PES vrátí \texttt{add\_list} a \texttt{delete\_list} a pravidla popisující možné agentovy akce, které musí mít definici u třídy \texttt{Agent} v \texttt{prostredi.py},
+    \item Direktivu nastavující janus a volání funkce na inicializaci prostředí \texttt{janus}.
+\end{itemize}
+Soubor \texttt{prostredi.py} zajišťuje prostředí samotné. Jeho zodpovědnosti, které musí být zajištěny, jsou:
+\begin{itemize}
+    \item funkce inicializace prostředí, která musí prostředí vytvořit (vytvoření \texttt{Grid}, nebo \texttt{Structure}, případné tvarování prostředí, počáteční předměty,...), a to předtím, než se do něho FRAg pokusí zavést agenty, 
+    \item načtení si všech podpůrných tříd z \texttt{FRAg/env},
+    \item pomocí dědění tříd přepsat metody tříd \texttt{Agent, ModEnv, Cell, Item} pokud je třeba, aby byly v souladu s parametry tvořeného prostředí,
+    \item definované hodnoty proměnných, které byly ve třídě \texttt{ModEnv} pouze deklarované,
+    \item vytvořený slovník koordinátů či názvů buněk, spojujících podle jména agenta s jeho počátečním umístěním.
+\end{itemize}
+Mezi nejčastěji přepisované metody patří \texttt{percept\_g} a \texttt{percept\_s}, třídy \texttt{Agent}, tvořící \texttt{add\_list}y a \texttt{delete\_list}y z prostředí \texttt{Grid}, nebo \texttt{Structure}. Dalšími často přepisovanými metodami jsou obecně metody:
+\begin{itemize}
+    \item \texttt{debug}, u kterých můžeme chtít vypisovat informace specificky přidané prostředí a
+    \item akce agenta jako \texttt{move\_to\_cell}, \texttt{drop\_item}, \texttt{pick\_item}, u kterých můžeme chtít jiné odměny, nebo jako v případu prostředí miconic zabalit metodu \texttt{move\_to\_cell} do jiné, která se bude posouvat místo jedné buňku za tah a libovolný počet opakovaným voláním metody \texttt{move\_to\_cell}.
+\end{itemize}
+
+
+
+\chapter{Podrobný popis implementovaných prostředí}
+\section{Výrobní linka}
+\subsection*{Obecný popis prostředí:}
+Prostředí má za úkol simulovat výrobní linku\cite{icaart}. Agenti mají za úkol dopravovat materiály ze skladů A a B do dílny, kde následně jeden či více strojů vyrobí produkt. Tento produkt pak ti samí agenti, kteří mají na starost přepravu materiálů, musí dopravit do místnosti pro odbavení. 
+Prostředí je převzato z článku\cite{icaart} a lehce modifikováno. Jeho struktura je k vidění na obrázku~\ref{assembly}.
+\subsection*{Cíle prostředí}
+\begin{enumerate}
+    \item \textbf{Spolupráce}: Agenti by si měli vybírat vhodné role a tím zvyšovat efektivitu. Kámen má vyšší hodnotu, než dřevo. Ke zhotovení výrobku je však třeba jak dřevo, tak kámen. Některý agent by se tedy měl "obětovat," pro dobro celku, aby mohl stroj vyrábět.
+    \item \textbf{Vhodné upřednostňování akcí}: Jsou-li všechny stroje na výrobu vyřazeny z provozu a opravují se, agenti by měli tento čas využít produktivně k naskladnění materiálů a doručení produktů do místnosti pro odbavení.
+\end{enumerate}
+V tomto prostředí se tedy hodnocení vztahuje na agenty jako na celek. Čím více agentů bude sebestředných a odmítat práce, které mají nižší ohodnocení, tím méně efektivní celá výrobní linka bude.
+
+\subsection*{Klasifikace}
+\begin{itemize}
+    \item \textbf{Počet agentů}: Dva a více.
+    \item \textbf{Agenti v týmu}: Homogenní.
+    \item \textbf{Logistika}: Závažný problém.
+    \item \textbf{Dlouhodobé plánování}: Závažný problém.
+    \item \textbf{Emergentní spolupráce}: Závažný problém.
+    \item \textbf{Hostilita}: Ne.
+    \item \textbf{Čas na rozhodnutí}: Sekundy -- Minuty.
+    \item \textbf{Dostupnost informací}: Přiměřeně dobrá.
+    \item \textbf{Reprezentace}: Symbolické.
+    \item \textbf{Řízení}: Distribuované.    
+\end{itemize}
+\noindent
+Prostředí výrobní linky je zhotoveno s pomocí třídy \texttt{Structure}. Jedná se tedy o prostředí, které není abstraktní -- entita/agent musí mít za všech okolností přiřazenou buňku.
+\subsection*{Prostředí má pět buněk/místností:}
+\begin{itemize}
+    \item \textbf{Shipment (Místnost pro odbavení)}: Všechny výrobky, které agenti vyrobili a donesli do této oblasti je vyvezeno ven -- přestane v prostředí existovat.
+    \item \textbf{Workshop (Dílna)}: Agent má za úkol nosit materiály ze skladu A, kámen, a ze skladu B, dřevo. Pokud je v místnosti dostatek materiálů, agent může zapnout stroj, který produkt vyrobí. Jeho výroba spotřebuje daný materiál.
+    \item \textbf{Warehouse (Sklady)}: Ve dvou skladech se nachází materiály nutné k sestavení výrobku.
+    \item \textbf{Hall (Hlavní hala)}: Propojovací místnost, ze které je možné jít do skladů, či do místnosti pro odbavení.
+\end{itemize}
+\noindent
+\subsection*{Předměty nacházející se v prostředí:}
+\begin{itemize}
+    \item \textbf{Kámen}: Váha 10, hodnota 5.
+    \item \textbf{Dřevo}: Váha 10, hodnota 3.
+    \item \textbf{Produkt}: Váha 10, hodnota 30.
+\end{itemize}
+
+\subsection*{Vjemy prostředí:}
+\begin{itemize}
+    \item \textbf{fact(weight\_limit(10))}: Agent unese váhu (X), včetně.
+    \item \textbf{fact(carrying\_weight(5))}: Teď nese (X).
+    \item \textbf{fact(closed(@(true)))}: Prostředí se zavírá.
+    \item \textbf{fact(self(robot\_b,"Workshop"))}: On sám se nachází v buňce s názvem "Workshop".
+    \item \textbf{fact(agent(robot\_a,"Workshop"))}: Agent paul se nachází v buňce s názvem "Workshop".
+    \item \textbf{fact(item('Stone',5,10,"Warehouse A", <uuid>))}: předmět(Název, hodnota, váha, název buňky, nějaké uuid).
+    \item \textbf{fact(carrying(stone,5,10))}: nesený předmět(Název, hodnota, váha).
+    \item \textbf{fact(available\_machines(3))}: Momentálně fungující stroje, které čekají na práci.
+\end{itemize}
+
+\subsection*{Akce a jejich odměny}
+\begin{itemize}
+    \item \textbf{Pohyb}: Jakýkoliv pohyb je penalizován ztrátou jednoho bodu.
+    \item \textbf{Výroba}: Zapnutí stroje na výrobu je odměněno získáním patnácti bodů.
+    \item \textbf{Zvednutí předmětu}: Jakékoliv zvednutí předmětu je odměněno získáním jednoho bodu.
+    \item \textbf{Položení předmětu}: Pokud předmět položí do místnosti, do které daný předmět patří, dostane za něho plnou odměnu danou hodnotou předmětu. V opačném případě za položení nedostane odměnu žádnou, přesněji dostane odměnu nula.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{obrazky-figures/assembly.pdf}
+\caption{Směrové propojení jednotlivých místností.}
+\label{assembly}
+\end{figure}
+
+\noindent
+\subsection*{Zvolené parametry prostředí:}
+Uvedené hodnoty parametrů se dají měnit, následující výpis jsou hodnoty výchozí.
+\begin{itemize}
+    \item \textbf{Míra poruchovosti strojů}: Stroj se porouchá průměrně jednou za čtyřicet jednotek času a zůstává nefunkčním 10 časových jednotek.
+    \item \textbf{Počet strojů v prostředí}: V základním nastavením se v prostředí nachází 3 stroje.
+    \item \textbf{Počet časových jednotek na zhotovení produktu}: 2.
+    \item \textbf{Počet agentů v prostředí}: 4.
+    \item \textbf{Váhový limit agentů}: 10.
+    \item \textbf{Generace}: Jakmile je možné naplánovat vytvoření materiálu \texttt{Wood} nebo \texttt{Stone}, plánují se pro generaci za průměrně 3 časové jednotky.
+\end{itemize}
+
+\subsection*{Výsledky}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c c c l c S}
+\toprule
+\textbf{Test} & \textbf{Počet předmětů} & \textbf{Počet agentů} & \textbf{Early/Late} & \textbf{Omezení} & \textbf{Splněno za} \\
+\midrule
+%––––– Původní výsledky –––––
+1  &   5 & 4 & Early & 2 &  49.1 \\
+2  &   5 & 4 & Early & 5 &  43.7 \\
+3  &   5 & 4 &  Late & 2 &  48.5 \\
+4  &   5 & 4 &  Late & 5 &  42.8 \\
+5  & 100 & 4 & Early & 2 & 838.2 \\
+6  & 100 & 4 & Early & 5 & 709.4 \\
+7  & 100 & 4 &  Late & 2 & 807.1 \\
+8  & 100 & 4 &  Late & 5 & 693.2 \\
+\midrule
+%––––– Po optimalizaci .fap –––––
+9  & 100 & 4 & Early & 5 & 558.5 \\
+10 & 100 & 4 &  Late & 5 & 534.2 \\
+\bottomrule
+\end{tabular}
+\caption{Časy dokončení výrobní linky před a po optimalizaci \texttt{.fap}-souboru. Sloupec \textit{Omezení} udává maximální počet materiálů ve skladu (při vypnuté generaci). Sloupec \textit{Splněno za} uvádí čas v epizodách (1 epizoda = jedno vnímací kolo všech agentů).}
+\label{assemblyRes}
+\end{table}
+
+Z tabulky~\ref{assemblyRes} je vidět, že pozdní vázání proměnných dosahuje ve všech případech lepších výsledků. Mnohem markantnější zlepšení však bylo úpravou souboru \texttt{.fap}. Úprava spočívala například v tom, že agent nosící produkt k odvezení se nejdříve podíval, jestli nějaký produkt v dílně chybí. Ten posléze donesl zpátky, našel-li ho ve skladu.
+
+\section{Výtah Miconic 10 -- pouze agentní systém}
+Obecný popis prostředí:
+Schindler Miconic 10 je komerčně nasazený \textit{systém odesílání do místa určení}. Tento systém (výtah) využívající agenty od firmy \textit{Schindler}, je používán v mnoha zemích světa. U běžných výtahů si pasažér pouze zvolí, zda chce z patra jet směrem nahoru či dolů, a nastoupí do prvního výtahu, který do patra přijede. Výtahy Miconic 10 pracují na jiném principu. Pasažér si zvolí konkrétní patro, do kterého by chtěl jet, a je mu sděleno, ke kterému konkrétnímu výtahu se má dostavit. Tímto způsobem systém agreguje pasažéry a minimalizuje počet zastávek. Podle výrobce je zkrácení doby jízdy cestujících během špičkového provozu až o 30 \% oproti běžné skupinové kontrole.\cite{micon}
+To je především zásluha tří věcí pracujících ruku v ruce. Znalost, kolik pasažérů stojí za požadavkem, znalost cílového podlaží každého cestujícího a systém plánování. Porovnání agregace pasažérů na jejich požadavcích je patrné z obrázku~\ref{agg} pocházejícího od výrobce, stejně jako samotné cesty výtahu Miconic 10 v porovnání s typickými nacházejícími se na obrázku \ref{routes}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.50\linewidth]{obrazky-figures/mic10-aggre.png}
+\caption{Porovnání agregace pasažérů podle jejich destinace v systému Miconic 10 oproti běžnému výtahu.\cite{micon}}
+\label{agg}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{obrazky-figures/Mic10-traffic.png}
+\caption{Trasy výtahu Miconic 10 oproti běžným výtahům.\cite{micon}}
+\label{routes}
+\end{figure}
+\noindent
+Agent, výtah, umístěný v tomto prostředí, má za cíl přemístit všechny pasažéry do jimi zvoleného místa určení. Úloha byla zvolena jako jedno z nejjednodušších, ale přesto v realitě úspěšně nasazených využití MAS, ačkoli v implementaci této úlohy se jedná pouze o agentní systém. Implementované prostředí má takovouto podobu~\ref{micstr}.
+\subsection*{Cíle prostředí}
+\begin{enumerate}
+    \item \textbf{Chytré plánování tras}: Agent by si měl vybírat vhodné trasy, k uspokojení všech pasažérů. Měl by minimalizovat celkový čas potřebný k převezení všech pasažérů.
+\end{enumerate}
+
+\subsection*{Klasifikace}
+\begin{itemize}
+    \item \textbf{Počet agentů}: 1.
+    \item \textbf{Agenti v týmu}: Ne.
+    \item \textbf{Logistika}: Závažný problém.
+    \item \textbf{Dlouhodobé plánování}: Závažný problém.
+    \item \textbf{Emergentní spolupráce}: Ne.
+    \item \textbf{Hostilita}: Ne.
+    \item \textbf{Čas na rozhodnutí}: Sekundy.
+    \item \textbf{Dostupnost informací}: Kompletní.
+    \item \textbf{Reprezentace}: Symbolické.
+    \item \textbf{Řízení}: -    
+\end{itemize}
+\noindent
+Prostředí \texttt{miconic} je zhotoveno s pomocí třídy \texttt{Grid}. Jedná se tedy o prostředí, které není abstraktní -- entita/agent musí mít za všech okolností přiřazenou buňku. Prostředí je zhotoveno jako mřížka 1×20. Aby entita byla schopna vidět všechny pasažéry, musí být její dohled nastaven alespoň na výšku mřížky.
+
+\subsection*{Předměty nacházející se v prostředí:}
+\begin{itemize}
+    \item \textbf{Pasažér}: Jméno, destinace Y1, váha X(desítky), popis, současná lokace Y2.
+\end{itemize}
+
+\subsection*{Vjemy prostředí:}
+\begin{itemize}
+    \item \textbf{fact(weight\_limit(200))}: Agent unese váhu (X), včetně.
+    \item \textbf{fact(carrying\_weight(50))}: Teď je zatížený (X).
+    \item \textbf{fact(all\_served(@(true)))}: Všichni pasažéři obslouženi.
+    \item \textbf{fact(self(lift,0,10))}: Agentova pozice (X,Y).
+    \item \textbf{fact(item('Martin', 3, 50, 0, 9, <uuid>))}: Pasažér(Jméno pasažéra, destinace, váha, 0, Y, nějaké uuid (v tomto případu by konkrétní shoda nastat neměla)).
+    \item \textbf{fact(carrying('Martin', 3, 50))}: Přepravuje(Jméno pasažéra, destinace, váha).
+\end{itemize}
+
+\subsection*{Akce a jejich odměny}
+\begin{itemize}
+    \item \textbf{Pohyb}: Pohyb výtah provádí skokově, penalizuje se ztrátou absolutní vzdálenost, kterou agent skočil.
+    \item \textbf{Stop}: Nejdříve nechá vystoupit všechny své pasažéry, které mají patro ve kterém stojí, jako svůj cíl. Za každého pasažéra dostane 41 bodů (2 × výšku prostředí + 1). Poté nechá nastoupit všechny pasažéry, dokud buď nenastoupí všichni čekající v patře, nebo není překročen váhový limit. Za nastoupené pasažéry odměnu nedostává.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=1\linewidth, angle =90]{obrazky-figures/miconicenv.png}
+\caption{Vizualizace prostředí miconic společně s výtahem (červená tečka) a pasažéry (celočíselné hodnoty). Zelené tečky jsou viditelné buňky, ve kterých není ani výtah, ani čekající pasažér. V zájmu úspory místa je obrázek otočen o 90°}
+\label{micstr}
+\end{figure}
+
+
+\noindent
+\subsection*{Zvolené parametry prostředí:}
+Uvedené hodnoty parametrů se dají měnit, následující výpis jsou hodnoty výchozí.
+\begin{itemize}
+    \item \textbf{Počet pater budovy}: 20.
+    \item \textbf{Počáteční pasažéři při startu prostředí}: 26.
+    \item \textbf{Počet agentů v prostředí}: 1.
+    \item \textbf{Váhový limit agenta}: 200.
+\end{itemize}
+
+\subsection*{Výsledky}
+Výtah, ačkoliv neoptimální, řeší úlohu správně. Respektuje svoji váhu, nesnaží se nabrat cestující, které neunese. Všechny cestující doveze na správné místo. Vždy, když nemůže udělat optimální plán, vybere si patro s náhodným cestujícím, kterého dokáže unést. Přepracování strategie by bylo jednodušší na straně prostředí. Při předělání metody 
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Prostředí stalker}
+Obecný popis prostředí:
+Prostředí stalker je inspirováno sérií her S.T.A.L.K.E.R, kde hráč a NPC (počítačem ovládané postavy) čelí nebezpečnému světu, na který jsou zpravidla sami. Nebezpečí v herním světě představuje nejen prostředí samotné skrze anomální zóny, ale i smrtelná fauna, která se v něm pohybuje. Aby stalker -- člověk, který žije v černobylské uzavřené zóně -- přežil, musí hledat zásoby, přijímat nebezpečné práce a minimalizovat přitom vystavení se nebezpečí. 
+
+Prostředí stalker v této práci mnoho aspektů přežití zjednodušuje. Nebezpečnost prostředí je dána v každém políčku nebezpečí vyskytujícími se anomáliemi a frekventovaností výskytu zmutované fauny. Momentálně se jedná o nebezpečné prostředí, kde je hledání artefaktů na prvním místě a agenti se předhání o získání artefaktů. Ty agent sbírá a odnáší obchodníkovi, který mu za to dá peníze (odměnu). Je to však prostředí, které vybízí k mnoha rozšířením.
+\begin{itemize}
+    \item Implementace více akcí, jako \texttt{střel}, kterou by agent mohl zranit, případně zabít jiného agenta a tím mu sebrat věci.
+    \item S implementací střelby by se daly zavést frakce, které by znemožňovaly palbu do vlastních řad, ale umožňovaly agentům cestovat ve větší skupině, které by mohli věřit.
+    \item Zavedení jiného druhu agentů, takzvaných mutantů, jejichž jediným úkolem je zabíjet stalkery a ostatní mutanty. Ačkoliv by nemohli střílet, pohybovali by se dvakrát tak rychleji a stalkerům, kteří preferují prozkoumávat prostředí o samotě, by velmi ohrožovali.
+    \item Zavedení takzvaných emisí (smrtelně nebezpečných, krátkých bouří, které pochází z černobylské jaderné elektrárny). Tyto emise by nutili stalkery přestat dělat cokoliv, co momentálně dělají a okamžitě najít úkryt, jimiž by byla předem daná políčka v prostředí. To, že probíhá emise by samozřejmě neznamenalo, že mezi stalkery existuje příměří, ba naopak je celkem pravděpodobné, že ke střelbě by docházelo v bezpečných oblastech, kde by najednou byla veliká koncentrace stalkerů. Implementovaná mapa ze hry stalker je zobrazena na obrázku~\ref{aw}, její struktura a heatmapa nebezpečí je poté zobrazena na obrázku~\ref{awheat}.
+\end{itemize}
+
+\subsection*{Cíle prostředí}
+\begin{enumerate}
+    \item \textbf{Chytré plánování tras}: Agent by si měl vybírat vhodné trasy, aby sesbíral co nejvíce artefaktů, které donese obchodníkovi. Artefakty se nachází v buňkách se zvýšenou anomální aktivitou. Cesty ke sbírání artefaktů by si tedy měl volit takové, aby vkročil na co nejméně velmi nebezpečných políček. Stejně tak při cestování za obchodníkem by si měl vybírat cestu, která má nejmenší celkovou penalizaci.
+    \item \textbf{Sbírání podpůrných předmětů}: Agent v prostředí může nalézt předměty, které samy o sobě nemají vysokou hodnotu při prodeji, ale pomohou mu jiným způsobem. Jsou jimi binokuláry, které mu zvýší jeho dohled o 1 políčko.
+\end{enumerate}
+
+\subsection*{Klasifikace}
+\begin{itemize}
+    \item \textbf{Počet agentů}: 2 a více.
+    \item \textbf{Agenti v týmu}: Ne.
+    \item \textbf{Logistika}: Ne.
+    \item \textbf{Dlouhodobé plánování}: Mírný problém.
+    \item \textbf{Emergentní spolupráce}: Ne.
+    \item \textbf{Hostilita}: Ano -- prostředí.
+    \item \textbf{Čas na rozhodnutí}: Sekundy -- minuty.
+    \item \textbf{Dostupnost informací}: Špatná.
+    \item \textbf{Reprezentace}: Symbolické.
+    \item \textbf{Řízení}: Distribuované.    
+\end{itemize}
+\noindent
+
+\subsection*{Předměty nacházející se v prostředí:}
+\begin{itemize}
+    \item \textbf{Artefakt}: Název, hodnota, váha, popis, lokace (X, Y).
+\end{itemize}
+
+\subsection*{Příklady vyskytujících se vjemů:}
+\begin{itemize}
+    \item \textbf{fact(danger(10,9,10))}: políčko(negativní odměna, X, Y).
+    \item \textbf{fact('TRADER'(10,15))}: Obchodník(X,Y).
+    \item \textbf{fact(weight\_limit(10))}: Agent unese váhu (X), včetně.
+    \item \textbf{fact(carrying\_weight(5))}: Teď nese (X).
+    \item \textbf{fact(closed(@(true)))}: Prostředí se zavírá.
+    \item \textbf{fact(self(peter,11,10))}: Agentova pozice (X,Y).
+    \item \textbf{fact(agent(paul,11,10))}: Agent paul se nachází na políčku (X,Y).
+    \item \textbf{fact(item('Ball',300,5,7,9, <uuid>))}: předmět(Název, hodnota, váha, X, Y, nějaké uuid).
+    \item \textbf{fact(carrying(stone,5,10))}: nesený předmět(Název, hodnota, váha).
+\end{itemize}
+
+\subsection*{Akce a jejich odměny}
+\begin{itemize}
+    \item \textbf{Pohyb}: Agent se pohybuje buňku po buňce, při každém pohnutí dostává penalizaci rovnající se nebezpečnosti buňky.
+    \item \textbf{Prozkoumání předmětu}: Agent dostane malou odměnu za prozkoumání předmětu.
+    \item \textbf{Sebrání předmětu}: Agent může dostat pouze sekundární odměnu, vyplývající z vylepšených vlastností agenta.
+    \item \textbf{Položení předmětu}: Agent dostane odměnu v hodnotě neseného předmětu, pouze pokud položí daný předmět na políčko obchodníka. V opačném případě nedostane odměnu žádnou (0).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{obrazky-figures/army_warehouses_screenshot.png}
+\caption{Snímek obrazovky ze hry S.T.A.L.K.E.R, konkrétně oblasti \textit{Army Warehouses}. Jedna z několika desítek samostatných oblastí, která je součástí mapy. Ideální kandidát pro rozšíření funkčnosti díky bohaté přítomnosti frakcí a frekvenci mutantů.}
+\label{aw}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{obrazky-figures/heat-combined.png}
+\caption{Struktura prostředí společně s heatmapou nebezpečí.}
+\label{awheat}
+\end{figure}
+
+\noindent
+\subsection*{Zvolené parametry prostředí:}
+Uvedené hodnoty parametrů se dají měnit, následující výpis jsou hodnoty výchozí.
+\begin{itemize}
+    \item \textbf{Poloměr dohledu agenta}: 3 (4, pokud nese dalekohled).
+    \item \textbf{Počet agentů v prostředí:} 4.
+    \item \textbf{Váhový limit co agent unese:} 10.
+    \item \textbf{Velikost prostředí:} 20×20.
+\end{itemize}
+
+\subsection*{Výsledky}
+Samotný MAS naprogramovaný vůči tomuto prostředí nebyl. Funkčnost komunikace je však ověřena pomocí předpřipravené cesty a akcí, které mají agenti v prostředí dělat.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Obchod -- není implementovaný skrze PES}
+Vzhledem ke skutečnosti, že prostředí už implementované ve FRAgu je, není implementováno v PES a tedy v této práci. Je však popsáno, alespoň obecně, nejen prostředí \texttt{shop}, ale jak by se případně dalo vytvořit v PES.
+Obecný popis prostředí:
+Základní testovací prostředí dodávané se systémem FRAg. Slouží jak k testování, že systém FRAg na daném zařízení funguje, tak k vyhodnocení pozdní versus brzké strategie vazby proměnných v BDI agentech. Toto virtuální tržní prostředí simuluje obchodování se CDčky, kde kupující i prodávající postupně přicházejí a odcházejí podle stochastických rozdělení. Každé CD má dynamickou cenu, kterou stanovují kupující a prodávající, přičemž platí, že kupující i prodávající zůstanou na trhu jen po omezenou dobu. Agenti zde vystupují jako zprostředkovatelé (resellers), kteří párují kupující a prodávající, pokud je cena pro obě strany přijatelná.\cite{icaart}
+\subsubsection*{Kroky k implementaci prostředí v PES}
+Prostředí \texttt{shop} by muselo být upraveno s ohledem na fakt, že se nachází v buňkovém prostředí. Původní fakta jako CDčka, prodávající a obchodníci by se stala předměty v jediném existujícím políčku. Bylo by tudíž nezbytné upravit \texttt{trader.fap} soubor, aby reflektoval změny vnímání.
+
+\subsection*{Předměty nacházející se v prostředí ve formě vjemů:}
+\begin{itemize}
+    \item \textbf{Prodávající}: \texttt{fact(Item(seller54, 0, 50, "CD5", "shop"))} -- (název předmětu, bez významu, minimální cena za kterou předmět prodá, jaké CDčko, název buňky).
+    \item \textbf{Kupující}: \texttt{fact(Item(buyer42, 0, 55, "CD5", "shop"))} -- (název předmětu, bez významu, maximální cena za kterou předmět koupí, jaké CDčko, název buňky).
+    \item \textbf{CD}: \texttt{fact(Item(CD5, 0, 0, "popis CD5", "shop"))} -- (název CDčka, bez významu, bez významu, případný popis CDčka, název buňky).
+\end{itemize}
+
+
+
+
+
+\chapter{Závěr}
+Tato práce podrobně představila agenty jako nástroj pro řešení složitých, jednoduchými algoritmy často neřešitelných problémů. Dále pak rozšířila škálu řešitelných problémů stručným vysvětlením multiagentních systémů. Před samotným návrhem byla rozebrána problematika prostředí, včetně jeho zodpovědností a vlastností. 
+
+Na samotnou volbu prostředí byl navržen a implementován systém PES (\textbf{P}ython \textbf{E}nvironment \textbf{S}ystem) pro rychlou tvorbu testovacích prostředí kompatibilních s multiagentním systémem FRAg. Se systémem PES jsou vytvořena tři prostředí (dvě multiagentní a jedno agentní). Prostředími jsou výrobní linka (multiagentní), model výtahu Miconic 10 (agentní) a prostředí inspirované hrou S.T.A.L.K.E.R. (multiagentní). Na kooperativním prostředí výrobní linky se ukázala pozdní vazba proměnných jako efektivnější než brzká, zároveň se však ukázalo, že optimalizovaný agentův program je o mnoho důležitější z hlediska efektivity.
+
+Přínos práce více než v testovacích úlohách spočívá v modularitě a snadné rozšiřitelnosti prostředí díky systému PES. Systému FRAg poskytuje prostředí typu mřížka a typu struktura. To s vestavěným systémem animací, včetně různých režimů v případě mřížky. Dále je možné díky prostředí typu mřížka simulovat více agentů ve stejné kopii prostředí současně díky rozčlenění a izolaci celého prostředí na identické, menší části.
+
+Realizované prostředí PES tak představuje užitečný nástroj pro další experimenty s BDI a multiagentními systémy a otevírá cestu k rychlejším iteracím při vývoji i evaluaci. Zároveň to otevírá dveře těm, kteří by si předtím kvůli nutnosti programování v Prologu systém FRAg ani nezkusili.

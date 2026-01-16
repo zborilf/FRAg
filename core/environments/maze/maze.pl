@@ -175,13 +175,13 @@ init_beliefs_agent(Agent):-
 
 
 simple_maze(add_agent, Agent):-
-    situate_agent_environment(Agent, simple_maze),
+    env_utils:situate_agent_environment(Agent, simple_maze),
     env_utils:add_facts(simple_maze, [position([1,1])]),
     env_utils:add_beliefs(Agent, [my_position(a)]),
     init_beliefs([Agent]).
 
 simple_maze(add_agent, Agent, Clone):-
-    situate_agents_clone([Agent], simple_maze, Clone),
+    env_utils:situate_agents_clone([Agent], simple_maze, Clone),
     init_beliefs([Agent]).
 
 simple_maze(add_agent, _, _).

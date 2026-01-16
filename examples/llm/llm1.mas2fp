@@ -1,0 +1,12 @@
+
+
+include_environment("environments/llm/llm_environment.pl").
+
+set_agents([(bindings, late), (reasoning, simple_reasoning),
+		(environment, llm_environment)]).
+
+
+load("kecal1","../examples/llm/kecal1",1,[ ]).
+
+			   
+			  

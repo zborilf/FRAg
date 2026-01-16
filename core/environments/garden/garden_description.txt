@@ -1,0 +1,38 @@
+5.2.1 Definition of the garden example
+The garden example itself then specifies these rules:
+• The agent is situated in a grid based environment that is 3x3 in size. Where each
+space has its own zone. The agent starts in the upper left position that is [1,1].
+• Every zone has a level of moisture that can range from 0 to 100.
+• At the start, each zone has a different moisture level.
+• The agent can either move from one zone to another or water a zone that is located
+on the space where the agent currently is.
+• The agent has a limited water tank that has a value of 10.
+• The agent can only see zones around it and can only move to these zones, similar to
+the task maze example.
+• Agent knows about two zones that have the lowest moisture level, these zones are
+marked as critical zones.
+• After every action agent does in the environment, every zone degrades and its moisture
+is reduced by 4.
+• When an agent waters a zone, the moisture level is increased by 30 points and the
+value of the water tank is decreased by one. If the agent has an empty water tank,
+he can not water any zone.
+• After the agent waters a critical zone, two zones with the lowest moisture level are
+selected as critical zones.
+• When an agent waters a zone, he receives a reward, where the value is determined by
+the level of moisture the zone has after watering. If the agent waters a zone that has
+a moisture level higher than 80, the reward is 1. If the moisture level is lower than 80
+the reward is 2. In order to encourage agent to prioritize critical zone if the hydration
+zone is lower, rather than watering zone that is already at 100.
+• The agents continued goal is to water any critical zone.
+
+Actions
+ go(Direction)
+ water
+
+Percepts
+ fact(my_position(b));
+ fact(zone(b,[2,1]));
+ fact(door(left,a));
+
+
+

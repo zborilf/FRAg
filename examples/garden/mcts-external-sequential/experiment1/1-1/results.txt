@@ -1,0 +1,13 @@
+Run times (seconds):
+Run 1: 0.1713s
+Run 2: 0.1716s
+Run 3: 0.1664s
+Run 4: 0.1643s
+Run 5: 0.1598s
+Run 6: 0.1661s
+Run 7: 0.1705s
+Run 8: 0.1702s
+Run 9: 0.1684s
+Run 10: 0.1692s
+
+Average time: 0.1678s

@@ -1,0 +1,4 @@
+MAS ex1 {
+    infrastructure: Centralised
+	agents:	ex1 #1;
+ }
